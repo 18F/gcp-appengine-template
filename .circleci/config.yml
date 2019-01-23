@@ -249,22 +249,22 @@ jobs:
 
 workflows:
   version: 2
-  # terraform:
-  #   jobs:
-  #     - enable_apis
-  #     - plan_terraform:
-  #         requires: 
-  #           - enable_apis
-  #     - hold_terraform:
-  #         type: approval
-  #         requires:
-  #           - plan_terraform
-  #     - apply_terraform:
-  #         requires:
-  #           - hold_terraform
-  #     - store_tf_output:
-  #         requires:
-  #           - apply_terraform
+  terraform:
+    jobs:
+      - enable_apis
+      - plan_terraform:
+          requires: 
+            - enable_apis
+      - hold_terraform:
+          type: approval
+          requires:
+            - plan_terraform
+      - apply_terraform:
+          requires:
+            - hold_terraform
+      - store_tf_output:
+          requires:
+            - apply_terraform
   # deploy-rails-example:
   #   jobs:
   #     - deploy-rails:
