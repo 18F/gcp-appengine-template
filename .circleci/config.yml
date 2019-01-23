@@ -1,0 +1,305 @@
+version: 2
+jobs:
+  enable_apis:
+    docker:
+      - image: google/cloud-sdk
+    steps:
+      - checkout
+      - run:
+          name: Store Service Account key
+          command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+      - run:
+          name: Setup Google Cloud SDK
+          command: |
+            gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
+            gcloud config set project $GOOGLE_PROJECT_ID
+            gsutil mb gs://gcp-terraform-state-$GOOGLE_PROJECT_ID || true
+      - run:
+          name: Enabling APIs
+          command: ./terraform/enable-apis.sh
+      - run:
+          name: Enable Audit Logging
+          command: ./terraform/enable-audit-logs.sh
+      - run:
+          name: make sure jq is installed
+          command: apt-get install -y jq
+      - run:
+          name: Enable app to do schema migrations
+          command: |
+            export PROJECT_NUMBER=`gcloud projects describe ${GOOGLE_PROJECT_ID} --format=json | jq -r .projectNumber`
+            gcloud projects add-iam-policy-binding ${GOOGLE_PROJECT_ID} --member=serviceAccount:${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com --role=roles/editor
+  plan_terraform:
+    docker:
+      - image: hashicorp/terraform:0.11.11
+    steps:
+      - checkout
+      - run:
+          name: Store Service Account
+          command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+      - run:
+          name: Initialize Terraform
+          command: |
+            export TF_VAR_project_id=$GOOGLE_PROJECT_ID
+            cd terraform && terraform init -backend-config="bucket=gcp-terraform-state-$GOOGLE_PROJECT_ID" && terraform plan -input=false
+  apply_terraform:
+    docker:
+      - image: hashicorp/terraform:0.11.11
+    steps:
+      - checkout
+      - run:
+          name: Store Service Account
+          command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+      - run:
+          name: Apply Terraform
+          command: |
+            export TF_VAR_project_id=$GOOGLE_PROJECT_ID
+            mkdir /tmp/workspace
+            cd terraform && terraform init -backend-config="bucket=gcp-terraform-state-$GOOGLE_PROJECT_ID" && terraform apply -input=false -auto-approve
+            terraform output -json > /tmp/workspace/tf-output.json
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - tf-output.json
+  store_tf_output:
+    docker:
+      - image: google/cloud-sdk
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: set up google cloud sdk and copy tf output into bucket
+          command: |
+            echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+            gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
+            gcloud config set project $GOOGLE_PROJECT_ID
+            gsutil cp /tmp/workspace/tf-output.json gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json
+  test-rails:
+    docker:
+      - image: circleci/ruby:2.5.3-stretch
+    steps:
+      - checkout
+      - run:
+          name: Run Tests!
+          command: echo "not tested! XXX"
+  deploy-rails:
+    docker:
+      - image: circleci/ruby:2.5.3-stretch
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "rails-example/Gemfile.lock" }}
+            - v1-dependencies-
+      - run:
+          name: Install Ruby dependencies
+          command: |
+            cd rails-example
+            BUNDLER_VERSION=$(cat Gemfile.lock | tail -1 | tr -d " ") gem install bundler
+            bundle check || bundle install --deployment
+      - save_cache:
+          key: v1-dependencies-{{ checksum "rails-example/Gemfile.lock" }}
+          paths:
+            - rails-example/vendor/bundle
+      - run:
+          name: Setup Google Cloud SDK
+          command: |
+            echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+            export GCLOUD_SDK_VERSION=229
+            curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-$GCLOUD_SDK_VERSION.0.0-linux-x86_64.tar.gz -o ./gcloud-sdk.tar.gz
+            tar xzf gcloud-sdk.tar.gz -C ~
+            rm gcloud-sdk.tar.gz
+            export PATH=~/google-cloud-sdk/bin:$PATH
+            gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
+            gcloud config set project $GOOGLE_PROJECT_ID
+            echo 'export PATH=~/google-cloud-sdk/bin:$PATH' >> $BASH_ENV
+            source $BASH_ENV
+      - run:
+          name: prepare app engine config
+          command: |
+            if [ "${CIRCLE_BRANCH}" = "master" ] ; then
+              export RAILS_ENV=production
+            else
+              export RAILS_ENV=${CIRCLE_BRANCH}
+            fi
+            gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json /tmp/tf-output.json
+            export RAILS_SECRET=`jq -r .rails_secret_${RAILS_ENV}.value < /tmp/tf-output.json`
+            export CLOUDSQL_USERNAME=`jq -r .postgres_username_${RAILS_ENV}.value < /tmp/tf-output.json`
+            export CLOUDSQL_PASSWORD=`jq -r .postgres_password_${RAILS_ENV}.value < /tmp/tf-output.json`
+            export CONNECTION_NAME=`jq -r .postgres_instance_${RAILS_ENV}.value < /tmp/tf-output.json`
+            rm -f /tmp/tf-output.json
+            cat <<EOF >> rails-example/app.yaml
+            env_variables:
+              SECRET_KEY_BASE: ${RAILS_SECRET}
+              CLOUDSQL_USERNAME: ${CLOUDSQL_USERNAME}
+              CLOUDSQL_PASSWORD: ${CLOUDSQL_PASSWORD}
+              CLOUDSQL_INSTANCE: ${CONNECTION_NAME}
+              RAILS_ENV: ${RAILS_ENV}
+              BASICAUTH_PASSWORD: "${BASICAUTH_PASSWORD}"
+              BASICAUTH_USER: "${BASICAUTH_USER}"
+
+            beta_settings:
+              cloud_sql_instances: ${CONNECTION_NAME}
+            EOF
+      - run:
+          name: deploy to app engine and run db migrations
+          command: |
+            mkdir /tmp/workspace
+            cd rails-example
+            bundle exec bin/rails assets:precompile
+            if [ "$CIRCLE_BRANCH" = "master" ] ; then
+              gcloud app deploy --no-promote 2>&1 | tee /tmp/deploy.out
+              egrep '^target version:' /tmp/deploy.out | sed 's/.*\[\(.*\)\].*/\1/' > /tmp/workspace/master_target_version
+              bundle exec rake appengine:exec -- bundle exec rake db:create db:migrate
+              # XXX clean up old versions?
+            else
+              gcloud app deploy --no-promote --version=${CIRCLE_BRANCH}
+              bundle exec rake appengine:exec GAE_VERSION=${CIRCLE_BRANCH} -- bundle exec rake db:create db:migrate
+              touch /tmp/workspace/master_target_version
+            fi
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - master_target_version
+  promote-rails-prod:
+    docker:
+      - image: google/cloud-sdk
+    steps:
+      - run:
+          name: Store Service Account key
+          command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+      - run:
+          name: Setup Google Cloud SDK
+          command: |
+            gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
+            gcloud config set project $GOOGLE_PROJECT_ID
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: Promote rails-example to production
+          command: |
+            export VERSION=`cat /tmp/workspace/master_target_version`
+            gcloud app services set-traffic default --splits ${VERSION}=1
+
+  test-dotnet:
+    docker:
+      - image: google/cloud-sdk
+    steps:
+      - checkout
+      - run:
+          name: Run Tests!
+          command: echo "not tested! XXX"
+  deploy-dotnet:
+    docker:
+      - image: gcr.io/google-appengine/aspnetcore:2.1.0
+    steps:
+      - checkout
+      - run:
+          name: Setup Google Cloud SDK
+          command: |
+            echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+            export GCLOUD_SDK_VERSION=229
+            curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-$GCLOUD_SDK_VERSION.0.0-linux-x86_64.tar.gz -o ./gcloud-sdk.tar.gz
+            tar xzf gcloud-sdk.tar.gz -C ~
+            rm gcloud-sdk.tar.gz
+            export PATH=~/google-cloud-sdk/bin:$PATH
+            apt-get update
+            apt install -y python python-dev python3 python3-dev python-pip git jq
+            gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
+            gcloud config set project $GOOGLE_PROJECT_ID
+            echo 'export PATH=~/google-cloud-sdk/bin:$PATH' >> $BASH_ENV
+            source $BASH_ENV
+      - run:
+          name: prepare app engine config, build, deploy
+          command: |
+            cd dotnet-example
+
+            if [ "${CIRCLE_BRANCH}" = "master" ] ; then
+              export DEPLOY_ENV=production
+            else
+              export DEPLOY_ENV=${CIRCLE_BRANCH}
+            fi
+
+            gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json /tmp/tf-output.json
+            export CLOUDSQL_USERNAME=`jq -r .postgres_username_${DEPLOY_ENV}.value < /tmp/tf-output.json`
+            export CLOUDSQL_PASSWORD=`jq -r .postgres_password_${DEPLOY_ENV}.value < /tmp/tf-output.json`
+            export CONNECTION_NAME=`jq -r .postgres_instance_${DEPLOY_ENV}.value < /tmp/tf-output.json`
+            rm -f /tmp/tf-output.json
+
+            cat <<EOF > app.yaml
+            runtime: aspnetcore
+            env: flex
+
+            env_variables:
+              ASPNETCORE_DEPLOY_ENV: "${DEPLOY_ENV}"
+              ASPNETCORE_BASICAUTH_USER: "${BASICAUTH_USER}"
+              ASPNETCORE_BASICAUTH_PASSWORD: "${BASICAUTH_PASSWORD}"
+              CUSTOMCONNSTR_postgres: Uid=${CLOUDSQL_USERNAME};Pwd=${CLOUDSQL_PASSWORD};Host=cloudsql;Database=dotnet-${DEPLOY_ENV}-visitors
+
+            beta_settings:
+              cloud_sql_instances: ${CONNECTION_NAME}=tcp:5432
+            EOF
+
+            # make sure database exists
+            gcloud sql databases create dotnet-${DEPLOY_ENV}-visitors --instance ${DEPLOY_ENV} || true
+
+            # deploy!  The app will automatically update it's schema.
+            dotnet restore
+            dotnet publish -c Release
+            gcloud app deploy --no-promote --version=dotnet-${CIRCLE_BRANCH} ./bin/Release/netcoreapp2.1/publish/app.yaml
+
+workflows:
+  version: 2
+  # terraform:
+  #   jobs:
+  #     - enable_apis
+  #     - plan_terraform:
+  #         requires: 
+  #           - enable_apis
+  #     - hold_terraform:
+  #         type: approval
+  #         requires:
+  #           - plan_terraform
+  #     - apply_terraform:
+  #         requires:
+  #           - hold_terraform
+  #     - store_tf_output:
+  #         requires:
+  #           - apply_terraform
+  # deploy-rails-example:
+  #   jobs:
+  #     - deploy-rails:
+  #         filters:
+  #           branches:
+  #             only:
+  #               # This is the list of branches which will be deployed automatically.
+  #               # Only master gets deployed to production.  
+  #               # Add more branches here if you want them automatically deployed.
+  #               # Their RAILS_ENV will get set to the branch name.
+  #               - master
+  #               - staging
+  #               - dev
+  #     - test-rails:
+  #         requires:
+  #           - deploy-rails
+  #     - promote-rails-prod:
+  #         requires:
+  #           - test-rails
+  #         filters:
+  #           branches:
+  #             only:
+  #               - master
+  deploy-dotnet-example:
+    jobs:
+      - deploy-dotnet:
+          filters:
+            branches:
+              only:
+                # This is the list of branches which will be deployed automatically.
+                # Only master gets deployed to production.  
+                # Add more branches here if you want them automatically deployed.
+                - master
+                - staging
+                - dev
+      - test-dotnet:
+          requires:
+            - deploy-dotnet

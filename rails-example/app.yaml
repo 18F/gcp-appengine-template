@@ -1,0 +1,16 @@
+entrypoint: bundle exec rackup --port $PORT
+env: flex
+runtime: ruby
+
+# The config commented out here is generated and appended on at build time.
+# see .circleci/config.yml for where this happens.
+# It is left here so that you can see what is supposed to be here.
+# 
+# env_variables:
+#   SECRET_KEY_BASE: xSECRET_KEY_BASEx
+#   CLOUDSQL_USERNAME: xCLOUDSQL_USERNAMEx
+#   CLOUDSQL_PASSWORD: xCLOUDSQL_PASSWORDx
+#   CLOUDSQL_INSTANCE: xCLOUDSQL_INSTANCEx
+
+# beta_settings:
+#   cloud_sql_instances: xCLOUDSQL_INSTANCEx
