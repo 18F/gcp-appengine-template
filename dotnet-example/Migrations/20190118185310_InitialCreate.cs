@@ -11,7 +11,7 @@ namespace dotnetexample.Migrations
                 columns: table => new
                 {
                     BlogId = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Sqlite:Autoincrement", true)
                         .Annotation("Npgsql:ValueGeneratedOnAdd", true),
                     Url = table.Column<string>(nullable: true)
                 },
@@ -25,7 +25,7 @@ namespace dotnetexample.Migrations
                 columns: table => new
                 {
                     PostId = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Sqlite:Autoincrement", true)
                         .Annotation("Npgsql:ValueGeneratedOnAdd", true),
                     Title = table.Column<string>(nullable: true),
                     Content = table.Column<string>(nullable: true),
