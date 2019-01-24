@@ -11,8 +11,7 @@ resource "google_sql_database_instance" "production" {
 }
 
 resource "random_string" "postgres_password_production" {
-  length  = 16
-  special = true
+  length  = 24
 }
 
 resource "google_sql_user" "postgres-production" {
@@ -49,8 +48,7 @@ resource "google_sql_database_instance" "dev" {
 }
 
 resource "random_string" "postgres_password_dev" {
-  length  = 16
-  special = true
+  length  = 24
 }
 
 resource "google_sql_user" "postgres-dev" {
@@ -86,8 +84,7 @@ resource "google_sql_database_instance" "staging" {
 }
 
 resource "random_string" "postgres_password_staging" {
-  length  = 16
-  special = true
+  length  = 24
 }
 
 resource "google_sql_user" "postgres-staging" {
