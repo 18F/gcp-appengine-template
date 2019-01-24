@@ -18,13 +18,15 @@ Rails / App Engine
 =============================
 This is a simple app that uses ActiveRecord to store a "blog" in a db.
 
-To test locally, run `cd rails-example && bundle install && bin/rails server`.
+To test locally, have ruby/bundler installed and 
+run `cd rails-example && bundle install && bin/rails server`.
 
 .NET Core / App Engine
 ======================
 This is a simple app that creates a list of URLs for "blogs" in a database.  
 This may change, but for now, you must use the netcoreapp2.1
-framework for applications deployed into App Engine.
+framework for applications deployed into App Engine.  It uses KMS to store
+antiforgery keys, and has basic auth enabled.
 
 To test locally, `cd dotnet-example && dotnet run`.
 This will operate on a local `blogging.db` sqlite db.
@@ -76,8 +78,8 @@ Things to note:
     when they are manually approved in circleci.  Before
     doing such an approval, you should check the terraform plan output to see what is
     changed, in case your change actually does something that you did not expect, like
-    delete resources instead of rename them.  Be careful!  This applies to _all_
-    infrastructure, production/staging/dev/etc.
+    delete resources instead of rename them.  **Be careful!  This applies to _all_
+    infrastructure, production/staging/dev/etc.**
   * These example apps all use the same username/password for each of the dev/staging/prod
   	databases.  In real life, you'd create separate username/passwords for each database
   	that you create, so that the apps in prod can't query each others' databases.
