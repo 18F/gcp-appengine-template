@@ -132,11 +132,11 @@ jobs:
             rm -f /tmp/tf-output.json
             cat <<EOF >> rails-example/app.yaml
             env_variables:
-              SECRET_KEY_BASE: ${RAILS_SECRET}
-              CLOUDSQL_USERNAME: ${CLOUDSQL_USERNAME}
-              CLOUDSQL_PASSWORD: ${CLOUDSQL_PASSWORD}
-              CLOUDSQL_INSTANCE: ${CONNECTION_NAME}
-              RAILS_ENV: ${RAILS_ENV}
+              SECRET_KEY_BASE: "${RAILS_SECRET}"
+              CLOUDSQL_USERNAME: "${CLOUDSQL_USERNAME}"
+              CLOUDSQL_PASSWORD: "${CLOUDSQL_PASSWORD}"
+              CLOUDSQL_INSTANCE: "${CONNECTION_NAME}"
+              RAILS_ENV: "${RAILS_ENV}"
               BASICAUTH_PASSWORD: "${BASICAUTH_PASSWORD}"
               BASICAUTH_USER: "${BASICAUTH_USER}"
 
