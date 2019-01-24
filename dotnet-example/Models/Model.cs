@@ -5,6 +5,11 @@ namespace dotnet_example.Models
 {
     public class BloggingContext : DbContext
     {
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.HasSequence<int>("BlogNumbers");
+        }
+
         public BloggingContext(DbContextOptions<BloggingContext> options)
             : base(options)
         { }            
