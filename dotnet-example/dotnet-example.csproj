@@ -7,6 +7,7 @@
   <ItemGroup>
     <PackageReference Include="Google.Api.Gax" Version="2.5.0" />
     <PackageReference Include="Google.Cloud.Diagnostics.AspNetCore" Version="2.0.1" />
+    <PackageReference Include="Google.Cloud.Kms.V1" Version="1.0.0-beta04" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.2" PrivateAssets="All" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.1.1" />
