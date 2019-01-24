@@ -4,6 +4,8 @@ env: flex
 # These are set up in the circleci deploy process
 # env_variables:
 #     ASPNETCORE_DEPLOY_ENV: ${DEPLOY_ENV}
+#     ASPNETCORE_BASICAUTH_USER: "${BASICAUTH_USER}"
+#     ASPNETCORE_BASICAUTH_PASSWORD: "${BASICAUTH_PASSWORD}"
 #     CUSTOMCONNSTR_postgres: Uid=${CLOUDSQL_USERNAME};Pwd=${CLOUDSQL_PASSWORD};Host=cloudsql;Database=dotnet-${DEPLOY_ENV}-visitors
 
 # beta_settings:
