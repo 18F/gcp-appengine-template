@@ -11,8 +11,8 @@ resource "google_sql_database_instance" "production" {
 }
 
 resource "random_string" "postgres_password_production" {
-  length  = 16
-  special = true
+  length  = 24
+  special = false
 }
 
 resource "google_sql_user" "postgres-production" {
@@ -24,6 +24,7 @@ resource "google_sql_user" "postgres-production" {
 output "postgres_password_production" {
   value = "${random_string.postgres_password_production.result}"
   description = "Postgres production password"
+  sensitive = true
 }
 
 output "postgres_username_production" {
@@ -49,8 +50,8 @@ resource "google_sql_database_instance" "dev" {
 }
 
 resource "random_string" "postgres_password_dev" {
-  length  = 16
-  special = true
+  length  = 24
+  special = false
 }
 
 resource "google_sql_user" "postgres-dev" {
@@ -62,6 +63,7 @@ resource "google_sql_user" "postgres-dev" {
 output "postgres_password_dev" {
   value = "${random_string.postgres_password_dev.result}"
   description = "Postgres dev password"
+  sensitive = true
 }
 
 output "postgres_username_dev" {
@@ -86,8 +88,8 @@ resource "google_sql_database_instance" "staging" {
 }
 
 resource "random_string" "postgres_password_staging" {
-  length  = 16
-  special = true
+  length  = 24
+  special = false
 }
 
 resource "google_sql_user" "postgres-staging" {
@@ -99,6 +101,7 @@ resource "google_sql_user" "postgres-staging" {
 output "postgres_password_staging" {
   value = "${random_string.postgres_password_staging.result}"
   description = "Postgres staging password"
+  sensitive = true
 }
 
 output "postgres_username_staging" {
