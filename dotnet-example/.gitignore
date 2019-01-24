@@ -39,3 +39,6 @@ global.json
 # Don't get the sqlite db
 blogging.db
 
+# Excluding this so we can save a proper app.yaml for hand deploys
+app.yaml.foo
+
