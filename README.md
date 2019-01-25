@@ -1,7 +1,8 @@
 # GCP App Engine template
 This repository contains a couple of example applications and
-supporting configuration files for Google App Engine.  It is meant
-to be used as a guide to quickly get a lightweight application running
+supporting infrastructure and configuration files for Google App Engine.
+It is meant to be used by people in the GSA (and other agencies)
+as a guide to quickly get a lightweight application running
 safely and securely in GCP.
 
 We hope to have procurement information and this process approved with a
@@ -12,8 +13,8 @@ up and running and get an ATO.
 
 To get the app(s) in this repo going, you will need to:
 
-1. Procure a https://circleci.com/ account.
-1. Procure a GCP project and gain access to the GCP console.
+1. Procure a [CircleCI](https://circleci.com/) account.
+1. Procure a GCP project and gain access to the [GCP console](https://console.cloud.google.com/).
 1. Fork or copy this repo into your github org.  Make your changes to this
    new repo.
 1. Consider your application load on the database and change the
@@ -24,18 +25,18 @@ To get the app(s) in this repo going, you will need to:
    `Console -> IAM & admin -> Service Accounts` in GCP
 1. Save the JSON credentials to `$HOME/gcloud-service-key.json`
    This file should either be stored securely by the administrators
-   of the system, or deleted after circleci has been seeded with
+   of the system, or (even better) deleted after circleci has been seeded with
    it's data.
 1. Go to `Console -> IAM & admin` in GCP, click on `View by: Roles`,
    and then add `Project -> Owner` to the terraform service account.
 1. You should be sure to set up master and staging branches as protected branches
    that require approval for PRs to land in this repo.
 1. Enable circleci on this repo, then add some environment variables to it:
-   * GCLOUD_SERVICE_KEY:  Set this to the contents of `$HOME/gcloud-service-key.json`
-   * GOOGLE_PROJECT_ID: Set this to your google project ID
-   * BASICAUTH_PASSWORD: Set this to a basic auth password to frontend your app with.
+   * `GCLOUD_SERVICE_KEY`:  Set this to the contents of `$HOME/gcloud-service-key.json`
+   * `GOOGLE_PROJECT_ID`: Set this to your google project ID
+   * `BASICAUTH_PASSWORD`: Set this to a basic auth password to frontend your app with.
      If it is not set, then your app will be public.
-   * BASICAUTH_USER: Set this to the basic auth username you want.
+   * `BASICAUTH_USER`: Set this to the basic auth username you want.
 1. Watch as circleci deploys the infrastructure and apps!
    You may need to approve and wait until the terraform run is done, and then
    redeploy the apps the first time in case it takes longer to launch the databases
@@ -51,8 +52,8 @@ KMS or share secrets or whatever.
 
 ### General Thoughts
 
-  * Google App Engine supports a few frameworks:
-    https://cloud.google.com/appengine/docs/flexible/
+  * Google App Engine supports a 
+    [few frameworks](https://cloud.google.com/appengine/docs/flexible/).
     Be sure you use a supported version of the framework.
   * You will need to customize the `.circleci/config.yml` file to remove the
     example apps and add yours in.  If you are not using a framework that has
@@ -66,7 +67,7 @@ KMS or share secrets or whatever.
     the branch that it's building to find secrets and other environment-specific
     info in the terraform output.
   * Everything in the database storage and Cloud Storage buckets are all encrypted at
-    rest.  You can also use KMS to encrypt things, so if your app requires
+    rest.  You can also use KMS to encrypt things, so if your app requires more
     encryption of data, make sure you read up on that:  https://cloud.google.com/kms/
   * The example apps all share the same usernames/passwords for the databases they access.
     This makes the config simpler, but if you happen to have multiple apps running in
@@ -91,9 +92,22 @@ public by default.  The example apps have basic auth enabled, so you can use
 that as an example on how to do that.
 
 For other identity providers, you will need to use OAuth2 or SAML in your app.
-Here are some providers you might want to integrate with:
-  * [login.gov](https://developers.login.gov/)
-  * [GSA SecureAuth](https://secureauth.gsa.gov/)
+Here are some identity providers you might want to integrate with:
+  * [login.gov](https://login.gov/), which has excellent
+    [developer documentation](https://developers.login.gov/).
+  * [GSA SecureAuth](https://secureauth.gsa.gov/), which seems to have
+    no public documentation, but according to the IT Servicedesk, you can
+    submit a Single Sign-On Integration Request:
+    ```
+    1. Go to servicedesk.gsa.gov
+	2. Click on "Order Something"
+	3. Click on the following options respectively: General Requests > Single Sign-On Integration Request
+	(Please refer to the Lightweight Security Authorization Process Form for information on FIPS 199.)
+
+	*All fields marked with a red asterisk must be populated*
+
+	**Your supervisor will receive an email after the request is submitted. That email will give them the option to either approve or deny the request. Failure to approve/deny the request will result in the ticket being cancelled**
+    ```
   * [cloud.gov UAA](https://cloud.gov/docs/apps/leveraging-authentication/),
     although this probably is not useful unless you have a cloud.gov
     account, it has some good documentation on the subject.
@@ -105,14 +119,20 @@ may be useful.
 
 ## ATO and launching considerations
 
-XXX
+XXX Fill out SSP template or opencontrol stuff?
 
 ## Common Workflows
 
 ### Normal Development Workflow
 
-The normal way that development for an app happens is:
-  * You develop locally, pushing changes up to your own feature/fix branch in github.
+Normal development is driven by what is in github, so most engineers
+would only need access to that, which helps separate duties and reduce the
+attack surface for compromised accounts.  It also provides a good audit trail
+for all changes, and with protected branches and good tests, makes sure that changes
+have oversight and will work.
+
+  * You develop locally, pushing changes up to your own feature/fix branch in github
+    and building/running tests locally.
   * Once you have something that is tested and worthy of going out, you can Pull Request
     (PR) it into the dev branch, where it will be automatically deployed to the dev
     version of the app in gcp and have it's tests run against it.
@@ -130,7 +150,7 @@ The normal way that development for an app happens is:
 
 ### Manual Deploy Workflow
 
-XXX
+XXX You can run some stuff by hand if you want to.
 
 ### Logging/Debugging
 
@@ -176,6 +196,9 @@ change, you could:
     you delete everything in the _new_ GCP project, not the real
     production one.**
 
+XXX Maybe we should make an infrastructure branch and trigger circleci
+terraform workflow off of it?  How to keep it in sync with master?
+
 ### Secrets Rotation Workflow
 
 The main secret in the system is the gcloud-service-key.json file.  This key can be
@@ -209,6 +232,14 @@ Application secrets (such as the rails secret) can be updated like so:
     This is a good thing to do during a maintenance window.
 
 ## Technologies used
+
+### Gitops/Infrastructure As Code
+
+This is less a technology, and more of a way of managing a system only using
+code.  The idea is that aside from perhaps some one-off startup tasks, almost
+everything is managed by checking in code and moving it between branches.
+This ensures that all changes to the system are contained in git, and thus
+may be rolled back or reconstructed in a Disaster Recovery scenario.
 
 ### Google App Engine
 App Engine is a simple way to deploy applications that will automatically scale
