@@ -40,7 +40,7 @@ jobs:
           name: Store Service Account
           command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
       - run:
-          name: Initialize Terraform
+          name: Initialize and plan Terraform (check plan out here before approving!)
           command: |
             export TF_VAR_project_id=$GOOGLE_PROJECT_ID
             cd terraform && terraform init -backend-config="bucket=gcp-terraform-state-$GOOGLE_PROJECT_ID" && terraform plan -input=false
@@ -83,7 +83,7 @@ jobs:
       - checkout
       - run:
           name: Run Tests!
-          command: echo "not tested! XXX"
+          command: echo "not tested! Run a testing script here. XXX"
   deploy-rails:
     docker:
       - image: circleci/ruby:2.5.3-stretch
@@ -124,12 +124,13 @@ jobs:
             else
               export RAILS_ENV=${CIRCLE_BRANCH}
             fi
-            gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json /tmp/tf-output.json
-            export RAILS_SECRET=`jq -r .rails_secret_${RAILS_ENV}.value < /tmp/tf-output.json`
-            export CLOUDSQL_USERNAME=`jq -r .postgres_username_${RAILS_ENV}.value < /tmp/tf-output.json`
-            export CLOUDSQL_PASSWORD=`jq -r .postgres_password_${RAILS_ENV}.value < /tmp/tf-output.json`
-            export CONNECTION_NAME=`jq -r .postgres_instance_${RAILS_ENV}.value < /tmp/tf-output.json`
-            rm -f /tmp/tf-output.json
+
+            # put the tf output into a variable so it doesn't hit the disk
+            export TFOUTPUT=`gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json -`
+            export RAILS_SECRET=`echo ${TFOUTPUT} | jq -r .rails_secret_${RAILS_ENV}.value`
+            export CLOUDSQL_USERNAME=`echo ${TFOUTPUT} | jq -r .postgres_username_${RAILS_ENV}.value`
+            export CLOUDSQL_PASSWORD=`echo ${TFOUTPUT} | jq -r .postgres_password_${RAILS_ENV}.value`
+            export CONNECTION_NAME=`echo ${TFOUTPUT} | jq -r .postgres_instance_${RAILS_ENV}.value`
             cat <<EOF >> rails-example/app.yaml
             env_variables:
               SECRET_KEY_BASE: "${RAILS_SECRET}"
@@ -190,7 +191,7 @@ jobs:
       - checkout
       - run:
           name: Run Tests!
-          command: echo "not tested! XXX"
+          command: echo "not tested! Run a testing script here. XXX"
   deploy-dotnet:
     docker:
       - image: gcr.io/google-appengine/aspnetcore:2.1.0
@@ -222,11 +223,11 @@ jobs:
               export DEPLOY_ENV=${CIRCLE_BRANCH}
             fi
 
-            gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json /tmp/tf-output.json
-            export CLOUDSQL_USERNAME=`jq -r .postgres_username_${DEPLOY_ENV}.value < /tmp/tf-output.json`
-            export CLOUDSQL_PASSWORD=`jq -r .postgres_password_${DEPLOY_ENV}.value < /tmp/tf-output.json`
-            export CONNECTION_NAME=`jq -r .postgres_instance_${DEPLOY_ENV}.value < /tmp/tf-output.json`
-            rm -f /tmp/tf-output.json
+            # put the tf output into a variable so it doesn't hit the disk
+            export TFOUTPUT=`gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json -`
+            export CLOUDSQL_USERNAME=`echo ${TFOUTPUT} | jq -r .postgres_username_${DEPLOY_ENV}.value`
+            export CLOUDSQL_PASSWORD=`echo ${TFOUTPUT} | jq -r .postgres_password_${DEPLOY_ENV}.value`
+            export CONNECTION_NAME=`echo ${TFOUTPUT} | jq -r .postgres_instance_${DEPLOY_ENV}.value`
 
             cat <<EOF > app.yaml
             runtime: aspnetcore
