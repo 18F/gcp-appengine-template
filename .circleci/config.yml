@@ -151,7 +151,7 @@ jobs:
             mkdir /tmp/workspace
             cd rails-example
             bundle exec bin/rails assets:precompile
-            export VERSION="${RAILS_ENV}-$(expr $(date +%s) % 86400)"
+            export VERSION="${CIRCLE_BRANCH}-$(expr $(date +%s) % 86400)"
             gcloud app deploy --no-promote --version=${VERSION}
             bundle exec rake appengine:exec GAE_VERSION=${VERSION} -- bundle exec rake db:create db:migrate
             echo ${VERSION} > /tmp/workspace/rails_target_version
