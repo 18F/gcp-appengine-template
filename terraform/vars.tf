@@ -46,6 +46,15 @@ output "sso_shared_secret" {
   sensitive = true
 }
 
+resource "random_string" "sso_idp_secret" {
+  length  = 32
+}
+output "sso_idp_secret" {
+  value = "${random_string.sso_idp_secret.result}"
+  description = "SSO idp secret string"
+  sensitive = true
+}
+
 resource "random_string" "sso_cookie_secret" {
   length  = 32
 }

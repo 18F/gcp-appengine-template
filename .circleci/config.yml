@@ -14,6 +14,7 @@ jobs:
             gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
             gcloud config set project $GOOGLE_PROJECT_ID
             gsutil mb gs://gcp-terraform-state-$GOOGLE_PROJECT_ID || true
+            gcloud app create --region=us-west2 || true
       - run:
           name: Enabling APIs
           command: ./terraform/enable-apis.sh
@@ -32,7 +33,6 @@ jobs:
       - run:
           name: Enable app to do schema migrations
           command: |
-            gcloud app create || true
             export PROJECT_NUMBER=`gcloud projects describe ${GOOGLE_PROJECT_ID} --format=json | jq -r .projectNumber`
             gcloud projects add-iam-policy-binding ${GOOGLE_PROJECT_ID} --member=serviceAccount:${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com --role=roles/editor
   plan_terraform:
@@ -131,7 +131,7 @@ jobs:
             cat <<EOF > rails-example/app.yaml
             runtime: custom
             env: flex
-            service: rails-example
+            service: rails
 
             env_variables:
               SECRET_KEY_BASE: "${RAILS_SECRET}"
@@ -151,13 +151,13 @@ jobs:
             mkdir /tmp/workspace
             cd rails-example
             bundle exec bin/rails assets:precompile
-            export VERSION="rails-${DEPLOY_ENV}-$(date '+%F-%s')"
+            export VERSION="${RAILS_ENV}-$(expr $(date +%s) % 86400)"
             gcloud app deploy --no-promote --version=${VERSION}
             bundle exec rake appengine:exec GAE_VERSION=${VERSION} -- bundle exec rake db:create db:migrate
             echo ${VERSION} > /tmp/workspace/rails_target_version
 
             # clean up old versions (leave the last two, so you can roll back)
-            gcloud app versions list --service=rails-example --format=list | sort -rn | tail -n +3 | sed 's/^.*\///' | xargs gcloud app versions delete
+            gcloud app versions list --service=rails --format=list | sort -rn | tail -n +3 | sed 's/^.*\///' | xargs gcloud app versions delete
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
@@ -206,6 +206,7 @@ jobs:
             # extract data for the app.yaml file
             export SHARED_SECRET=`echo ${TFOUTPUT} | jq -r '.sso_shared_secret.value | @base64'`
             export COOKIE_SECRET=`echo ${TFOUTPUT} | jq -r '.sso_cookie_secret.value | @base64'`
+            export IDP_CLIENT_SECRET=`echo ${TFOUTPUT} | jq -r '.sso_idp_secret.value | @base64'`
             export SIGNING_KEY=`echo ${TFOUTPUT} | jq -r '.sso_cert.value | @base64'`
             export RAILS_VERSION=`cat /tmp/workspace/rails_target_version`
             export SOURCE="https://${GOOGLE_PROJECT_ID}.appspot.com/"
@@ -222,10 +223,9 @@ jobs:
               IDP_PROVIDER_URL: ${IDP_PROVIDER_URL}
               IDP_CLIENT_ID: ${IDP_CLIENT_ID}
               IDP_CLIENT_SECRET: ${IDP_CLIENT_SECRET}
-              # export SIGNING_KEY="XXX Replace with base64'd P256 private key made by terraform"
               SCOPE: openid email
               PROXY_ROOT_DOMAIN: ${GOOGLE_PROJECT_ID}.appspot.com
-              ALLOWED_DOMAINS: *
+              ALLOWED_DOMAINS: "*"
               SHARED_SECRET: ${SHARED_SECRET}
               COOKIE_SECRET: ${COOKIE_SECRET}
               ROUTES: ${SOURCE}=${DEST}
@@ -233,8 +233,8 @@ jobs:
             EOF
 
             # deploy!
-            export VERSION="sso-${DEPLOY_ENV}-$(date '+%F-%s')"
-            gcloud app deploy --no-promote --version=${VERSION} app.yaml
+            export VERSION="sso-${DEPLOY_ENV}-$(expr $(date +%s) % 86400)"
+            gcloud app deploy --no-promote --version=${VERSION}
             echo ${VERSION} > /tmp/workspace/sso_target_version
 
             # clean up old versions (leave the last two, so you can roll back)
