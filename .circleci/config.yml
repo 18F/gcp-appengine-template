@@ -345,7 +345,14 @@ workflows:
   version: 2
   terraform:
     jobs:
-      - enable_apis
+      - enable_apis:
+          filters:
+            branches:
+              only:
+                # This is the list of branches which will trigger a terraform run.
+                - master
+                - staging
+                - dev
       - plan_terraform:
           requires: 
             - enable_apis
