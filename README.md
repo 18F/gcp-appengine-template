@@ -37,6 +37,11 @@ To get the app(s) in this repo going, you will need to:
    * `BASICAUTH_PASSWORD`: Set this to a basic auth password to frontend your app with.
      If it is not set, then your app will be public.
    * `BASICAUTH_USER`: Set this to the basic auth username you want.
+   * `IDP_PROVIDER_URL`: Set this to your IDP provider URL 
+     (like https://idp.int.identitysandbox.gov/openid_connect/authorize)
+   * `IDP_CLIENT_ID`: Set this to the client ID you registered with your IDP.
+     (like `urn:gov:gsa:openidconnect:development`)
+
 1. Watch as circleci deploys the infrastructure and apps!
    You may need to approve and wait until the terraform run is done, and then
    redeploy the apps the first time in case it takes longer to launch the databases

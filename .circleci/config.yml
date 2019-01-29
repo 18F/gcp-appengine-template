@@ -27,8 +27,12 @@ jobs:
           name: Enable KMS
           command: ./terraform/enable-kms.sh
       - run:
+          name: enable app engine if not already done
+          command: gcloud app create || true
+      - run:
           name: Enable app to do schema migrations
           command: |
+            gcloud app create || true
             export PROJECT_NUMBER=`gcloud projects describe ${GOOGLE_PROJECT_ID} --format=json | jq -r .projectNumber`
             gcloud projects add-iam-policy-binding ${GOOGLE_PROJECT_ID} --member=serviceAccount:${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com --role=roles/editor
   plan_terraform:
@@ -76,14 +80,7 @@ jobs:
             gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
             gcloud config set project $GOOGLE_PROJECT_ID
             gsutil cp /tmp/workspace/tf-output.json gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json
-  test-rails:
-    docker:
-      - image: circleci/ruby:2.5.3-stretch
-    steps:
-      - checkout
-      - run:
-          name: Run Tests!
-          command: echo "not tested! Run a testing script here. XXX"
+ 
   deploy-rails:
     docker:
       - image: circleci/ruby:2.5.3-stretch
@@ -131,7 +128,11 @@ jobs:
             export CLOUDSQL_USERNAME=`echo ${TFOUTPUT} | jq -r .postgres_username_${RAILS_ENV}.value`
             export CLOUDSQL_PASSWORD=`echo ${TFOUTPUT} | jq -r .postgres_password_${RAILS_ENV}.value`
             export CONNECTION_NAME=`echo ${TFOUTPUT} | jq -r .postgres_instance_${RAILS_ENV}.value`
-            cat <<EOF >> rails-example/app.yaml
+            cat <<EOF > rails-example/app.yaml
+            runtime: custom
+            env: flex
+            service: rails-example
+
             env_variables:
               SECRET_KEY_BASE: "${RAILS_SECRET}"
               CLOUDSQL_USERNAME: "${CLOUDSQL_USERNAME}"
@@ -150,20 +151,106 @@ jobs:
             mkdir /tmp/workspace
             cd rails-example
             bundle exec bin/rails assets:precompile
-            if [ "$CIRCLE_BRANCH" = "master" ] ; then
-              gcloud app deploy --no-promote 2>&1 | tee /tmp/deploy.out
-              egrep '^target version:' /tmp/deploy.out | sed 's/.*\[\(.*\)\].*/\1/' > /tmp/workspace/master_target_version
-              bundle exec rake appengine:exec -- bundle exec rake db:create db:migrate
-              # XXX clean up old versions?
-            else
-              gcloud app deploy --no-promote --version=${CIRCLE_BRANCH}
-              bundle exec rake appengine:exec GAE_VERSION=${CIRCLE_BRANCH} -- bundle exec rake db:create db:migrate
-              touch /tmp/workspace/master_target_version
-            fi
+            export VERSION="rails-${DEPLOY_ENV}-$(date '+%F-%s')"
+            gcloud app deploy --no-promote --version=${VERSION}
+            bundle exec rake appengine:exec GAE_VERSION=${VERSION} -- bundle exec rake db:create db:migrate
+            echo ${VERSION} > /tmp/workspace/rails_target_version
+
+            # clean up old versions (leave the last two, so you can roll back)
+            gcloud app versions list --service=rails-example --format=list | sort -rn | tail -n +3 | sed 's/^.*\///' | xargs gcloud app versions delete
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
-            - master_target_version
+            - rails_target_version
+  test-rails:
+    docker:
+      - image: circleci/ruby:2.5.3-stretch
+    steps:
+      - checkout
+      - run:
+          name: Run Tests!
+          command: echo "not tested! Run a testing script here. XXX"
+  deploy-ssoproxy:
+    docker:
+      - image: google/cloud-sdk
+    steps:
+      - checkout
+      - run:
+          name: Store Service Account key
+          command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+      - run:
+          name: Setup Google Cloud SDK
+          command: |
+            gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
+            gcloud config set project $GOOGLE_PROJECT_ID
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: prepare app engine config, build, deploy
+          command: |
+            cd sso-example
+            apt install -y jq
+            # XXX should probably lock version or turn it into a submodule
+            git clone https://github.com/pomerium/pomerium
+            cd pomerium
+
+            if [ "${CIRCLE_BRANCH}" = "master" ] ; then
+              export DEPLOY_ENV=production
+            else
+              export DEPLOY_ENV=${CIRCLE_BRANCH}
+            fi
+
+            # put the tf output into a variable so it doesn't hit the disk
+            export TFOUTPUT=`gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json -`
+
+            # extract data for the app.yaml file
+            export SHARED_SECRET=`echo ${TFOUTPUT} | jq -r '.sso_shared_secret.value | @base64'`
+            export COOKIE_SECRET=`echo ${TFOUTPUT} | jq -r '.sso_cookie_secret.value | @base64'`
+            export SIGNING_KEY=`echo ${TFOUTPUT} | jq -r '.sso_cert.value | @base64'`
+            export RAILS_VERSION=`cat /tmp/workspace/rails_target_version`
+            export SOURCE="https://${GOOGLE_PROJECT_ID}.appspot.com/"
+            export DEST=`gcloud app versions describe ${RAILS_VERSION} -s default --format=json | jq -r .versionUrl`
+
+            cat <<EOF > app.yaml
+            runtime: custom
+            env: flex
+            service: default
+
+            env_variables:
+              REDIRECT_URL: ${SOURCE}oauth2/callback
+              IDP_PROVIDER: oidc
+              IDP_PROVIDER_URL: ${IDP_PROVIDER_URL}
+              IDP_CLIENT_ID: ${IDP_CLIENT_ID}
+              IDP_CLIENT_SECRET: ${IDP_CLIENT_SECRET}
+              # export SIGNING_KEY="XXX Replace with base64'd P256 private key made by terraform"
+              SCOPE: openid email
+              PROXY_ROOT_DOMAIN: ${GOOGLE_PROJECT_ID}.appspot.com
+              ALLOWED_DOMAINS: *
+              SHARED_SECRET: ${SHARED_SECRET}
+              COOKIE_SECRET: ${COOKIE_SECRET}
+              ROUTES: ${SOURCE}=${DEST}
+              SIGNING_KEY: ${SIGNING_KEY}
+            EOF
+
+            # deploy!
+            export VERSION="sso-${DEPLOY_ENV}-$(date '+%F-%s')"
+            gcloud app deploy --no-promote --version=${VERSION} app.yaml
+            echo ${VERSION} > /tmp/workspace/sso_target_version
+
+            # clean up old versions (leave the last two, so you can roll back)
+            gcloud app versions list --service=default --format=list | sort -rn | tail -n +3 | sed 's/^.*\///' | xargs gcloud app versions delete
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - sso_target_version
+  test-ssoproxy:
+    docker:
+      - image: google/cloud-sdk
+    steps:
+      - checkout
+      - run:
+          name: Run Tests!
+          command: echo "not tested! Run a testing script here. XXX"
   promote-rails-prod:
     docker:
       - image: google/cloud-sdk
@@ -179,19 +266,11 @@ jobs:
       - attach_workspace:
           at: /tmp/workspace
       - run:
-          name: Promote rails-example to production
+          name: Promote rails-example with sso to production
           command: |
-            export VERSION=`cat /tmp/workspace/master_target_version`
+            export VERSION=`cat /tmp/workspace/sso_target_version`
             gcloud app services set-traffic default --splits ${VERSION}=1
 
-  test-dotnet:
-    docker:
-      - image: google/cloud-sdk
-    steps:
-      - checkout
-      - run:
-          name: Run Tests!
-          command: echo "not tested! Run a testing script here. XXX"
   deploy-dotnet:
     docker:
       - image: gcr.io/google-appengine/aspnetcore:2.1.0
@@ -232,6 +311,7 @@ jobs:
             cat <<EOF > app.yaml
             runtime: aspnetcore
             env: flex
+            service: dotnet-example
 
             env_variables:
               ASPNETCORE_DEPLOY_ENV: "${DEPLOY_ENV}"
@@ -250,6 +330,16 @@ jobs:
             dotnet restore
             dotnet publish -c Release
             gcloud app deploy --no-promote --version=dotnet-${CIRCLE_BRANCH} ./bin/Release/netcoreapp2.1/publish/app.yaml
+  test-dotnet:
+    docker:
+      - image: google/cloud-sdk
+    steps:
+      - checkout
+      - run:
+          name: Run Tests!
+          command: echo "not tested! Run a testing script here. XXX"
+
+
 
 workflows:
   version: 2
@@ -285,24 +375,30 @@ workflows:
       - test-rails:
           requires:
             - deploy-rails
-      - promote-rails-prod:
+      - deploy-ssoproxy:
           requires:
             - test-rails
-          filters:
-            branches:
-              only:
-                - master
-  deploy-dotnet-example:
-    jobs:
-      - deploy-dotnet:
-          filters:
-            branches:
-              only:
-                # This is the list of branches which will be deployed automatically.
-                # Add more branches here if you want them automatically deployed.
-                - master
-                - staging
-                - dev
-      - test-dotnet:
+      - test-ssoproxy:
           requires:
-            - deploy-dotnet
+            - deploy-ssoproxy
+      - promote-rails-prod:
+          requires:
+            - test-ssoproxy
+          filters:
+            branches:
+              only:
+                - master
+  # deploy-dotnet-example:
+  #   jobs:
+  #     - deploy-dotnet:
+  #         filters:
+  #           branches:
+  #             only:
+  #               # This is the list of branches which will be deployed automatically.
+  #               # Add more branches here if you want them automatically deployed.
+  #               - master
+  #               - staging
+  #               - dev
+  #     - test-dotnet:
+  #         requires:
+  #           - deploy-dotnet
