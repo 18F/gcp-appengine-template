@@ -129,7 +129,7 @@ jobs:
             export CLOUDSQL_PASSWORD=`echo ${TFOUTPUT} | jq -r .postgres_password_${RAILS_ENV}.value`
             export CONNECTION_NAME=`echo ${TFOUTPUT} | jq -r .postgres_instance_${RAILS_ENV}.value`
             cat <<EOF > rails-example/app.yaml
-            runtime: custom
+            runtime: ruby
             env: flex
             service: rails
 
