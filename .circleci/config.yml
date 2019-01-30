@@ -173,6 +173,9 @@ jobs:
             if [ ! -z ${VERSIONS} ] ; then
               gcloud app versions delete ${VERSIONS}
             fi
+
+            # This is so that if we don't find any versions to nuke, we don't return with an error.
+            true
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
@@ -266,6 +269,9 @@ jobs:
             if [ ! -z ${VERSIONS} ] ; then
               gcloud app versions delete ${VERSIONS}
             fi
+
+            # This is so that if we don't find any versions to nuke, we don't return with an error.
+            true
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
