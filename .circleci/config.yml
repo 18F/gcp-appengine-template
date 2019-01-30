@@ -135,7 +135,6 @@ jobs:
 
             # set the google app engine config file up
             cat <<EOF > rails-example/app.yaml
-            entrypoint: bundle exec rackup --port $PORT
             runtime: ruby
             env: flex
             service: rails
@@ -156,7 +155,7 @@ jobs:
             # do the deploy!
             cd rails-example
             bundle exec bin/rails assets:precompile
-            gcloud app deploy ${DEPLOY_TARGET} | tee /tmp/deploy.out
+            gcloud app deploy --no-promote ${DEPLOY_TARGET} | tee /tmp/deploy.out
 
             # Store info on what got deployed so we can test/promote it later on.
             mkdir /tmp/workspace
