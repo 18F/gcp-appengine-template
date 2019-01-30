@@ -135,6 +135,7 @@ jobs:
 
             # set the google app engine config file up
             cat <<EOF > rails-example/app.yaml
+            entrypoint: bundle exec rackup --port $PORT
             runtime: ruby
             env: flex
             service: rails
