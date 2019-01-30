@@ -169,13 +169,12 @@ jobs:
             bundle exec rake appengine:exec -- bundle exec rake db:create db:migrate
 
             # clean up old production versions (leave the last two, so you can roll back)
+            echo cleaning up old versions
             VERSIONS=$(gcloud app versions list --service=rails --format=list | egrep -v '\/dev$|\/staging$' | sort -rn | tail -n +3 | sed 's/^.*\///')
             if [ ! -z ${VERSIONS} ] ; then
               gcloud app versions delete ${VERSIONS}
+              echo cleaned up ${VERSIONS}
             fi
-
-            # This is so that if we don't find any versions to nuke, we don't return with an error.
-            true
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
@@ -265,13 +264,12 @@ jobs:
             echo ${TARGET_URL} > /tmp/workspace/sso_target_url
 
             # clean up old versions (leave the last two, so you can roll back)
+            echo cleaning up old versions
             VERSIONS=$(gcloud app versions list --service=default --format=list | egrep -v '\/dev$|\/staging$' | sort -rn | tail -n +3 | sed 's/^.*\///')
             if [ ! -z ${VERSIONS} ] ; then
               gcloud app versions delete ${VERSIONS}
+              echo cleaned up ${VERSIONS}
             fi
-
-            # This is so that if we don't find any versions to nuke, we don't return with an error.
-            true
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
