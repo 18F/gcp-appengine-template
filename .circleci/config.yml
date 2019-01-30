@@ -114,12 +114,16 @@ jobs:
             echo 'export PATH=~/google-cloud-sdk/bin:$PATH' >> $BASH_ENV
             source $BASH_ENV
       - run:
-          name: prepare app engine config
+          name: prepare app engine config, deploy, and run db migrations
           command: |
             if [ "${CIRCLE_BRANCH}" = "master" ] ; then
               export RAILS_ENV=production
+              export DEPLOY_TARGET=""
+              unset GAE_VERSION
             else
               export RAILS_ENV=${CIRCLE_BRANCH}
+              export DEPLOY_TARGET="--version=${CIRCLE_BRANCH}"
+              export GAE_VERSION=${CIRCLE_BRANCH}
             fi
 
             # put the tf output into a variable so it doesn't hit the disk
@@ -128,7 +132,10 @@ jobs:
             export CLOUDSQL_USERNAME=`echo ${TFOUTPUT} | jq -r .postgres_username_${RAILS_ENV}.value`
             export CLOUDSQL_PASSWORD=`echo ${TFOUTPUT} | jq -r .postgres_password_${RAILS_ENV}.value`
             export CONNECTION_NAME=`echo ${TFOUTPUT} | jq -r .postgres_instance_${RAILS_ENV}.value`
+
+            # set the google app engine config file up
             cat <<EOF > rails-example/app.yaml
+            entrypoint: bundle exec rackup --port $PORT
             runtime: ruby
             env: flex
             service: rails
@@ -145,31 +152,40 @@ jobs:
             beta_settings:
               cloud_sql_instances: ${CONNECTION_NAME}
             EOF
-      - run:
-          name: deploy to app engine and run db migrations
-          command: |
-            mkdir /tmp/workspace
+
+            # do the deploy!
             cd rails-example
             bundle exec bin/rails assets:precompile
-            export VERSION="${CIRCLE_BRANCH}-$(expr $(date +%s) % 86400)"
-            gcloud app deploy --no-promote --version=${VERSION}
-            bundle exec rake appengine:exec GAE_VERSION=${VERSION} -- bundle exec rake db:create db:migrate
-            echo ${VERSION} > /tmp/workspace/rails_target_version
+            gcloud app deploy ${DEPLOY_TARGET} | tee /tmp/deploy.out
+            mkdir /tmp/workspace
+            TARGET_VERSION=$(egrep '^target version:' /tmp/deploy.out | sed 's/^target version:.*\[\(.*\)\].*/\1/')
+            TARGET_URL=$(egrep '^target url:' /tmp/deploy.out | sed 's/^target url:.*\[\(.*\)\].*/\1/')
+            echo ${TARGET_VERSION} > /tmp/workspace/rails_target_version
+            echo ${TARGET_URL} > /tmp/workspace/rails_target_url
 
-            # clean up old versions (leave the last two, so you can roll back)
-            gcloud app versions list --service=rails --format=list | sort -rn | tail -n +3 | sed 's/^.*\///' | xargs gcloud app versions delete
+            # which version gets the migrations done is set up by GAE_VERSION
+            bundle exec rake appengine:exec -- bundle exec rake db:create db:migrate
+
+            # clean up old production versions (leave the last two, so you can roll back)
+            VERSIONS=$(gcloud app versions list --service=rails --format=list | egrep -v '\/dev$|\/staging$' | sort -rn | tail -n +3 | sed 's/^.*\///')
+            if [ ! -z ${VERSIONS} ] ; then
+              gcloud app versions delete ${VERSIONS}
+            fi
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
             - rails_target_version
+            - rails_target_url
   test-rails:
     docker:
       - image: circleci/ruby:2.5.3-stretch
     steps:
       - checkout
+      - attach_workspace:
+          at: /tmp/workspace
       - run:
           name: Run Tests!
-          command: echo "not tested! Run a testing script here. XXX"
+          command: echo "not tested! Run a testing script here on $(cat /tmp/workspace/rails_target_url). XXX"
   deploy-ssoproxy:
     docker:
       - image: google/cloud-sdk
@@ -196,8 +212,12 @@ jobs:
 
             if [ "${CIRCLE_BRANCH}" = "master" ] ; then
               export DEPLOY_ENV=production
+              export DEPLOY_TARGET=""
+              export RAILS_VERSION=""
             else
               export DEPLOY_ENV=${CIRCLE_BRANCH}
+              export DEPLOY_TARGET="--version=${CIRCLE_BRANCH}"
+              export RAILS_VERSION="${CIRCLE_BRANCH}-dot-"
             fi
 
             # put the tf output into a variable so it doesn't hit the disk
@@ -208,9 +228,8 @@ jobs:
             export COOKIE_SECRET=`echo ${TFOUTPUT} | jq -r '.sso_cookie_secret.value | @base64'`
             export IDP_CLIENT_SECRET=`echo ${TFOUTPUT} | jq -r '.sso_idp_secret.value | @base64'`
             export SIGNING_KEY=`echo ${TFOUTPUT} | jq -r '.sso_cert.value | @base64'`
-            export RAILS_VERSION=`cat /tmp/workspace/rails_target_version`
             export SOURCE="https://${GOOGLE_PROJECT_ID}.appspot.com/"
-            export DEST=`gcloud app versions describe ${RAILS_VERSION} -s default --format=json | jq -r .versionUrl`
+            export DEST=$(cat /tmp/workspace/rails_target_url)
 
             cat <<EOF > app.yaml
             runtime: custom
@@ -233,24 +252,33 @@ jobs:
             EOF
 
             # deploy!
-            export VERSION="sso-${DEPLOY_ENV}-$(expr $(date +%s) % 86400)"
-            gcloud app deploy --no-promote --version=${VERSION}
-            echo ${VERSION} > /tmp/workspace/sso_target_version
+            rm -f /tmp/deploy.out
+            gcloud app deploy --no-promote ${DEPLOY_TARGET} | tee /tmp/deploy.out
+            TARGET_VERSION=$(egrep '^target version:' /tmp/deploy.out | sed 's/^target version:.*\[\(.*\)\].*/\1/')
+            TARGET_URL=$(egrep '^target url:' /tmp/deploy.out | sed 's/^target url:.*\[\(.*\)\].*/\1/')
+            echo ${TARGET_VERSION} > /tmp/workspace/sso_target_version
+            echo ${TARGET_URL} > /tmp/workspace/sso_target_url
 
             # clean up old versions (leave the last two, so you can roll back)
-            gcloud app versions list --service=default --format=list | sort -rn | tail -n +3 | sed 's/^.*\///' | xargs gcloud app versions delete
+            VERSIONS=$(gcloud app versions list --service=default --format=list | egrep -v '\/dev$|\/staging$' | sort -rn | tail -n +3 | sed 's/^.*\///')
+            if [ ! -z ${VERSIONS} ] ; then
+              gcloud app versions delete ${VERSIONS}
+            fi
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
             - sso_target_version
+            - sso_target_url
   test-ssoproxy:
     docker:
       - image: google/cloud-sdk
     steps:
       - checkout
+      - attach_workspace:
+          at: /tmp/workspace
       - run:
           name: Run Tests!
-          command: echo "not tested! Run a testing script here. XXX"
+          command: echo "not tested! Run a testing script here on $(cat /tmp/workspace/sso_target_url). XXX"
   promote-rails-prod:
     docker:
       - image: google/cloud-sdk
