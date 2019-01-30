@@ -153,6 +153,7 @@ jobs:
             EOF
 
             # do the deploy!
+            set -x
             cd rails-example
             bundle exec bin/rails assets:precompile
             gcloud app deploy --no-promote ${DEPLOY_TARGET} | tee /tmp/deploy.out
@@ -169,7 +170,6 @@ jobs:
             bundle exec rake appengine:exec -- bundle exec rake db:create db:migrate
 
             # clean up old production versions (leave the last two, so you can roll back)
-            echo cleaning up old versions
             VERSIONS=$(gcloud app versions list --service=rails --format=list | egrep -v '\/dev$|\/staging$' | sort -rn | tail -n +3 | sed 's/^.*\///')
             if [ ! -z ${VERSIONS} ] ; then
               gcloud app versions delete ${VERSIONS}
