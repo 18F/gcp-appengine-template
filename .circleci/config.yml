@@ -128,7 +128,7 @@ jobs:
 
             # put the tf output into a variable so it doesn't hit the disk
             export TFOUTPUT=`gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json -`
-            export RAILS_SECRET=`echo ${TFOUTPUT} | jq -r .rails_secret_${RAILS_ENV}.value`
+            export SECRET_KEY_BASE=`echo ${TFOUTPUT} | jq -r .rails_secret_${RAILS_ENV}.value`
             export CLOUDSQL_USERNAME=`echo ${TFOUTPUT} | jq -r .postgres_username_${RAILS_ENV}.value`
             export CLOUDSQL_PASSWORD=`echo ${TFOUTPUT} | jq -r .postgres_password_${RAILS_ENV}.value`
             export CONNECTION_NAME=`echo ${TFOUTPUT} | jq -r .postgres_instance_${RAILS_ENV}.value`
@@ -141,7 +141,7 @@ jobs:
             service: rails
 
             env_variables:
-              SECRET_KEY_BASE: "${RAILS_SECRET}"
+              SECRET_KEY_BASE: "${SECRET_KEY_BASE}"
               CLOUDSQL_USERNAME: "${CLOUDSQL_USERNAME}"
               CLOUDSQL_PASSWORD: "${CLOUDSQL_PASSWORD}"
               CLOUDSQL_INSTANCE: "${CONNECTION_NAME}"
@@ -157,12 +157,15 @@ jobs:
             cd rails-example
             bundle exec bin/rails assets:precompile
             gcloud app deploy ${DEPLOY_TARGET} | tee /tmp/deploy.out
+
+            # Store info on what got deployed so we can test/promote it later on.
             mkdir /tmp/workspace
             TARGET_VERSION=$(egrep '^target version:' /tmp/deploy.out | sed 's/^target version:.*\[\(.*\)\].*/\1/')
             TARGET_URL=$(egrep '^target url:' /tmp/deploy.out | sed 's/^target url:.*\[\(.*\)\].*/\1/')
             echo ${TARGET_VERSION} > /tmp/workspace/rails_target_version
             echo ${TARGET_URL} > /tmp/workspace/rails_target_url
 
+            # do db creation/migration here
             # which version gets the migrations done is set up by GAE_VERSION
             bundle exec rake appengine:exec -- bundle exec rake db:create db:migrate
 
