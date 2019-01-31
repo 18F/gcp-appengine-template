@@ -253,6 +253,9 @@ jobs:
               SIGNING_KEY: ${SIGNING_KEY}
             EOF
 
+            # XXX debug
+            cat app.yaml
+            
             # We need this so that circleci won't time out because there's no output.
             (while true ; do sleep 60 ; date ; done)&
 
