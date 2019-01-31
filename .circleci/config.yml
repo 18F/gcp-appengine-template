@@ -137,6 +137,7 @@ jobs:
             cat <<EOF > rails-example/app.yaml
             runtime: ruby
             env: flex
+            disable_prompts: True
             service: rails
 
             env_variables:
@@ -237,6 +238,7 @@ jobs:
             cat <<EOF > app.yaml
             runtime: custom
             env: flex
+            disable_prompts: True
             service: default
 
             env_variables:
