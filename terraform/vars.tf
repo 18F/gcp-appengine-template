@@ -133,7 +133,7 @@ output "sso_key_staging" {
   description = "SSO JWT key for staging"
   sensitive = true
 }
-resource "tls_self_signed_cert_staging" "sso" {
+resource "tls_self_signed_cert" "sso_staging" {
   key_algorithm   = "ECDSA"
   private_key_pem = "${tls_private_key.sso_staging.private_key_pem}"
 
@@ -192,7 +192,7 @@ output "sso_key_production" {
   description = "SSO JWT key for production"
   sensitive = true
 }
-resource "tls_self_signed_cert_production" "sso" {
+resource "tls_self_signed_cert" "sso_production" {
   key_algorithm   = "ECDSA"
   private_key_pem = "${tls_private_key.sso_production.private_key_pem}"
 
