@@ -226,10 +226,10 @@ jobs:
             export TFOUTPUT=$(gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json -)
 
             # extract data for the app.yaml file
-            export SHARED_SECRET=$(echo ${TFOUTPUT} | jq -r '.sso_shared_secret_${TARGET_ENV}.value | @base64')
-            export COOKIE_SECRET=$(echo ${TFOUTPUT} | jq -r '.sso_cookie_secret_${TARGET_ENV}.value | @base64')
-            export IDP_CLIENT_SECRET=$(echo ${TFOUTPUT} | jq -r '.sso_idp_secret_${TARGET_ENV}.value | @base64')
-            export SIGNING_KEY=$(echo ${TFOUTPUT} | jq -r '.sso_cert_${TARGET_ENV}.value | @base64')
+            export SHARED_SECRET=$(echo ${TFOUTPUT} | jq -r ".sso_shared_secret_${TARGET_ENV}.value | @base64")
+            export COOKIE_SECRET=$(echo ${TFOUTPUT} | jq -r ".sso_cookie_secret_${TARGET_ENV}.value | @base64")
+            export IDP_CLIENT_SECRET=$(echo ${TFOUTPUT} | jq -r ".sso_idp_secret_${TARGET_ENV}.value | @base64")
+            export SIGNING_KEY=$(echo ${TFOUTPUT} | jq -r ".sso_cert_${TARGET_ENV}.value | @base64")
             export SOURCE="${TARGET_URL}"
             export DEST=$(cat /tmp/workspace/rails_target_url)
 
@@ -253,8 +253,6 @@ jobs:
               SIGNING_KEY: ${SIGNING_KEY}
             EOF
 
-            cat app.yaml
-            
             # We need this so that circleci won't time out because there's no output.
             (while true ; do sleep 60 ; date ; done)&
 
