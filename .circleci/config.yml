@@ -254,6 +254,7 @@ jobs:
             EOF
 
             # deploy!
+            (while true ; do sleep 60 ; date ; done)&
             gcloud app deploy -q --no-promote --version=${TARGET_VERSION}
             echo ${TARGET_VERSION} > /tmp/workspace/sso_target_version
             echo ${TARGET_URL} > /tmp/workspace/sso_target_url
