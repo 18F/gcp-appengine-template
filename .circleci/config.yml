@@ -160,6 +160,8 @@ jobs:
 
             # Store info on what got deployed so we can test/promote it later on.
             mkdir /tmp/workspace
+            ls -l /tmp/deploy.out
+            egrep ^target /tmp/deploy.out
             TARGET_VERSION=$(egrep '^target version:' /tmp/deploy.out | sed 's/^target version:.*\[\(.*\)\].*/\1/')
             TARGET_URL=$(egrep '^target url:' /tmp/deploy.out | sed 's/^target url:.*\[\(.*\)\].*/\1/')
             echo ${TARGET_VERSION} > /tmp/workspace/rails_target_version
