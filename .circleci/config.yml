@@ -137,7 +137,6 @@ jobs:
             cat <<EOF > rails-example/app.yaml
             runtime: ruby
             env: flex
-            disable_prompts: True
             service: rails
 
             env_variables:
@@ -156,7 +155,7 @@ jobs:
             # do the deploy!
             cd rails-example
             bundle exec bin/rails assets:precompile
-            gcloud app deploy --no-promote ${DEPLOY_TARGET} 2>&1 | tee /tmp/deploy.out
+            gcloud app deploy -q --no-promote ${DEPLOY_TARGET} 2>&1 | tee /tmp/deploy.out
 
             # Store info on what got deployed so we can test/promote it later on.
             mkdir /tmp/workspace
@@ -238,7 +237,6 @@ jobs:
             cat <<EOF > app.yaml
             runtime: custom
             env: flex
-            disable_prompts: True
             service: default
 
             env_variables:
@@ -257,7 +255,7 @@ jobs:
             EOF
 
             # deploy!
-            gcloud app deploy --no-promote ${DEPLOY_TARGET} 2>&1 | tee /tmp/deploy.out
+            gcloud app deploy -q --no-promote ${DEPLOY_TARGET} 2>&1 | tee /tmp/deploy.out
             TARGET_VERSION=$(egrep '^target version:' /tmp/deploy.out | sed 's/^target version:.*\[\(.*\)\].*/\1/')
             TARGET_URL=$(egrep '^target url:' /tmp/deploy.out | sed 's/^target url:.*\[\(.*\)\].*/\1/')
             echo ${TARGET_VERSION} > /tmp/workspace/sso_target_version
