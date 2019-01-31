@@ -61,7 +61,8 @@ KMS or share secrets or whatever.
     [few frameworks](https://cloud.google.com/appengine/docs/flexible/).
     Be sure you use a supported version of the framework.
   * You will need to customize the `.circleci/config.yml` file to remove the
-    example apps and add yours in.  If you are not using a framework that has
+    example apps and add yours in.  **This is the core of automation in this project.**
+    If you are not using a framework that has
     an example app, you may have to write your own deployment pipeline from
     scratch.  Also, delete the `*-example` directories.
   * We are trying to keep the secrets mostly managed by terraform so that they
