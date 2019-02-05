@@ -56,9 +56,26 @@ output "sso_key_dev" {
   description = "SSO JWT key for dev"
   sensitive = true
 }
-output "sso_pubkey_dev" {
-  value = "${tls_private_key.sso_dev.public_key_pem}"
-  description = "SSO JWT pubkey for dev"
+resource "tls_self_signed_cert" "sso_dev" {
+  key_algorithm   = "RSA"
+  private_key_pem = "${tls_private_key.sso_dev.private_key_pem}"
+
+  subject {
+    common_name  = "dev"
+    organization = "GSA"
+  }
+
+  validity_period_hours = 26280
+
+  allowed_uses = [
+    "key_encipherment",
+    "digital_signature",
+    "server_auth",
+  ]
+}
+output "sso_cert_dev" {
+  value = "${tls_self_signed_cert.sso_dev.cert_pem}"
+  description = "SSO JWT cert for dev"
 }
 
 # staging SSO stuff
@@ -80,9 +97,26 @@ output "sso_key_staging" {
   description = "SSO JWT key for staging"
   sensitive = true
 }
-output "sso_pubkey_staging" {
-  value = "${tls_private_key.sso_staging.public_key_pem}"
-  description = "SSO JWT pubkey for staging"
+resource "tls_self_signed_cert" "sso_staging" {
+  key_algorithm   = "RSA"
+  private_key_pem = "${tls_private_key.sso_staging.private_key_pem}"
+
+  subject {
+    common_name  = "staging"
+    organization = "GSA"
+  }
+
+  validity_period_hours = 26280
+
+  allowed_uses = [
+    "key_encipherment",
+    "digital_signature",
+    "server_auth",
+  ]
+}
+output "sso_cert_staging" {
+  value = "${tls_self_signed_cert.sso_staging.cert_pem}"
+  description = "SSO JWT cert for staging"
 }
 
 # production SSO stuff
@@ -104,7 +138,24 @@ output "sso_key_production" {
   description = "SSO JWT key for production"
   sensitive = true
 }
-output "sso_pubkey_production" {
-  value = "${tls_private_key.sso_production.public_key_pem}"
-  description = "SSO JWT pubkey for production"
+resource "tls_self_signed_cert" "sso_production" {
+  key_algorithm   = "RSA"
+  private_key_pem = "${tls_private_key.sso_production.private_key_pem}"
+
+  subject {
+    common_name  = "production"
+    organization = "GSA"
+  }
+
+  validity_period_hours = 26280
+
+  allowed_uses = [
+    "key_encipherment",
+    "digital_signature",
+    "server_auth",
+  ]
+}
+output "sso_cert_production" {
+  value = "${tls_self_signed_cert.sso_production.cert_pem}"
+  description = "SSO JWT cert for production"
 }
