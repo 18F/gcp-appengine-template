@@ -208,7 +208,7 @@ jobs:
             cd sso-example
             apt install -y jq
             # XXX should probably lock version or turn it into a submodule
-            git clone https://github.com/timothy-spencer/oauth2_proxy-1
+            git clone https://github.com/timothy-spencer/oauth2_proxy-1 oauth2_proxy
             cd oauth2_proxy
 
             if [ "${CIRCLE_BRANCH}" = "master" ] ; then
