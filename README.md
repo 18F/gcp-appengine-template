@@ -15,6 +15,8 @@ To get the app(s) in this repo going, you will need to:
 
 1. Procure a [CircleCI](https://circleci.com/) account.
 1. Procure a GCP project and gain access to the [GCP console](https://console.cloud.google.com/).
+1. Sign up as a developer for [login.gov](https://developers.login.gov/) and
+   register an application in their dashboard. XXX tell how to get public key.
 1. Fork or copy this repo into your github org.  Make your changes to this
    new repo.
 1. Consider your application load on the database and change the
@@ -41,6 +43,9 @@ To get the app(s) in this repo going, you will need to:
      (like https://idp.int.identitysandbox.gov/openid_connect/authorize)
    * `IDP_CLIENT_ID`: Set this to the client ID you registered with your IDP.
      (like `urn:gov:gsa:openidconnect:development`)
+   * `IDP_EMAIL_DOMAIN`: Set this to either the email domain that you would
+   	 like your access restricted to (like `gsa.gov`), or `*`, if you would
+   	 not like to restrict who can get in.
 
 1. Watch as circleci deploys the infrastructure and apps!
    You may need to approve and wait until the terraform run is done, and then
