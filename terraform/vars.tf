@@ -50,6 +50,7 @@ output "sso_cookie_secret_dev" {
 resource "tls_private_key" "sso_dev" {
   algorithm   = "RSA"
   rsa_bits = 2048
+  sensitive = true
 }
 output "sso_key_dev" {
   value = "${tls_private_key.sso_dev.private_key_pem}"
@@ -91,6 +92,7 @@ output "sso_cookie_secret_staging" {
 resource "tls_private_key" "sso_staging" {
   algorithm   = "RSA"
   rsa_bits = 2048
+  sensitive = true
 }
 output "sso_key_staging" {
   value = "${tls_private_key.sso_staging.private_key_pem}"
@@ -132,6 +134,7 @@ output "sso_cookie_secret_production" {
 resource "tls_private_key" "sso_production" {
   algorithm   = "RSA"
   rsa_bits = 2048
+  sensitive = true
 }
 output "sso_key_production" {
   value = "${tls_private_key.sso_production.private_key_pem}"
