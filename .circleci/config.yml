@@ -210,6 +210,7 @@ jobs:
             # XXX should probably lock version or turn it into a submodule
             git clone https://github.com/timothy-spencer/oauth2_proxy-1 oauth2_proxy
             cd oauth2_proxy
+            git checkout tspencerrepo
 
             if [ "${CIRCLE_BRANCH}" = "master" ] ; then
               # This is kinda like google's default version naming
