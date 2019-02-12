@@ -46,6 +46,8 @@ To get the app(s) in this repo going, you will need to:
    * `IDP_EMAIL_DOMAIN`: Set this to either the email domain that you would
    	 like your access restricted to (like `gsa.gov`), or `*`, if you would
    	 not like to restrict who can get in.
+   * `IDP_PROFILE_URL`:  Set this to your IDP provider profile URL
+     (like https://idp.int.identitysandbox.gov/api/openid_connect/userinfo).
 
 1. Watch as circleci deploys the infrastructure and apps!
    You may need to approve and wait until the terraform run is done, and then
