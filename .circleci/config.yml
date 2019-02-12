@@ -239,7 +239,7 @@ jobs:
 
             env_variables:
               OAUTH2_PROXY_PROVIDER: login.gov
-              OAUTH2_PROXY_HTTP_ADDRESS: 127.0.0.1:8080
+              OAUTH2_PROXY_HTTP_ADDRESS: 0.0.0.0:8080
               OAUTH2_PROXY_CLIENT_ID: ${IDP_CLIENT_ID}
               OAUTH2_PROXY_REDIRECT_URL: ${SOURCE}oauth2/callback
               OAUTH2_PROXY_OIDC_ISSUER_URL: ${IDP_PROVIDER_URL}
