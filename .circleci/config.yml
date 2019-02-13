@@ -228,9 +228,9 @@ jobs:
 
             # extract data for the app.yaml file
             export COOKIE_SECRET=$(echo ${TFOUTPUT} | jq -r .sso_cookie_secret_${TARGET_ENV}.value)
-            export SIGNING_KEY=$(echo ${TFOUTPUT} | jq -r .sso_key_${TARGET_ENV}.value)
             export SOURCE="${TARGET_URL}"
             export DEST=$(cat /tmp/workspace/rails_target_url)
+            echo ${TFOUTPUT} | jq -r .sso_key_${TARGET_ENV}.value > jwt_signing_key.pem
 
             cat <<EOF > app.yaml
             runtime: custom
@@ -249,8 +249,8 @@ jobs:
               OAUTH2_PROXY_COOKIE_SECRET: "${COOKIE_SECRET}"
               OAUTH2_PROXY_COOKIE_DOMAIN: "${TARGET_VERSION}-dot-${GOOGLE_PROJECT_ID}.appspot.com"
               OAUTH2_PROXY_SKIP_PROVIDER_BUTTON: true
-              OAUTH2_PROXY_JWT_KEY: "${SIGNING_KEY}"
               OAUTH2_PROXY_PROFILE_URL: "${IDP_PROFILE_URL}"
+              OAUTH2_PROXY_JWT_KEY_FILE: /etc/ssl/certs/jwt_signing_key.pem
             EOF
 
             # We need this so that circleci won't time out because there's no output.
