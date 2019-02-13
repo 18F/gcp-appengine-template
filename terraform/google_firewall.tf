@@ -1,11 +1,5 @@
 # Allow in access from other services in this project
-resource "google_app_engine_firewall_rule" "rule" {
-  project = "${var.project_id}"
-  priority = 1000
-  action = "ALLOW"
-  source_range = "0.1.0.40"
-}
-resource "google_app_engine_firewall_rule" "rule" {
+resource "google_app_engine_firewall_rule" "flexible_backends" {
   project = "${var.project_id}"
   priority = 1100
   action = "ALLOW"
@@ -13,7 +7,7 @@ resource "google_app_engine_firewall_rule" "rule" {
 }
 
 # Deny access to everything else
-resource "google_app_engine_firewall_rule" "rule" {
+resource "google_app_engine_firewall_rule" "defaultdeny" {
   project = "${var.project_id}"
   priority = 20000
   action = "DENY"
