@@ -15,7 +15,7 @@ resource "google_app_engine_firewall_rule" "rule" {
 # Deny access to everything else
 resource "google_app_engine_firewall_rule" "rule" {
   project = "${var.project_id}"
-  priority = default
+  priority = 20000
   action = "DENY"
   source_range = "*"
 }
