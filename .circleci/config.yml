@@ -121,10 +121,12 @@ jobs:
               # This is kinda like google's default version naming
               export TARGET_VERSION=$(date +%Y%m%d)t$(printf "%05d" $(expr $(date +%s) % 86400))
               export TARGET_URL="https://rails-${GOOGLE_PROJECT_ID}.appspot.com/"
+              export INSTANCES=2
             else
               export RAILS_ENV=${CIRCLE_BRANCH}
               export TARGET_VERSION=${CIRCLE_BRANCH}
               export TARGET_URL="https://${TARGET_VERSION}-dot-rails-dot-${GOOGLE_PROJECT_ID}.appspot.com/"
+              export INSTANCES=1
             fi
 
             # put the tf output into a variable so it doesn't hit the disk
@@ -142,6 +144,8 @@ jobs:
             network:
               instance_tag: rails-${RAILS_ENV}
               name: ${RAILS_ENV}-backend
+            automatic_scaling:
+              min_instances: ${INSTANCES}
 
             env_variables:
               SECRET_KEY_BASE: "${SECRET_KEY_BASE}"
@@ -222,10 +226,12 @@ jobs:
               export TARGET_VERSION=$(date +%Y%m%d)t$(printf "%05d" $(expr $(date +%s) % 86400))
               export TARGET_URL="https://${GOOGLE_PROJECT_ID}.appspot.com/"
               export TARGET_ENV=production
+              export INSTANCES=2
             else
               export TARGET_VERSION=${CIRCLE_BRANCH}
               export TARGET_URL="https://${TARGET_VERSION}-dot-${GOOGLE_PROJECT_ID}.appspot.com/"
               export TARGET_ENV=${CIRCLE_BRANCH}
+              export INSTANCES=1
             fi
 
             # put the tf output into a variable so it doesn't hit the disk
@@ -243,6 +249,8 @@ jobs:
             service: default
             network:
               instance_tag: ssoproxy-${TARGET_ENV}
+            automatic_scaling:
+              min_instances: ${INSTANCES}
 
             env_variables:
               OAUTH2_PROXY_PROVIDER: login.gov
