@@ -168,15 +168,18 @@ jobs:
 
             # do db creation/migration here
             bundle exec rake appengine:exec GAE_SERVICE=rails GAE_VERSION=${TARGET_VERSION} -- bundle exec rake db:create db:migrate
+            echo did db migration
 
             # clean up old production versions (leave the last two, so you can roll back)
             VERSIONS=$(gcloud app versions list --service=rails --format=list | egrep -v '\/dev$|\/staging$' | sort -rn | tail -n +3 | sed 's/^.*\///')
+            echo collected versions
             if [ ! -z ${VERSIONS} ] ; then
               gcloud app versions delete ${VERSIONS}
               echo cleaned up ${VERSIONS}
             else
               echo no versions to clean up
             fi
+            true
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
