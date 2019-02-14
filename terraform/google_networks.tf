@@ -23,7 +23,7 @@ resource "google_compute_firewall" "dev" {
     ports    = ["80-2000"]
   }
 
-  source_tags = ["ssoproxy_dev"]
+  source_tags = ["ssoproxy-dev"]
 }
 
 resource "google_compute_firewall" "staging" {
@@ -39,7 +39,7 @@ resource "google_compute_firewall" "staging" {
     ports    = ["80-2000"]
   }
 
-  source_tags = ["ssoproxy_staging"]
+  source_tags = ["ssoproxy-staging"]
 }
 
 resource "google_compute_firewall" "production" {
@@ -55,5 +55,5 @@ resource "google_compute_firewall" "production" {
     ports    = ["80-2000"]
   }
 
-  source_tags = ["ssoproxy_production"]
+  source_tags = ["ssoproxy-production"]
 }

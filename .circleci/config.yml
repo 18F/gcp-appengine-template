@@ -240,7 +240,7 @@ jobs:
             env: flex
             service: default
             network:
-              instance_tag: ssoproxy_${TARGET_ENV}
+              instance_tag: ssoproxy-${TARGET_ENV}
 
             env_variables:
               OAUTH2_PROXY_PROVIDER: login.gov
