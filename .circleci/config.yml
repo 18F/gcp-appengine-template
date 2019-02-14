@@ -234,7 +234,7 @@ jobs:
             # extract data for the app.yaml file
             export COOKIE_SECRET=$(echo ${TFOUTPUT} | jq -r .sso_cookie_secret_${TARGET_ENV}.value)
             export SOURCE="${TARGET_URL}"
-            export DEST=$(sed 's/^https/http/' /tmp/workspace/rails_target_url)
+            export DEST=$(cat /tmp/workspace/rails_target_url)
             echo ${TFOUTPUT} | jq -r .sso_key_${TARGET_ENV}.value > jwt_signing_key.pem
 
             cat <<EOF > app.yaml
