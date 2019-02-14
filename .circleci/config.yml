@@ -141,7 +141,7 @@ jobs:
             service: rails
             network:
               instance_tag: rails_${RAILS_ENV}
-              name: ${RAILS_ENV}_backend
+              name: ${RAILS_ENV}-backend
 
             env_variables:
               SECRET_KEY_BASE: "${SECRET_KEY_BASE}"
