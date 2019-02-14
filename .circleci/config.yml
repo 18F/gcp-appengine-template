@@ -224,12 +224,14 @@ jobs:
             if [ "${CIRCLE_BRANCH}" = "master" ] ; then
               # This is kinda like google's default version naming
               export TARGET_VERSION=$(date +%Y%m%d)t$(printf "%05d" $(expr $(date +%s) % 86400))
-              export TARGET_URL="https://${GOOGLE_PROJECT_ID}.appspot.com/"
+              export COOKIE_DOMAIN="${GOOGLE_PROJECT_ID}.appspot.com"
+              export TARGET_URL="https://${COOKIE_DOMAIN}/"
               export TARGET_ENV=production
               export INSTANCES=2
             else
               export TARGET_VERSION=${CIRCLE_BRANCH}
-              export TARGET_URL="https://${TARGET_VERSION}-dot-${GOOGLE_PROJECT_ID}.appspot.com/"
+              export COOKIE_DOMAIN="${TARGET_VERSION}-dot-${GOOGLE_PROJECT_ID}.appspot.com"
+              export TARGET_URL="https://${COOKIE_DOMAIN}/"
               export TARGET_ENV=${CIRCLE_BRANCH}
               export INSTANCES=1
             fi
@@ -262,7 +264,7 @@ jobs:
               OAUTH2_PROXY_UPSTREAM: ${DEST}
               OAUTH2_PROXY_COOKIE_SECURE: true
               OAUTH2_PROXY_COOKIE_SECRET: "${COOKIE_SECRET}"
-              OAUTH2_PROXY_COOKIE_DOMAIN: "${TARGET_VERSION}-dot-${GOOGLE_PROJECT_ID}.appspot.com"
+              OAUTH2_PROXY_COOKIE_DOMAIN: "${COOKIE_DOMAIN}"
               OAUTH2_PROXY_SKIP_PROVIDER_BUTTON: true
               OAUTH2_PROXY_PROFILE_URL: "${IDP_PROFILE_URL}"
               OAUTH2_PROXY_JWT_KEY_FILE: /etc/ssl/private/jwt_signing_key.pem
