@@ -139,6 +139,9 @@ jobs:
             runtime: ruby
             env: flex
             service: rails
+            network:
+              instance_tag: rails_${RAILS_ENV}
+              name: ${RAILS_ENV}_backend
 
             env_variables:
               SECRET_KEY_BASE: "${SECRET_KEY_BASE}"
@@ -236,6 +239,8 @@ jobs:
             runtime: custom
             env: flex
             service: default
+            network:
+              instance_tag: ssoproxy_${TARGET_ENV}
 
             env_variables:
               OAUTH2_PROXY_PROVIDER: login.gov
@@ -399,35 +404,35 @@ workflows:
       - store_tf_output:
           requires:
             - apply_terraform
-  # deploy-rails-example:
-  #   jobs:
-  #     - deploy-rails:
-  #         filters:
-  #           branches:
-  #             only:
-  #               # This is the list of branches which will be deployed automatically.
-  #               # Only master gets promoted to the default production service.
-  #               # Add more branches here if you want them automatically deployed.
-  #               # Their RAILS_ENV will get set to the branch name.
-  #               - master
-  #               - staging
-  #               - dev
-  #     - test-rails:
-  #         requires:
-  #           - deploy-rails
-  #     - deploy-ssoproxy:
-  #         requires:
-  #           - test-rails
-  #     - test-ssoproxy:
-  #         requires:
-  #           - deploy-ssoproxy
-  #     - promote-rails-prod:
-  #         requires:
-  #           - test-ssoproxy
-  #         filters:
-  #           branches:
-  #             only:
-  #               - master
+  deploy-rails-example:
+    jobs:
+      - deploy-rails:
+          filters:
+            branches:
+              only:
+                # This is the list of branches which will be deployed automatically.
+                # Only master gets promoted to the default production service.
+                # Add more branches here if you want them automatically deployed.
+                # Their RAILS_ENV will get set to the branch name.
+                - master
+                - staging
+                - dev
+      - test-rails:
+          requires:
+            - deploy-rails
+      - deploy-ssoproxy:
+          requires:
+            - test-rails
+      - test-ssoproxy:
+          requires:
+            - deploy-ssoproxy
+      - promote-rails-prod:
+          requires:
+            - test-ssoproxy
+          filters:
+            branches:
+              only:
+                - master
   # deploy-dotnet-example:
   #   jobs:
   #     - deploy-dotnet:
