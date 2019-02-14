@@ -167,7 +167,7 @@ jobs:
             echo ${TARGET_URL} > /tmp/workspace/rails_target_url
 
             # do db creation/migration here
-            bundle exec rake appengine:exec GAE_VERSION=${TARGET_VERSION} -- bundle exec rake db:create db:migrate
+            bundle exec rake appengine:exec GAE_SERVICE=rails GAE_VERSION=${TARGET_VERSION} -- bundle exec rake db:create db:migrate
 
             # clean up old production versions (leave the last two, so you can roll back)
             VERSIONS=$(gcloud app versions list --service=rails --format=list | egrep -v '\/dev$|\/staging$' | sort -rn | tail -n +3 | sed 's/^.*\///')
