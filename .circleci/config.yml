@@ -145,7 +145,7 @@ jobs:
               instance_tag: rails-${RAILS_ENV}
               name: ${RAILS_ENV}-backend
             automatic_scaling:
-              min_instances: ${INSTANCES}
+              min_num_instances: ${INSTANCES}
 
             env_variables:
               SECRET_KEY_BASE: "${SECRET_KEY_BASE}"
@@ -252,7 +252,7 @@ jobs:
             network:
               instance_tag: ssoproxy-${TARGET_ENV}
             automatic_scaling:
-              min_instances: ${INSTANCES}
+              min_num_instances: ${INSTANCES}
 
             env_variables:
               OAUTH2_PROXY_PROVIDER: login.gov
