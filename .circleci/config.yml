@@ -171,7 +171,6 @@ jobs:
 
             # clean up old production versions (leave the last two, so you can roll back)
             VERSIONS=$(gcloud app versions list --service=rails --format=list | egrep -v '\/dev$|\/staging$' | sort -rn | tail -n +3 | sed 's/^.*\///') || true
-            echo collected versions
             if [ ! -z ${VERSIONS} ] ; then
               gcloud app versions delete ${VERSIONS}
               echo cleaned up ${VERSIONS}
