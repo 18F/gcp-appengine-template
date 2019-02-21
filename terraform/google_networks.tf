@@ -20,12 +20,10 @@ resource "google_compute_firewall" "dev" {
 
   allow {
     protocol = "tcp"
-    ports    = ["80-2000"]
+    ports    = ["80", "8080"]
   }
 
   source_tags = ["ssoproxy-dev"]
-  # Allow everything temporarily
-  source_ranges = ["0.0.0.0/0"]
 }
 
 resource "google_compute_firewall" "staging" {
@@ -38,7 +36,7 @@ resource "google_compute_firewall" "staging" {
 
   allow {
     protocol = "tcp"
-    ports    = ["80-2000"]
+    ports    = ["80", "8080"]
   }
 
   source_tags = ["ssoproxy-staging"]
@@ -54,7 +52,7 @@ resource "google_compute_firewall" "production" {
 
   allow {
     protocol = "tcp"
-    ports    = ["80-2000"]
+    ports    = ["80", "8080"]
   }
 
   source_tags = ["ssoproxy-production"]
