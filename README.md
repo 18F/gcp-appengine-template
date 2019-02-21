@@ -15,6 +15,8 @@ To get the app(s) in this repo going, you will need to:
 
 1. Procure a [CircleCI](https://circleci.com/) account.
 1. Procure a GCP project and gain access to the [GCP console](https://console.cloud.google.com/).
+1. Sign up as a developer for [login.gov](https://developers.login.gov/) and
+   register an application in their dashboard. XXX tell how to get public key.
 1. Fork or copy this repo into your github org.  Make your changes to this
    new repo.
 1. Consider your application load on the database and change the
@@ -37,6 +39,16 @@ To get the app(s) in this repo going, you will need to:
    * `BASICAUTH_PASSWORD`: Set this to a basic auth password to frontend your app with.
      If it is not set, then your app will be public.
    * `BASICAUTH_USER`: Set this to the basic auth username you want.
+   * `IDP_PROVIDER_URL`: Set this to your IDP provider URL 
+     (like https://idp.int.identitysandbox.gov/openid_connect/authorize)
+   * `IDP_CLIENT_ID`: Set this to the client ID you registered with your IDP.
+     (like `urn:gov:gsa:openidconnect:development`)
+   * `IDP_EMAIL_DOMAIN`: Set this to either the email domain that you would
+   	 like your access restricted to (like `gsa.gov`), or `*`, if you would
+   	 not like to restrict who can get in.
+   * `IDP_PROFILE_URL`:  Set this to your IDP provider profile URL
+     (like https://idp.int.identitysandbox.gov/api/openid_connect/userinfo).
+
 1. Watch as circleci deploys the infrastructure and apps!
    You may need to approve and wait until the terraform run is done, and then
    redeploy the apps the first time in case it takes longer to launch the databases
@@ -56,7 +68,8 @@ KMS or share secrets or whatever.
     [few frameworks](https://cloud.google.com/appengine/docs/flexible/).
     Be sure you use a supported version of the framework.
   * You will need to customize the `.circleci/config.yml` file to remove the
-    example apps and add yours in.  If you are not using a framework that has
+    example apps and add yours in.  **This is the core of automation in this project.**
+    If you are not using a framework that has
     an example app, you may have to write your own deployment pipeline from
     scratch.  Also, delete the `*-example` directories.
   * We are trying to keep the secrets mostly managed by terraform so that they
