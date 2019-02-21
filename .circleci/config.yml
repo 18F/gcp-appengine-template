@@ -141,9 +141,6 @@ jobs:
             runtime: ruby
             env: flex
             service: rails
-            network:
-              instance_tag: rails-${RAILS_ENV}
-              name: ${RAILS_ENV}-backend
             automatic_scaling:
               min_num_instances: ${INSTANCES}
 
@@ -249,8 +246,6 @@ jobs:
             runtime: custom
             env: flex
             service: default
-            network:
-              instance_tag: ssoproxy-${TARGET_ENV}
             automatic_scaling:
               min_num_instances: ${INSTANCES}
 
