@@ -24,6 +24,8 @@ resource "google_compute_firewall" "dev" {
   }
 
   source_tags = ["ssoproxy-dev"]
+  # XXX Allow everything temporarily
+  source_ranges = ["0.0.0.0/0"]
 }
 
 resource "google_compute_firewall" "staging" {
