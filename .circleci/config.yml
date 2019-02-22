@@ -191,8 +191,19 @@ jobs:
       - attach_workspace:
           at: /tmp/workspace
       - run:
-          name: Run Tests!
-          command: echo "not tested! Run a testing script here on $(cat /tmp/workspace/rails_target_url). XXX"
+          name: Test the app!
+          command: echo "run tests here against $(cat /tmp/workspace/rails_target_url)"
+  owaspzap-rails:
+    docker:
+      - image: owasp/zap2docker-stable
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: Run OWASP Zap against the app! (fails if the test takes more than 30 minutes)
+          no_output_timeout: 30m
+          command: zap-full-scan.py -t "$(cat /tmp/workspace/rails_target_url)"
   deploy-ssoproxy:
     docker:
       - image: google/cloud-sdk
@@ -427,6 +438,15 @@ workflows:
       - test-rails:
           requires:
             - deploy-rails
+      - owaspzap-rails:
+          requires:
+            - deploy-rails
+          filters:
+            branches:
+              only:
+                # Do not run this against dev.  It takes a long time.
+                - master
+                - staging
       - deploy-ssoproxy:
           requires:
             - test-rails
