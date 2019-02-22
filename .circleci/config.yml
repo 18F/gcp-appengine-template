@@ -191,7 +191,8 @@ jobs:
       - attach_workspace:
           at: /tmp/workspace
       - run:
-          name: Run OWASP Zap against the app!
+          name: Run OWASP Zap against the app! (fails if the test takes more than 30 minutes)
+          no_output_timeout: 30m
           command: zap-full-scan.py -t "$(cat /tmp/workspace/rails_target_url)"
   deploy-ssoproxy:
     docker:
