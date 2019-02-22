@@ -185,14 +185,14 @@ jobs:
             - rails_target_url
   test-rails:
     docker:
-      - image: circleci/ruby:2.5.3-stretch
+      - image: owasp/zap2docker-stable
     steps:
       - checkout
       - attach_workspace:
           at: /tmp/workspace
       - run:
-          name: Run Tests!
-          command: echo "not tested! Run a testing script here on $(cat /tmp/workspace/rails_target_url). XXX"
+          name: Run OWASP Zap against the app!
+          command: zap-full-scan.py -t "$(cat /tmp/workspace/rails_target_url)"
   deploy-ssoproxy:
     docker:
       - image: google/cloud-sdk
