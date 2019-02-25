@@ -17,6 +17,16 @@ output "rails_secret_production" {
   sensitive = true
 }
 
+resource "random_string" "signature_key_production" {
+  length  = 128
+  special = false
+}
+output "signature_key_production" {
+  value = "${random_string.signature_key_production.result}"
+  description = "production signature_key"
+  sensitive = true
+}
+
 resource "random_string" "rails_secret_dev" {
   length  = 128
   special = false
@@ -27,6 +37,16 @@ output "rails_secret_dev" {
   sensitive = true
 }
 
+resource "random_string" "signature_key_dev" {
+  length  = 128
+  special = false
+}
+output "signature_key_dev" {
+  value = "${random_string.signature_key_dev.result}"
+  description = "dev signature_key"
+  sensitive = true
+}
+
 resource "random_string" "rails_secret_staging" {
   length  = 128
   special = false
@@ -34,6 +54,16 @@ resource "random_string" "rails_secret_staging" {
 output "rails_secret_staging" {
   value = "${random_string.rails_secret_staging.result}"
   description = "Rails staging secret string"
+  sensitive = true
+}
+
+resource "random_string" "signature_key_staging" {
+  length  = 128
+  special = false
+}
+output "signature_key_staging" {
+  value = "${random_string.signature_key_staging.result}"
+  description = "staging signature_key"
   sensitive = true
 }
 

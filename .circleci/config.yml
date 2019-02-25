@@ -135,6 +135,7 @@ jobs:
             export CLOUDSQL_USERNAME=$(echo ${TFOUTPUT} | jq -r .postgres_username_${RAILS_ENV}.value)
             export CLOUDSQL_PASSWORD=$(echo ${TFOUTPUT} | jq -r .postgres_password_${RAILS_ENV}.value)
             export CONNECTION_NAME=$(echo ${TFOUTPUT} | jq -r .postgres_instance_${RAILS_ENV}.value)
+            export SIGNATURE_KEY=$(echo ${TFOUTPUT} | jq -r .signature_key_${TARGET_ENV}.value)
 
             # set the google app engine config file up
             cat <<EOF > rails-example/app.yaml
@@ -149,6 +150,7 @@ jobs:
               CLOUDSQL_USERNAME: "${CLOUDSQL_USERNAME}"
               CLOUDSQL_PASSWORD: "${CLOUDSQL_PASSWORD}"
               CLOUDSQL_INSTANCE: "${CONNECTION_NAME}"
+              SIGNATURE_KEY: "${SIGNATURE_KEY}"
               RAILS_ENV: "${RAILS_ENV}"
               BASICAUTH_PASSWORD: "${BASICAUTH_PASSWORD}"
               BASICAUTH_USER: "${BASICAUTH_USER}"
@@ -249,6 +251,7 @@ jobs:
 
             # extract data for the app.yaml file
             export COOKIE_SECRET=$(echo ${TFOUTPUT} | jq -r .sso_cookie_secret_${TARGET_ENV}.value)
+            export SIGNATURE_KEY=$(echo ${TFOUTPUT} | jq -r .signature_key_${TARGET_ENV}.value)
             export SOURCE="${TARGET_URL}"
             export DEST=$(cat /tmp/workspace/rails_target_url)
             echo ${TFOUTPUT} | jq -r .sso_key_${TARGET_ENV}.value > jwt_signing_key.pem
@@ -269,6 +272,7 @@ jobs:
               OAUTH2_PROXY_EMAIL_DOMAINS: "${IDP_EMAIL_DOMAIN}"
               OAUTH2_PROXY_UPSTREAM: ${DEST}
               OAUTH2_PROXY_PASS_HOST_HEADER: false
+              OAUTH2_PROXY_SIGNATURE_KEY: "sha1:${SIGNATURE_KEY}"
               OAUTH2_PROXY_COOKIE_SECURE: true
               OAUTH2_PROXY_COOKIE_SECRET: "${COOKIE_SECRET}"
               OAUTH2_PROXY_COOKIE_DOMAIN: "${COOKIE_DOMAIN}"
