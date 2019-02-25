@@ -1,0 +1,18 @@
+runtime: custom
+env: flex
+service: default
+
+# env_variables:
+#   REDIRECT_URL: https://${GOOGLE_PROJECT_ID}.appspot.com/oauth2/callback
+#   IDP_PROVIDER: oidc
+#   IDP_PROVIDER_URL: ${IDP_PROVIDER_URL}
+#   IDP_CLIENT_ID: ${IDP_CLIENT_ID}
+#   IDP_CLIENT_SECRET: ${IDP_CLIENT_SECRET}
+#   # export SIGNING_KEY="XXX Replace with base64'd P256 private key made by terraform"
+#   SCOPE: openid email
+#   PROXY_ROOT_DOMAIN: ${GOOGLE_PROJECT_ID}.appspot.com
+#   ALLOWED_DOMAINS: *
+#   SHARED_SECRET: ${SHARED_SECRET}
+#   COOKIE_SECRET: ${COOKIE_SECRET}
+#   ROUTES: ${ROUTES}
+
