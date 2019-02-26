@@ -398,6 +398,15 @@ jobs:
       - run:
           name: Run Tests!
           command: echo "not tested! Run a testing script here. XXX"
+  owaspzap-dotnet:
+    docker:
+      - image: owasp/zap2docker-stable
+    steps:
+      - checkout
+      - run:
+          name: Run OWASP Zap against the app! (fails if the test takes more than 30 minutes)
+          no_output_timeout: 30m
+          command: zap-full-scan.py -t "https://dotnet-${CIRCLE_BRANCH}-dot-${GOOGLE_PROJECT_ID}.appspot.com/"
 
 
 
@@ -464,17 +473,20 @@ workflows:
             branches:
               only:
                 - master
-  # deploy-dotnet-example:
-  #   jobs:
-  #     - deploy-dotnet:
-  #         filters:
-  #           branches:
-  #             only:
-  #               # This is the list of branches which will be deployed automatically.
-  #               # Add more branches here if you want them automatically deployed.
-  #               - master
-  #               - staging
-  #               - dev
-  #     - test-dotnet:
-  #         requires:
-  #           - deploy-dotnet
+  deploy-dotnet-example:
+    jobs:
+      - deploy-dotnet:
+          filters:
+            branches:
+              only:
+                # This is the list of branches which will be deployed automatically.
+                # Add more branches here if you want them automatically deployed.
+                - master
+                - staging
+                - dev
+      - test-dotnet:
+          requires:
+            - deploy-dotnet
+      - owaspzap-dotnet:
+          requires:
+            - deploy-dotnet
