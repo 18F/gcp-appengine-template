@@ -205,7 +205,7 @@ jobs:
       - run:
           name: Run OWASP Zap against the app! (fails if the test takes more than 30 minutes)
           no_output_timeout: 30m
-          command: zap-full-scan.py -t "$(cat /tmp/workspace/rails_target_url)"
+          command: zap-full-scan.py  -m 5 -t "$(cat /tmp/workspace/rails_target_url)"
   deploy-ssoproxy:
     docker:
       - image: google/cloud-sdk
@@ -406,7 +406,7 @@ jobs:
       - run:
           name: Run OWASP Zap against the app! (fails if the test takes more than 30 minutes)
           no_output_timeout: 30m
-          command: zap-full-scan.py -t "https://dotnet-${CIRCLE_BRANCH}-dot-${GOOGLE_PROJECT_ID}.appspot.com/"
+          command: zap-full-scan.py -m 5 -z "-e 'robots.txt$'" -t "https://dotnet-${CIRCLE_BRANCH}-dot-${GOOGLE_PROJECT_ID}.appspot.com/"
 
 
 
