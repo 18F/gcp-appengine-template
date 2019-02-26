@@ -7,11 +7,11 @@ class ApplicationController < ActionController::Base
 		signature_key = ENV.fetch('SIGNATURE_KEY') {''}
 		return if signature_key == ''
 		if request.headers['GAP-Signature'].nil? 
-			pp 'missing GAP-Signature'
+			logger.info 'missing GAP-Signature'
 			render plain: "305 use proxy", status: 305
 		end
 		if ApiAuth.authentic?(request, signature_key, :digest => 'sha1')
-			pp 'signature did not verify'
+			logger.info 'signature did not verify'
 			render plain: "305 use proxy", status: 305
 		end
 	end

@@ -168,6 +168,7 @@ jobs:
             mkdir /tmp/workspace
             echo ${TARGET_VERSION} > /tmp/workspace/rails_target_version
             echo ${TARGET_URL} > /tmp/workspace/rails_target_url
+            echo ${SIGNATURE_KEY} > /tmp/workspace/rails_signature_key
 
             # do db creation/migration here
             bundle exec rake appengine:exec GAE_SERVICE=rails GAE_VERSION=${TARGET_VERSION} -- bundle exec rake db:create db:migrate
@@ -185,6 +186,7 @@ jobs:
           paths:
             - rails_target_version
             - rails_target_url
+            - rails_signature_key
   test-rails:
     docker:
       - image: circleci/ruby:2.5.3-stretch
@@ -205,7 +207,64 @@ jobs:
       - run:
           name: Run OWASP Zap against the app! (fails if the test takes more than 30 minutes)
           no_output_timeout: 30m
-          command: zap-full-scan.py  -m 5 -t "$(cat /tmp/workspace/rails_target_url)"
+          command: |
+            cat <<EOF > hmac_auth.py
+            # This script generates an HMAC signature header for zap that lets us test without using the oauth2_proxy
+            import time, hashlib, hmac, urlparse, urllib
+
+            signing_key = '$(cat /tmp/workspace/rails_signature_key)'
+            amzdate = time.strftime('%Y%m%dT%H%M%SZ',time.gmtime())
+            datestamp = time.strftime('%Y%m%d',time.gmtime())
+
+            def sendingRequest(msg, initiator, helper):
+              parsedurl = urlparse.urlparse(msg.getRequestHeader().getURI().toString())
+              canonical_uri = urllib.quote(parsedurl.path if parsedurl.path else '/', safe='/-_.~')
+              method = msg.getRequestHeader().getMethod()
+              host = msg.getRequestHeader().getHostName()
+              canonical_querystring = ''
+
+              # replace any + * from ZAP Payloads with %20 - + breaks signature
+              query = parsedurl.query.replace('+', '%20')
+              query = query.replace('*', '%2A')
+
+              # sort parameters
+              querystring_sorted = '&'.join(sorted(query.split('&')))
+
+              if querystring_sorted != '':
+                for query_param in querystring_sorted.split('&'):
+                   key_val_split = query_param.split('=', 1)
+
+                   key = key_val_split[0]
+                   if len(key_val_split) > 1:
+                      val = key_val_split[1]
+                   else:
+                      val = ''
+
+                   if key:
+                      if canonical_querystring:
+                         canonical_querystring += "&"
+                      canonical_querystring += u'='.join([key, val])
+
+              canonical_headers = 'host:' + host + '\n' + 'x-amz-date:' + amzdate + '\n'
+              signed_headers = 'host;x-amz-date'
+              payload = msg.getRequestBody().toString();
+              payload_hash = hashlib.sha1(payload).hexdigest()
+              canonical_request = method + '\n' + canonical_uri + '\n' + canonical_querystring + '\n' + canonical_headers + '\n' + signed_headers + '\n' + payload_hash
+              algorithm = 'SHA1'
+              credential_scope = datestamp + '/' + region + '/' + service + '/' + 'aws4_request'
+              string_to_sign = algorithm + '\n' +  amzdate + '\n' +  credential_scope + '\n' +  hashlib.sha1(canonical_request).hexdigest()
+              signature = hmac.new(signing_key, (string_to_sign).encode('utf-8'), hashlib.sha1).hexdigest()
+              authorization_header = algorithm + ' ' + 'Credential=' + access_key + '/' + credential_scope + ', ' +  'SignedHeaders=' + signed_headers + ', ' + 'Signature=' + signature
+
+              headers = {'x-amz-date':amzdate, 'GAP-Signature':authorization_header}
+              for x in list(headers):
+                msg.getRequestHeader().setHeader(x, headers[x]);
+
+            def responseReceived(msg, initiator, helper):
+              pass;
+            EOF
+
+            zap-full-scan.py  -m 5 -z "-config script.api.action.load='hmac_auth, httpsender, jython, hmac_auth.py'" -t "$(cat /tmp/workspace/rails_target_url)"
   deploy-ssoproxy:
     docker:
       - image: google/cloud-sdk
@@ -406,7 +465,7 @@ jobs:
       - run:
           name: Run OWASP Zap against the app! (fails if the test takes more than 30 minutes)
           no_output_timeout: 30m
-          command: zap-full-scan.py -m 5 -z "-e 'robots.txt$'" -t "https://dotnet-${CIRCLE_BRANCH}-dot-${GOOGLE_PROJECT_ID}.appspot.com/"
+          command: zap-full-scan.py -m 5 -z "-config ascan.api.action.excludeFromScan='/robots.txt$'" -t "https://dotnet-${CIRCLE_BRANCH}-dot-${GOOGLE_PROJECT_ID}.appspot.com/"
 
 
 
@@ -457,8 +516,8 @@ workflows:
           filters:
             branches:
               only:
-                # Do not run this against dev.  It takes a long time.
-                - master
+                # Do not run this against production, lest it fill it with garbage.
+                - dev
                 - staging
       - deploy-ssoproxy:
           requires:
@@ -490,3 +549,9 @@ workflows:
       - owaspzap-dotnet:
           requires:
             - deploy-dotnet
+          filters:
+            branches:
+              only:
+                # Do not run this against production, lest it fill it with garbage.
+                - dev
+                - staging
