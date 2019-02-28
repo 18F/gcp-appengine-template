@@ -54,6 +54,8 @@ class ApplicationController < ActionController::Base
 		# If we have a properly signed ZAP-Authorization header, then
 		# it's the ZAP scanner, and we should let it in
 		if ! request.headers['ZAP-Authorization'].nil?
+			pp 'found ZAP-Authorization header'
+			
 			authheader = request.headers['ZAP-Authorization']
 			signedtoken, token = authheader.split(':',2)
 			uuid, datestamp = token.split(':',2)
