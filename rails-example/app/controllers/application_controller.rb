@@ -1,3 +1,5 @@
+require 'digest'
+
 class ApplicationController < ActionController::Base
 	# check to make sure we are authenticated before going forward
 	before_action :check_auth
@@ -49,13 +51,33 @@ class ApplicationController < ActionController::Base
 		idp = ENV.fetch('IDP_PROVIDER_URL') {''}
 		return if idp == ''
 
+		# If we have a properly signed ZAP-Authorization header, then
+		# it's the ZAP proxy, and we should let it in
+		if ! request.headers['ZAP-Authorization'].nil?
+			authheader = request.headers['ZAP-Authorization']
+			token, signedtoken = authheader.split(':',2)
+			targetversion, datestamp = token.split(':',2)
+			if (Time.new.to_i - datestamp).abs > 1800
+				logger.info 'ZAP-Authorization has expired'
+				render plain: "305 use proxy", status: 305
+			end
+
+			checktoken = signature_key + '_' + token
+			if Digest::SHA256.hexdigest checktoken == signedtoken
+				return
+			else
+				logger.info 'ZAP-Authorization did not verify'
+				render plain: "305 use proxy", status: 305
+			end
+		end
+
 		# Otherwise, check the HMAC signature
 		if request.headers['GAP-Signature'].nil? 
 			logger.info 'missing GAP-Signature'
 			render plain: "305 use proxy", status: 305
 		end
 		if ApiAuth.authentic?(request, signature_key, :digest => 'sha1')
-			logger.info 'signature did not verify'
+			logger.info 'GAP-Signature did not verify'
 			render plain: "305 use proxy", status: 305
 		end
 	end

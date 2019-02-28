@@ -209,63 +209,18 @@ jobs:
           name: Run OWASP Zap against the app! (fails if the test takes more than 30 minutes)
           no_output_timeout: 30m
           command: |
-            cat <<EOF > hmac_auth.py
-            # This script generates an HMAC signature header for zap that lets us test without using the oauth2_proxy
-            import time, hashlib, hmac, urlparse, urllib
+            # send special auth header that lets us scan
+            SIGNATURE_KEY=$(cat /tmp/workspace/rails_signature_key)
+            TOKEN="$(cat /tmp/workspace/rails_target_version):$(date +%s)"
+            SIGNED_TOKEN=$(echo -n "${SIGNATURE_KEY}_${TOKEN}" | sha256sum | awk '{print $1}')
+            AUTH_INFO="-config replacer.full_list\(0\).description=auth1 \
+               -config replacer.full_list\(0\).enabled=true \
+               -config replacer.full_list\(0\).matchtype=REQ_HEADER \
+               -config replacer.full_list\(0\).matchstr=ZAP-Authorization \
+               -config replacer.full_list\(0\).regex=false \
+               -config replacer.full_list\(0\).replacement=${TOKEN}:${SIGNED_TOKEN}"
 
-            signing_key = '$(cat /tmp/workspace/rails_signature_key)'
-            amzdate = time.strftime('%Y%m%dT%H%M%SZ',time.gmtime())
-            datestamp = time.strftime('%Y%m%d',time.gmtime())
-
-            def sendingRequest(msg, initiator, helper):
-              parsedurl = urlparse.urlparse(msg.getRequestHeader().getURI().toString())
-              canonical_uri = urllib.quote(parsedurl.path if parsedurl.path else '/', safe='/-_.~')
-              method = msg.getRequestHeader().getMethod()
-              host = msg.getRequestHeader().getHostName()
-              canonical_querystring = ''
-
-              # replace any + * from ZAP Payloads with %20 - + breaks signature
-              query = parsedurl.query.replace('+', '%20')
-              query = query.replace('*', '%2A')
-
-              # sort parameters
-              querystring_sorted = '&'.join(sorted(query.split('&')))
-
-              if querystring_sorted != '':
-                for query_param in querystring_sorted.split('&'):
-                   key_val_split = query_param.split('=', 1)
-
-                   key = key_val_split[0]
-                   if len(key_val_split) > 1:
-                      val = key_val_split[1]
-                   else:
-                      val = ''
-
-                   if key:
-                      if canonical_querystring:
-                         canonical_querystring += "&"
-                      canonical_querystring += u'='.join([key, val])
-
-              canonical_headers = 'host:' + host + '\n' + 'x-amz-date:' + amzdate + '\n'
-              signed_headers = 'host;x-amz-date'
-              payload = msg.getRequestBody().toString();
-              payload_hash = hashlib.sha1(payload).hexdigest()
-              canonical_request = method + '\n' + canonical_uri + '\n' + canonical_querystring + '\n' + canonical_headers + '\n' + signed_headers + '\n' + payload_hash
-              algorithm = 'SHA1'
-              credential_scope = datestamp + '/' + region + '/' + service + '/' + 'aws4_request'
-              string_to_sign = algorithm + '\n' +  amzdate + '\n' +  credential_scope + '\n' +  hashlib.sha1(canonical_request).hexdigest()
-              signature = hmac.new(signing_key, (string_to_sign).encode('utf-8'), hashlib.sha1).hexdigest()
-              authorization_header = algorithm + ' ' + 'Credential=' + access_key + '/' + credential_scope + ', ' +  'SignedHeaders=' + signed_headers + ', ' + 'Signature=' + signature
-
-              headers = {'x-amz-date':amzdate, 'GAP-Signature':authorization_header}
-              for x in list(headers):
-                msg.getRequestHeader().setHeader(x, headers[x]);
-
-            def responseReceived(msg, initiator, helper):
-              pass;
-            EOF
-
-            zap-full-scan.py  -m 5 -z "-config script.api.action.load='hmac_auth, httpsender, jython, hmac_auth.py'" -t "$(cat /tmp/workspace/rails_target_url)"
+            zap-full-scan.py  -m 5 -z "${AUTH_INFO}" -t "$(cat /tmp/workspace/rails_target_url)"
   deploy-ssoproxy:
     docker:
       - image: google/cloud-sdk
