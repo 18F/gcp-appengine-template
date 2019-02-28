@@ -154,6 +154,7 @@ jobs:
               RAILS_ENV: "${RAILS_ENV}"
               BASICAUTH_PASSWORD: "${BASICAUTH_PASSWORD}"
               BASICAUTH_USER: "${BASICAUTH_USER}"
+              IDP_PROVIDER_URL: "${IDP_PROVIDER_URL}"
 
             beta_settings:
               cloud_sql_instances: ${CONNECTION_NAME}
