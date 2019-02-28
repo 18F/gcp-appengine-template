@@ -60,7 +60,7 @@ class ApplicationController < ActionController::Base
 
 			# Check that the token hasn't expired (scans run for 30 minutes max)
 			if (Time.new.to_i - datestamp).abs > 1800
-				logger.info 'ZAP-Authorization has expired'
+				logger.warn 'ZAP-Authorization has expired'
 				render plain: "305 use proxy", status: 305
 			end
 
@@ -69,18 +69,18 @@ class ApplicationController < ActionController::Base
 			if Digest::SHA256.hexdigest checktoken == signedtoken
 				return
 			else
-				logger.info 'ZAP-Authorization did not verify'
+				logger.warn 'ZAP-Authorization did not verify'
 				render plain: "305 use proxy", status: 305
 			end
 		end
 
 		# Otherwise, check the HMAC signature
 		if request.headers['GAP-Signature'].nil? 
-			logger.info 'missing GAP-Signature'
+			logger.warn 'missing GAP-Signature'
 			render plain: "305 use proxy", status: 305
 		end
 		if ApiAuth.authentic?(request, signature_key, :digest => 'sha1')
-			logger.info 'GAP-Signature did not verify'
+			logger.warn 'GAP-Signature did not verify'
 			render plain: "305 use proxy", status: 305
 		end
 	end
