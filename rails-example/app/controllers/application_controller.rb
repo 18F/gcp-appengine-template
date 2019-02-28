@@ -55,7 +55,7 @@ class ApplicationController < ActionController::Base
 		# it's the ZAP scanner, and we should let it in
 		if ! request.headers['ZAP-Authorization'].nil?
 			authheader = request.headers['ZAP-Authorization']
-			token, signedtoken = authheader.split(':',2)
+			signedtoken, token = authheader.split(':',2)
 			uuid, datestamp = token.split(':',2)
 
 			# Check that the token hasn't expired (scans run for 30 minutes max)
