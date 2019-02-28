@@ -52,7 +52,7 @@ class ApplicationController < ActionController::Base
 		return if idp == ''
 
 		# If we have a properly signed ZAP-Authorization header, then
-		# it's the ZAP proxy, and we should let it in
+		# it's the ZAP scanner, and we should let it in
 		if ! request.headers['ZAP-Authorization'].nil?
 			authheader = request.headers['ZAP-Authorization']
 			token, signedtoken = authheader.split(':',2)
@@ -64,7 +64,7 @@ class ApplicationController < ActionController::Base
 				render plain: "305 use proxy", status: 305
 			end
 
-			# Check that the hash results in the same
+			# Check that the hash results are the same
 			checktoken = signature_key + '_' + token
 			if Digest::SHA256.hexdigest checktoken == signedtoken
 				return
