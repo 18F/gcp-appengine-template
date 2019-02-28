@@ -1,5 +1,7 @@
 class WelcomeController < ApplicationController
   def index
-	pp self.request.env.select {|k,v| k =~ /^HTTP_/}
+	if ENV["RAILS_LOG_HEADERS"].present?
+		logger.info self.request.env.select {|k,v| k =~ /^HTTP_/}
+	end
   end
 end

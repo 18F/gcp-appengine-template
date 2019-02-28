@@ -15,8 +15,6 @@ To get the app(s) in this repo going, you will need to:
 
 1. Procure a [CircleCI](https://circleci.com/) account.
 1. Procure a GCP project and gain access to the [GCP console](https://console.cloud.google.com/).
-1. Sign up as a developer for [login.gov](https://developers.login.gov/) and
-   register an application in their dashboard. XXX tell how to get public key.
 1. Fork or copy this repo into your github org.  Make your changes to this
    new repo.
 1. Consider your application load on the database and change the
@@ -36,9 +34,36 @@ To get the app(s) in this repo going, you will need to:
 1. Enable circleci on this repo, then add some environment variables to it:
    * `GCLOUD_SERVICE_KEY`:  Set this to the contents of `$HOME/gcloud-service-key.json`
    * `GOOGLE_PROJECT_ID`: Set this to your google project ID
-   * `BASICAUTH_PASSWORD`: Set this to a basic auth password to frontend your app with.
-     If it is not set, then your app will be public.
+   * `BASICAUTH_PASSWORD`: Set this to a basic auth password to frontend non-SSO apps with.
+     If it is not set, then your non-SSO app will be public.
    * `BASICAUTH_USER`: Set this to the basic auth username you want.
+1. Watch as circleci deploys the infrastructure.  The apps will all fail
+   because it takes much longer for the databases to be created than the apps,
+   and because you will need to get some info from terraform to make the
+   oauth2_proxy work.
+1. Go to the failed app deploy workflows in circleci and click on `Rerun`.
+   Everything should fully deploy this time, though the rails app SSO proxy jobs
+   will fail unless you completed the SSO proxy steps too.  This is fine.
+1. You can now find all the apps if you go look at `Console -> App Engine -> Versions` and
+   then click on the `Service` popup to find the app you'd like to get to
+   (rails and dotnet-example, currently).  You will need to authenticate with
+   the basic auth credentials you set above.
+
+### Enabling the SSO proxy in front of the rails example
+
+1. Sign up as a developer for [login.gov](https://developers.login.gov/) and
+   create dev, staging, and production apps in the login.gov dashboard using their 
+   directions and the following guidance:
+   1. Look at the output from the `apply_terraform` job in circleci to get the Public Keys.
+      Look for the `sso_cert_XXX` outputs.  If you have the gcloud utility working and
+      have `jq` installed, you can use this command to get the dev cert, for example:  
+      `gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json - | jq -r .sso_cert_dev.value`.
+      Change `dev` to `staging` and `production`, and you will have all the certs.
+   1. Make the `Return to App URL` be something like `https://dev-dot-${GOOGLE_PROJECT_ID}.appspot.com/oauth2/sign_in`
+      for dev, and change dev to `staging` and `production` for those apps too.
+   1. Make the `Redirect URIs` be something like `https://dev-dot-${GOOGLE_PROJECT_ID}.appspot.com/oauth2/callback`
+      for dev, and change dev to `staging` and `production` for those apps too.
+1. Add these environment variables to the circleci repo:
    * `IDP_PROVIDER_URL`: Set this to your IDP provider URL 
      (like https://idp.int.identitysandbox.gov/openid_connect/authorize)
    * `IDP_CLIENT_ID`: Set this to the client ID you registered with your IDP.
@@ -48,12 +73,9 @@ To get the app(s) in this repo going, you will need to:
    	 not like to restrict who can get in.
    * `IDP_PROFILE_URL`:  Set this to your IDP provider profile URL
      (like https://idp.int.identitysandbox.gov/api/openid_connect/userinfo).
-
-1. Watch as circleci deploys the infrastructure and apps!
-   You may need to approve and wait until the terraform run is done, and then
-   redeploy the apps the first time in case it takes longer to launch the databases
-   than it takes to launch the apps.
-1. You can now find all the apps if you go look at `Console -> App Engine -> Versions`.
+1. You should then be able to go to circleci and click `Rerun` on a `deploy-rails-example`
+   workflow, and everything should then deploy fully.  You will then be able to go to
+   the frontend URL (something like https://dev-dot-${GOOGLE_PROJECT_ID}.appspot.com/) and experience the SSO login.
 
 ## Customization For Your Application
 
@@ -99,12 +121,12 @@ GCP should issue a proper SSL cert too.
 
 ### Authentication
 
-You will probably need to keep basic auth in front of your application
-until you get it mostly going and have your ATO.  These apps are all
-public by default.  The example apps have basic auth enabled, so you can use
-that as an example on how to do that.
+You will probably need to keep authentication in front of your application
+until you have your ATO.  The .NET core example app has
+basic auth enabled, and the rails example app has an OAuth2 proxy in front of it.
+Another option is to implement OAuth2 support directly in your application, though
+we do not have an example of that here.
 
-For other identity providers, you will need to use OAuth2 or SAML in your app.
 Here are some identity providers you might want to integrate with:
   * [login.gov](https://login.gov/), which has excellent
     [developer documentation](https://developers.login.gov/).
@@ -125,10 +147,20 @@ Here are some identity providers you might want to integrate with:
     although this probably is not useful unless you have a cloud.gov
     account, it has some good documentation on the subject.
 
-Another option is putting an [OAuth2 proxy](https://github.com/18F/oauth2_proxy)
-in front of your application.  We currently have no examples on how to do this,
-but the documentation on how to get registered with a number of identity providers
-may be useful.
+One thing that you should be aware of if you are using the OAuth2 proxy is
+that the application launched behind the proxy needs to ensure that traffic
+not originating from the proxy is rejected.  This can be done by checking
+the HMAC in the `GAP-Signature` header using the key found in the `SIGNATURE_KEY`
+environment variable in the application, and if it does not verify, reject
+the request.  This is usually simpler to do than implementing the full OAuth2
+control flow.  An example of this can be found in the rails-example 
+[application_controller.rb](https://github.com/18F/gcp-appengine-template/blob/master/rails-example/app/controllers/application_controller.rb).
+More info on how the proxy is configured to do this, and HMAC in general can be found here:
+https://github.com/pusher/oauth2_proxy#request-signatures
+
+### Automated scanning
+
+
 
 ## ATO and launching considerations
 
@@ -167,7 +199,8 @@ XXX You can run some stuff by hand if you want to.
 
 ### Logging/Debugging
 
-Logs can be watched either by using the GCP Console (`XXX`), or by getting the google
+Logs can be watched either by using the [GCP Console](https://console.cloud.google.com/logs/)
+, or by getting the google
 cloud SDK going and saying `gcloud app logs tail` to get all logs from all versions
 of the apps.
 
@@ -271,9 +304,13 @@ prior to changing production.  https://circleci.com/
 
 ### Rails / App Engine
 This is a simple app that uses ActiveRecord to store a "blog" in a db.
+It is deployed to GCP with an [OAuth2 Proxy](https://github.com/pusher/oauth2_proxy)
+in front of it, so to use it properly, you will need an Identity Provider
+to configure it with like login.gov.
 
 To test locally, have ruby/bundler installed and 
-run `cd rails-example && bundle install && bin/rails server`.
+run `cd rails-example && bundle install && bin/rails server`.  You will be able
+to access the application on http://localhost:3000/.
 
 ### .NET Core / App Engine
 This is a simple app that creates a list of URLs for "blogs" in a database.  
