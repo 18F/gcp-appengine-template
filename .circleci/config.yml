@@ -211,7 +211,7 @@ jobs:
           command: |
             # send special auth header that lets us scan
             SIGNATURE_KEY=$(cat /tmp/workspace/rails_signature_key)
-            TOKEN="$(cat /tmp/workspace/rails_target_version):$(date +%s)"
+            TOKEN="$(cat /proc/sys/kernel/random/uuid):$(date +%s)"
             SIGNED_TOKEN=$(echo -n "${SIGNATURE_KEY}_${TOKEN}" | sha256sum | awk '{print $1}')
             AUTH_INFO="-config replacer.full_list\(0\).description=auth1 \
                -config replacer.full_list\(0\).enabled=true \

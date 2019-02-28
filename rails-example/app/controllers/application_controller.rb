@@ -56,12 +56,15 @@ class ApplicationController < ActionController::Base
 		if ! request.headers['ZAP-Authorization'].nil?
 			authheader = request.headers['ZAP-Authorization']
 			token, signedtoken = authheader.split(':',2)
-			targetversion, datestamp = token.split(':',2)
+			uuid, datestamp = token.split(':',2)
+
+			# Check that the token hasn't expired (scans run for 30 minutes max)
 			if (Time.new.to_i - datestamp).abs > 1800
 				logger.info 'ZAP-Authorization has expired'
 				render plain: "305 use proxy", status: 305
 			end
 
+			# Check that the hash results in the same
 			checktoken = signature_key + '_' + token
 			if Digest::SHA256.hexdigest checktoken == signedtoken
 				return
