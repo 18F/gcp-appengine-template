@@ -54,40 +54,38 @@ class ApplicationController < ActionController::Base
 		# If we have a properly signed ZAP-Authorization header, then
 		# it's the ZAP scanner, and we should let it in
 		if ! request.headers['ZAP-Authorization'].nil?
-			pp 'found ZAP-Authorization header'
-			
 			authheader = request.headers['ZAP-Authorization']
-			signedtoken, token = authheader.split(':',2)
-			uuid, datestamp = token.split(':',2)
+			tokenhash, token = authheader.split('_',2)
+			uuid, datestamp = token.split('_',2)
 
 			# Check that the token hasn't expired (scans run for 30 minutes max)
-			if (Time.new.to_i - datestamp).abs > 1800
+			if (Time.new.to_i - datestamp.to_i).abs > 1800
 				logger.warn 'ZAP-Authorization has expired'
-				pp 'ZAP-Authorization has expired'
 				render plain: "305 use proxy", status: 305
+				return
 			end
 
 			# Check that the hash results are the same
-			checktoken = signature_key + '_' + token
-			if Digest::SHA256.hexdigest checktoken == signedtoken
+			checktokenhash = Digest::SHA256.hexdigest(signature_key + '_' + token)
+			if checktokenhash == tokenhash
 				return
 			else
 				logger.warn 'ZAP-Authorization did not verify'
-				pp 'ZAP-Authorization did not verify'
 				render plain: "305 use proxy", status: 305
+				return
 			end
 		end
 
 		# Otherwise, check the HMAC signature
 		if request.headers['GAP-Signature'].nil? 
 			logger.warn 'missing GAP-Signature'
-			pp 'missing GAP-Signature'
 			render plain: "305 use proxy", status: 305
+			return
 		end
 		if ApiAuth.authentic?(request, signature_key, :digest => 'sha1')
 			logger.warn 'GAP-Signature did not verify'
-			pp 'GAP-Signature did not verify'
 			render plain: "305 use proxy", status: 305
+			return
 		end
 	end
 end
