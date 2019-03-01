@@ -362,9 +362,15 @@ jobs:
           name: Promote rails-example with sso to production
           no_output_timeout: 30m
           command: |
+            # promote ssoproxy
             export VERSION=$(cat /tmp/workspace/sso_target_version)
             gcloud app services set-traffic default --splits ${VERSION}=1 --quiet
             echo promoted ${VERSION} to $(cat /tmp/workspace/sso_target_url)
+
+            # promote rails
+            export VERSION=$(cat /tmp/workspace/rails_target_version)
+            gcloud app services set-traffic rails --splits ${VERSION}=1 --quiet
+            echo promoted rails ${VERSION} to $(cat /tmp/workspace/rails_target_url)
 
             # clean up old versions (leave the last two, so you can roll back)
             echo cleaning up old versions
