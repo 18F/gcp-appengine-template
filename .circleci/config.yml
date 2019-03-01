@@ -319,14 +319,6 @@ jobs:
             gcloud app deploy -q --no-promote --version=${TARGET_VERSION}
             echo ${TARGET_VERSION} > /tmp/workspace/sso_target_version
             echo ${TARGET_URL} > /tmp/workspace/sso_target_url
-
-            # clean up old versions (leave the last two, so you can roll back)
-            echo cleaning up old versions
-            VERSIONS=$(gcloud app versions list --service=default --format=list | egrep -v '\/dev$|\/staging$' | sort -rn | tail -n +3 | sed 's/^.*\///') || true
-            if [ ! -z ${VERSIONS} ] ; then
-              gcloud app versions delete ${VERSIONS} || true
-              echo cleaned up ${VERSIONS}
-            fi
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
@@ -362,6 +354,14 @@ jobs:
             export VERSION=$(cat /tmp/workspace/sso_target_version)
             gcloud app services set-traffic default --splits ${VERSION}=1
             echo promoted ${VERSION} to $(cat /tmp/workspace/sso_target_url)
+
+            # clean up old versions (leave the last two, so you can roll back)
+            echo cleaning up old versions
+            VERSIONS=$(gcloud app versions list --service=default --format=list | egrep -v '\/dev$|\/staging$' | sort -rn | tail -n +3 | sed 's/^.*\///') || true
+            if [ ! -z ${VERSIONS} ] ; then
+              gcloud app versions delete ${VERSIONS} || true
+              echo cleaned up ${VERSIONS}
+            fi
 
   deploy-dotnet:
     docker:
