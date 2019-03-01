@@ -66,8 +66,12 @@ To get the app(s) in this repo going, you will need to:
 1. Add these environment variables to the circleci repo:
    * `IDP_PROVIDER_URL`: Set this to your IDP provider URL 
      (like https://idp.int.identitysandbox.gov/openid_connect/authorize)
-   * `IDP_CLIENT_ID`: Set this to the client ID you registered with your IDP.
+   * `IDP_CLIENT_ID_DEV`: Set this to the client ID you registered with your IDP for dev.
      (like `urn:gov:gsa:openidconnect:development`)
+   * `IDP_CLIENT_ID_STAGING`: Set this to the client ID you registered with your IDP for staging.
+     (like `urn:gov:gsa:openidconnect:staging`)
+   * `IDP_CLIENT_ID_PRODUCTION`: Set this to the client ID you registered with your IDP for production.
+     (like `urn:gov:gsa:openidconnect:production`)
    * `IDP_EMAIL_DOMAIN`: Set this to either the email domain that you would
    	 like your access restricted to (like `gsa.gov`), or `*`, if you would
    	 not like to restrict who can get in.
