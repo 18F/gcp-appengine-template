@@ -373,6 +373,11 @@ jobs:
               gcloud app versions delete ${VERSIONS} --quiet
               echo cleaned up "${VERSIONS}"
             fi
+            VERSIONS=$(gcloud app versions list --service=rails --format=list | egrep -v '\/dev$|\/staging$' | sort -rn | tail -n +3 | sed 's/^.*\///') || true
+            if [ ! -z "${VERSIONS}" ] ; then
+              gcloud app versions delete --service=rails ${VERSIONS} --quiet
+              echo cleaned up rails "${VERSIONS}"
+            fi            
 
   deploy-dotnet:
     docker:
@@ -497,12 +502,6 @@ workflows:
       - owaspzap-rails:
           requires:
             - deploy-rails
-          filters:
-            branches:
-              only:
-                # Do not run this against production, lest it fill it with garbage.
-                - dev
-                - staging
       - deploy-ssoproxy:
           requires:
             - test-rails
