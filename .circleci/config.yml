@@ -197,7 +197,14 @@ jobs:
           at: /tmp/workspace
       - run:
           name: Test the app!
-          command: echo "run tests here against $(cat /tmp/workspace/rails_target_url)"
+          command: |
+            export SIGNATURE_KEY=$(cat /tmp/workspace/rails_signature_key)
+            export TOKEN="$(cat /proc/sys/kernel/random/uuid)_$(date +%s)"
+            export HASHED_TOKEN=$(echo -n "${SIGNATURE_KEY}_${TOKEN}" | sha256sum | awk '{print $1}')
+            export AUTH_HEADER="ZAP-Authorization"
+            export AUTH_INFO="${HASHED_TOKEN}_${TOKEN}"
+
+            echo "run tests here against $(cat /tmp/workspace/rails_target_url) with an ${AUTH_HEADER} header"
   owaspzap-rails:
     docker:
       - image: owasp/zap2docker-weekly
@@ -416,7 +423,7 @@ jobs:
           command: echo "not tested! Run a testing script here. XXX"
   owaspzap-dotnet:
     docker:
-      - image: owasp/zap2docker-stable
+      - image: owasp/zap2docker-weekly
     steps:
       - checkout
       - run:
