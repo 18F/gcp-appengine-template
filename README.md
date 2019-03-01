@@ -208,6 +208,42 @@ Some frameworks can be debugged in the GCP console without changes.  Others
 may require some special libraries.  Consult https://cloud.google.com/debugger/docs/
 for more information.
 
+### App Scanning with OWASP ZAP
+
+Circleci will automatically scan the applications upon deploy.  One thing to note
+is that if your app uses authentication (basic auth or SSO proxy, etc), then you
+will need to probably add an authentication header to your app that allows ZAP to
+securely scan without doing a login.  You can see how to do this in the `owaspzap-rails` job
+in the circleci [config.yml](https://github.com/18F/gcp-appengine-template/blob/master/.circleci/config.yml),
+and how you might check this header in the rails-example 
+[application_controller.rb](https://github.com/18F/gcp-appengine-template/blob/master/rails-example/app/controllers/application_controller.rb)
+
+You should also probably scan while doing local development, since that is faster to do
+than waiting for a deploy.  You can do this by:
+  * `docker pull owasp/zap2docker-weekly` to get the OWASP ZAP scanner ready for you to use.
+  * Start up your app for local development.  In the case of the rails-example, that would be
+    `rails server`.
+  * Figure out your computer's local IP address.  While you might access the app over
+    http://localhost:3000/, docker cannot, because it has it's own localhost IP.
+    For example, your system might have been issued `10.0.1.50` as your local IP on
+    your network.
+  * `docker run -t owasp/zap2docker-weekly zap-full-scan.py -t http://YOURIPHERE:3000/`, where
+    `YOURIPHERE` is your IP address as we discovered in your last step.
+  * The scanner should run and issue a report that you can use to understand what sort of
+    things might have security problems that require fixing.
+  * Be aware that the scanner will try submitting forms many times, so if you have a form
+    that sends email or adds entries to a blog or something, that form will be triggered by
+    the scanner.  You may need to adjust the scanner to skip certain urls.
+    https://github.com/zaproxy/zaproxy/wiki/FAQpreventSpam
+
+More information on how to configure and use the OWASP ZAP scanner in this way
+can be found on their wiki:  https://github.com/zaproxy/zaproxy/wiki/ZAP-Full-Scan  
+
+You can also use the proxy on your computer in GUI mode, which is much more like a traditional
+app, and thus less tricky to customize than the docker version, which is better for automated 
+scans.  More info on that can be found in the 
+"Getting Started Guide" on https://github.com/zaproxy/zaproxy/wiki/Downloads.
+
 ### Infrastructure Update Workflow
 
 Infrastructure updates are driven by circleci and implemented by terraform.
@@ -289,7 +325,7 @@ may be rolled back or reconstructed in a Disaster Recovery scenario.
 
 ### Google App Engine
 App Engine is a simple way to deploy applications that will automatically scale
-up and down according to load.  https://cloud.google.com/appengine/
+up and down according to load, collect logs, etc.  https://cloud.google.com/appengine/
 
 ### Terraform
 Terraform orchestrates the project setup, creating databases, storage,
@@ -299,6 +335,10 @@ secrets, etc.  https://www.terraform.io/
 Terraform and the Google Cloud SDK are invoked on commit by Circle CI, which
 enables required APIs, creates a Terraform plan, and waits for operator approval
 prior to changing production.  https://circleci.com/
+
+### OWASP ZAP
+ZAP is a proxy that can be used to scan an app for common security vulnerabilities.
+https://www.owasp.org/index.php/OWASP_Zed_Attack_Proxy_Project
 
 ## Example Applications
 
