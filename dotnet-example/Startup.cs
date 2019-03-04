@@ -150,7 +150,13 @@ namespace dotnet_example
             UpdateDatabase(app);
 
             app.UseHttpsRedirection();
-            app.UseStaticFiles();
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                OnPrepareResponse = ctx =>
+                {
+                    ctx.Context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+                }
+            });
             app.UseCookiePolicy();
 
             // Add various headers to prevent clickjacking, XSS, etc.
