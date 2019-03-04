@@ -412,8 +412,10 @@ jobs:
 
             if [ "${CIRCLE_BRANCH}" = "master" ] ; then
               export DEPLOY_ENV=production
+              export INSTANCES=2
             else
               export DEPLOY_ENV=${CIRCLE_BRANCH}
+              export INSTANCES=1
             fi
 
             # put the tf output into a variable so it doesn't hit the disk
@@ -426,6 +428,8 @@ jobs:
             runtime: aspnetcore
             env: flex
             service: dotnet-example
+            automatic_scaling:
+              min_num_instances: ${INSTANCES}
 
             env_variables:
               ASPNETCORE_DEPLOY_ENV: "${DEPLOY_ENV}"
