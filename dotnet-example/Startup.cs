@@ -119,7 +119,7 @@ namespace dotnet_example
             }
             else
             {
-                // create an empty authorization that lets everybody in.
+                // create an empty authorization that lets everybobody in.
                 services.AddAuthorization(x =>
                     x.DefaultPolicy = new AuthorizationPolicyBuilder()
                         .RequireAssertion(_ => true)
@@ -152,6 +152,23 @@ namespace dotnet_example
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
+
+            // Add various headers to prevent clickjacking, XSS, etc.
+            app.Use(async (context, next) =>
+            {
+                context.Response.Headers.Add("X-Xss-Protection", "1; mode=block");
+                await next();
+            });
+            app.Use(async (context, next) =>
+            {
+                context.Response.Headers.Add("X-Frame-Options", "SAMEORIGIN");
+                await next();
+            });
+            app.Use(async (context, next) =>
+            {
+                context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
+                await next();
+            });
 
             app.UseMvc(routes =>
             {
