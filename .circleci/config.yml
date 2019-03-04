@@ -229,16 +229,19 @@ jobs:
             export SIGNATURE_KEY=$(cat /tmp/workspace/rails_signature_key)
             export TOKEN="$(cat /proc/sys/kernel/random/uuid)_$(date +%s)"
             export HASHED_TOKEN=$(echo -n "${SIGNATURE_KEY}_${TOKEN}" | sha256sum | awk '{print $1}')
-            export AUTH_INFO=" \
-               -config replacer.full_list\(0\).description=auth1 \
-               -config replacer.full_list\(0\).enabled=true \
-               -config replacer.full_list\(0\).matchtype=REQ_HEADER \
-               -config replacer.full_list\(0\).matchstr=ZAP-Authorization \
-               -config replacer.full_list\(0\).regex=false \
-               -config replacer.full_list\(0\).replacement=${HASHED_TOKEN}_${TOKEN} \
-               -config spider.postform=${POSTFORM}"
+            export ZAP_CONFIG=" \
+              -config globalexcludeurl.url_list.url\(0\).regex='.*/robots\.txt.*' \
+              -config globalexcludeurl.url_list.url\(0\).description='Exclude robots.txt' \
+              -config globalexcludeurl.url_list.url\(0\).enabled=true \
+              -config replacer.full_list\(0\).description=auth1 \
+              -config replacer.full_list\(0\).enabled=true \
+              -config replacer.full_list\(0\).matchtype=REQ_HEADER \
+              -config replacer.full_list\(0\).matchstr=ZAP-Authorization \
+              -config replacer.full_list\(0\).regex=false \
+              -config replacer.full_list\(0\).replacement=${HASHED_TOKEN}_${TOKEN} \
+              -config spider.postform=${POSTFORM}"
 
-            zap-full-scan.py -m 5 -z "${AUTH_INFO}" -t "$(cat /tmp/workspace/rails_target_url)"
+            zap-full-scan.py -m 5 -z "${ZAP_CONFIG}" -t "$(cat /tmp/workspace/rails_target_url)"
   deploy-ssoproxy:
     docker:
       - image: google/cloud-sdk
@@ -464,7 +467,21 @@ jobs:
       - run:
           name: Run OWASP Zap against the app! (fails if the test takes more than 30 minutes)
           no_output_timeout: 30m
-          command: zap-full-scan.py -m 5 -t "https://dotnet-${CIRCLE_BRANCH}-dot-${GOOGLE_PROJECT_ID}.appspot.com/"
+          command: |
+            # if we are in production, do not do form posts, because they can potentially create cruft in the db.
+            if [ "${CIRCLE_BRANCH}" = "master" ] ; then
+              POSTFORM=false
+            else
+              POSTFORM=true
+            fi
+
+            export ZAP_CONFIG=" \
+              -config globalexcludeurl.url_list.url\(0\).regex='.*/robots\.txt.*' \
+              -config globalexcludeurl.url_list.url\(0\).description='Exclude robots.txt' \
+              -config globalexcludeurl.url_list.url\(0\).enabled=true \
+              -config spider.postform=${POSTFORM}"
+
+            zap-full-scan.py -m 5 -z "${ZAP_CONFIG}" -t "https://dotnet-${CIRCLE_BRANCH}-dot-${GOOGLE_PROJECT_ID}.appspot.com/"
 
 
 
