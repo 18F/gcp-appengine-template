@@ -67,4 +67,5 @@ gem "appengine", "~> 0.4.6"
 
 gem "therubyracer"
 gem "api-auth"
+gem "stackdriver"
 
