@@ -230,16 +230,18 @@ jobs:
             export TOKEN="$(cat /proc/sys/kernel/random/uuid)_$(date +%s)"
             export HASHED_TOKEN=$(echo -n "${SIGNATURE_KEY}_${TOKEN}" | sha256sum | awk '{print $1}')
             export ZAP_CONFIG=" \
-              -config globalexcludeurl.url_list.url\(0\).regex='.*/robots\.txt.*' \
+              -config globalexcludeurl.url_list.url\(0\).regex=.*/robots\.txt.* \
               -config globalexcludeurl.url_list.url\(0\).description='Exclude robots.txt' \
               -config globalexcludeurl.url_list.url\(0\).enabled=true \
-              -config replacer.full_list\(0\).description=auth1 \
+              -config replacer.full_list\(0\).description='auth header for app' \
               -config replacer.full_list\(0\).enabled=true \
               -config replacer.full_list\(0\).matchtype=REQ_HEADER \
               -config replacer.full_list\(0\).matchstr=ZAP-Authorization \
               -config replacer.full_list\(0\).regex=false \
               -config replacer.full_list\(0\).replacement=${HASHED_TOKEN}_${TOKEN} \
-              -config spider.postform=${POSTFORM}"
+              -config connection.defaultUserAgent='Mozilla/5.0 (Windows NT 6.3; WOW64; rv:39.0) Gecko/20100101 Firefox/39.0 ZAP/2.7' \
+              -config spider.postform=${POSTFORM} \
+            "
 
             zap-full-scan.py -m 5 -z "${ZAP_CONFIG}" -t "$(cat /tmp/workspace/rails_target_url)"
   deploy-ssoproxy:

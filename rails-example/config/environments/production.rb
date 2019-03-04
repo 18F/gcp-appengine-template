@@ -89,6 +89,7 @@ Rails.application.configure do
     logger.formatter = config.log_formatter
     config.logger    = ActiveSupport::TaggedLogging.new(logger)
   elsif Dir.exist? "/var/log/app_engine/custom_logs"
+    pp 'logging to /var/log/app_engine/custom_logs'
     config.logger = ActiveSupport::TaggedLogging.new Logger.new("/var/log/app_engine/custom_logs/application.log")
   end
 

@@ -1,6 +1,10 @@
 class ArticlesController < ApplicationController
   def new
-    @article = Article.new
+    if /ZAP\/2.7/ =~ request.user_agent
+      render plain: "403 scanner not allowed to add data", status: 403
+    else
+      @article = Article.new
+    end
   end
 
   def edit
