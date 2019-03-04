@@ -7,6 +7,10 @@ resource "google_sql_database_instance" "production" {
   settings {
     tier = "db-f1-micro"
     availability_type = "REGIONAL"
+    backup_configuration {
+      enabled = true
+      start_time = "05:00"
+    }
   }
 }
 
