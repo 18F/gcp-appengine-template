@@ -1,6 +1,7 @@
 class ArticlesController < ApplicationController
   def new
     if /ZAP\/2.7/ =~ request.user_agent
+      logger.info "not allowing scanner to post"
       render plain: "403 scanner not allowed to add data", status: 403
     else
       @article = Article.new
