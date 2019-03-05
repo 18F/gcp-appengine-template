@@ -16,5 +16,5 @@ resource "google_app_engine_firewall_rule" "disallow_outbound" {
   project = "${var.project_id}"
   priority = 2147483646
   action = "DENY"
-  source_range = "10.0.0.1"
+  source_range = "*"
 }

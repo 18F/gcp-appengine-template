@@ -91,11 +91,6 @@ Rails.application.configure do
   elsif Dir.exist? "/var/log/app_engine/custom_logs"
     pp 'logging to /var/log/app_engine/custom_logs'
     config.logger = ActiveSupport::TaggedLogging.new Logger.new("/var/log/app_engine/custom_logs/application.log")
-  else
-    pp 'logging to stdout'
-    logger           = ActiveSupport::Logger.new(STDOUT)
-    logger.formatter = config.log_formatter
-    config.logger    = ActiveSupport::TaggedLogging.new(logger)    
   end
 
   # Do not dump schema after migrations.
