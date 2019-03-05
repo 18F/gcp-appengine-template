@@ -83,15 +83,15 @@ Rails.application.configure do
   # require 'syslog/logger'
   # config.logger = ActiveSupport::TaggedLogging.new(Syslog::Logger.new 'app-name')
 
-  if ENV["RAILS_LOG_TO_STDOUT"].present?
-    pp 'logging to stdout'
-    logger           = ActiveSupport::Logger.new(STDOUT)
-    logger.formatter = config.log_formatter
-    config.logger    = ActiveSupport::TaggedLogging.new(logger)
-  elsif Dir.exist? "/var/log/app_engine/custom_logs"
-    pp 'logging to /var/log/app_engine/custom_logs'
-    config.logger = ActiveSupport::TaggedLogging.new Logger.new("/var/log/app_engine/custom_logs/application.log")
-  end
+  # if ENV["RAILS_LOG_TO_STDOUT"].present?
+  #   pp 'logging to stdout'
+  #   logger           = ActiveSupport::Logger.new(STDOUT)
+  #   logger.formatter = config.log_formatter
+  #   config.logger    = ActiveSupport::TaggedLogging.new(logger)
+  # elsif Dir.exist? "/var/log/app_engine/custom_logs"
+  #   pp 'logging to /var/log/app_engine/custom_logs'
+  #   config.logger = ActiveSupport::TaggedLogging.new Logger.new("/var/log/app_engine/custom_logs/application.log")
+  # end
 
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
