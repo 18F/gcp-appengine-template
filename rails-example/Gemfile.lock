@@ -290,7 +290,6 @@ DEPENDENCIES
   spring
   spring-watcher-listen (~> 2.0.0)
   sqlite3
-  stackdriver
   therubyracer
   turbolinks (~> 5)
   tzinfo-data
