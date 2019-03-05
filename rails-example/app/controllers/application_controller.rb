@@ -41,6 +41,10 @@ class ApplicationController < ActionController::Base
 	private
 
 	def check_auth
+		# if auth is turned off, let everything through
+		disable_auth = ENV.fetch('DISABLE_AUTH') {''}
+		return if disable_auth != ''
+
 		# if we don't have a signature key, then
 		# we are running locally and should thus let them in
 		signature_key = ENV.fetch('SIGNATURE_KEY') {''}
