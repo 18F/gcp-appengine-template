@@ -156,6 +156,7 @@ jobs:
               BASICAUTH_USER: "${BASICAUTH_USER}"
               IDP_PROVIDER_URL: "${IDP_PROVIDER_URL}"
               RAILS_LOG_TO_STDOUT: True
+              RAILS_SERVE_STATIC_FILES: True
 
             beta_settings:
               cloud_sql_instances: ${CONNECTION_NAME}
