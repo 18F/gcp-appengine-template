@@ -53,10 +53,14 @@ Rails.application.configure do
   config.assets.quiet = true
 
   # log to stdout
-  pp 'logging to stdout'
   logger           = ActiveSupport::Logger.new(STDOUT)
   logger.formatter = config.log_formatter
   config.logger    = ActiveSupport::TaggedLogging.new(logger)
+
+  # XXX This is a bit ugly, but it solves this error:
+  # HTTP Origin header (https://dev-dot-PROJECT.appspot.com) didn't match request.base_url (https://dev-dot-rails-dot-PROJECT.appspot.com)
+  # Probably just need to fiddle with origin headers in the proxy to solve this properly?
+  config.action_controller.forgery_protection_origin_check = false
 
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
