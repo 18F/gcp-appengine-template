@@ -340,8 +340,8 @@ secrets, etc.  https://www.terraform.io/
 
 ### Circle CI
 Terraform and the Google Cloud SDK are invoked on commit by Circle CI, which
-enables required APIs, creates a Terraform plan, and waits for operator approval
-prior to changing production.  https://circleci.com/
+automates all of the terraform, code deployment, testing and scanning tasks
+for each environment.  https://circleci.com/
 
 ### OWASP ZAP
 ZAP is a proxy that can be used to scan an app for common security vulnerabilities.
