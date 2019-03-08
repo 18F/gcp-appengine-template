@@ -330,7 +330,7 @@ jobs:
               OAUTH2_PROXY_SKIP_PROVIDER_BUTTON: true
               OAUTH2_PROXY_PROFILE_URL: "${IDP_PROFILE_URL}"
               OAUTH2_PROXY_JWT_KEY_FILE: /etc/ssl/private/jwt_signing_key.pem
-              OAUTH2_PROXY_PUBJWK_URL: "${IDP_PUBKEY_URL}""
+              OAUTH2_PROXY_PUBJWK_URL: "${IDP_PUBKEY_URL}"
             EOF
 
             # deploy!
