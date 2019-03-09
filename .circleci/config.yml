@@ -121,11 +121,13 @@ jobs:
               # This is kinda like google's default version naming
               export TARGET_VERSION=$(date +%Y%m%d)t$(printf "%05d" $(expr $(date +%s) % 86400))
               export TARGET_URL="https://rails-${GOOGLE_PROJECT_ID}.appspot.com/"
+              export PROXY_URL="https://${GOOGLE_PROJECT_ID}.appspot.com/"
               export INSTANCES=2
             else
               export RAILS_ENV=${CIRCLE_BRANCH}
               export TARGET_VERSION=${CIRCLE_BRANCH}
               export TARGET_URL="https://${TARGET_VERSION}-dot-rails-dot-${GOOGLE_PROJECT_ID}.appspot.com/"
+              export PROXY_URL="https://${TARGET_VERSION}-dot-${GOOGLE_PROJECT_ID}.appspot.com/"
               export INSTANCES=1
             fi
 
@@ -158,6 +160,7 @@ jobs:
               RAILS_LOG_TO_STDOUT: True
               RAILS_SERVE_STATIC_FILES: True
               RAILS_LOG_HEADERS: True
+              PROXY_URL: "${PROXY_URL}"
 
             beta_settings:
               cloud_sql_instances: ${CONNECTION_NAME}
