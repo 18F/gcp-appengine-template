@@ -94,9 +94,7 @@ Rails.application.configure do
 
   # allow the oauth2_proxy in
   if ENV["PROXY_URL"].present?
-    config.action_dispatch.default_headers = {
-      'Access-Control-Allow-Origin' => ENV["PROXY_URL"],
-      'Access-Control-Request-Method' => %w{GET POST OPTIONS DELETE}.join(",")
-    }
+    config.action_dispatch.default_headers['Access-Control-Allow-Origin'] = ENV["PROXY_URL"]
+    config.action_dispatch.default_headers['Access-Control-Request-Method'] = %w{GET POST OPTIONS DELETE}.join(",")
   end
 end

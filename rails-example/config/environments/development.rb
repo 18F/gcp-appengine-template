@@ -68,4 +68,10 @@ Rails.application.configure do
   # Use an evented file watcher to asynchronously detect changes in source code,
   # routes, locales, etc. This feature depends on the listen gem.
   config.file_watcher = ActiveSupport::EventedFileUpdateChecker
+
+  # allow the oauth2_proxy in
+  if ENV["PROXY_URL"].present?
+    config.action_dispatch.default_headers['Access-Control-Allow-Origin'] = ENV["PROXY_URL"]
+    config.action_dispatch.default_headers['Access-Control-Request-Method'] = %w{GET POST OPTIONS DELETE}.join(",")
+  end
 end
