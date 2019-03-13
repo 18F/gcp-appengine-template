@@ -2,10 +2,11 @@
 
 The architecture of this project lends itself directly to fulfilling the principles found
 in https://tech.gsa.gov/guides/dev_sec_ops_guide/.  The overall idea behind this project is
-to create a template that people can clone, add their application to, and then enable CircleCI
-to automatically provision dev/staging/production environments with good secrets management,
-backups, tests, and other controls that make their project automatically use best DevSecOps
-practices, making it easy for people to get an ATO.
+to create a template that people can clone, add their application to, provision some GCP
+Projects, and then enable CircleCI
+to automatically provision dev/staging/production environments into those GCP Projects
+with good secrets management, backups, tests, and other controls that make their project 
+automatically use best DevSecOps practices, making it easy for people to get an ATO.
 
 ## Platform
 
@@ -165,15 +166,16 @@ There are a few known issues with the project:
     the environment and get everything set up, and then lower their access once things are going.
   * We need the project owner IAM role added to our user accounts so that we can explore how to
     activate/configure/use Stackdriver alerts and the Security Command Center.
-  * Limiting outbound access seems pretty close to impossible with App Engine.  The firewall that
-    App Engine does only operates on inbound traffic.  I have hopes that we can set up some sort of
-    anomaly detection thing that kills apps if they query outside of the project, but the best
-    thing to do would be to ask the GCP people what they expect people to do.
-  * Limiting access from the outside world to services protected by the oauth2_proxy seems to be
-    hard.  Inbound filtering seems to not be selective enough to apply to a service.
-    So app implementers need to check for a properly signed GAP-Authentication header.  This seems
-    like an easy thing to forget to do, or do improperly, so it would be good to talk with GCP
-    to try to understand if they have better networking controls coming.
+  * Networking is not very customizable in App Engine:
+    * Limiting outbound access seems pretty close to impossible with App Engine.  The firewall that
+      App Engine does only operates on inbound traffic.  I have hopes that we can set up some sort of
+      anomaly detection thing that kills apps if they query outside of the project, but the best
+      thing to do would be to ask the GCP people what they expect people to do.
+    * Limiting access from the outside world to services protected by the oauth2_proxy seems to be
+      hard.  Inbound filtering seems to not be selective enough to apply to a service.
+      So app implementers need to check for a properly signed GAP-Authentication header.  This seems
+      like an easy thing to forget to do, or do improperly, so it would be good to talk with GCP
+      to try to understand if they have better networking controls coming.
   * We really don't have any good guidance on how GSA IT Security would like us to make an SSP
     or get a P-ATO for
     this project.  There seem to be some interesting oscal/opencontrol things that would fill
