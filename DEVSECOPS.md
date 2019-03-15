@@ -235,6 +235,9 @@ a list of requirements, and under each requirement, we listed how this project c
 * This is currently a bit of a weak spot.  Google App Engine does not provide very good networking controls.
 * We are hoping that we will be able to leverage GSA IT Security's relationship with the GCP folks to know
   what they recommend and/or have coming down the pipe.
+* What we hope to do is be able to show how we have been able to apply fine-grained networking controls on inbound and
+  outbound connections.
+* We expect that the networking controls will be applied through terraform, and thus easily auditable for compliance.
 
 ## ATO processes are highly automated. Compliant code and process is reused by multiple teams. All ATOs take the same amount of time for the same system and frequent deployment is only interrupted when specific risk triggers are raised through automation. Controls can be continuously monitored and measured with automation.
 * We are still needing some direction on how to manage this.  We hope to use https://pages.nist.gov/OSCAL/
