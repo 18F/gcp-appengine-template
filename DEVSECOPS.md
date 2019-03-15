@@ -12,32 +12,13 @@ automatically use best DevSecOps practices, making it easy for people to get an 
 
 The platform that people will be deploying to is Google Cloud Platform (GCP).  This project does not 
 directly address how GCP is provisioned and set up, but from discussions with the people within GSA 
-ICE who are developing the process, the rough plan is to have a GSA GCP organization account run by
+ICE who are developing the process, the rough plan is to have a GSA GCP Organization account run by
 the ICE folks who will, upon receiving an approved request from a Project Owner, set up GCP Project(s)
 for the Project Owner with a minimal set of permissions and services provisioned in it.
 
-GCP Projects are fully compartmentalized subdivisions within a GCP organization that are meant to
+GCP Projects are fully compartmentalized subdivisions within a GCP Organization that are meant to
 be used for individual application environments like dev/test/prod.  Access to one GCP Project
 does not give you access to any other Project.  Billing is managed on a per-Project basis as well.
-
-### Controls
-
-* The creation of GCP Projects is controlled by GSA ICE.
-* Users and service accounts in the GCP Project and their permissions are managed by GSA ICE as well.
-* Users are required to use 2fa to get into the GCP Console and use GCP resources.  The current second
-  factor that must be used is a U2F/FIDO key.
-* Billing is configured by GSA ICE.  
-
-### Logging/Auditing/Visibility
-
-* We believe that GSA ICE will be implementing some level of audit logging and alerting for
-  users and permissions changes across the organization, but do not know specifics.
-* This project attempts to turn on our own audit logs within the project so that we can listen and alert on
-  unusual activity.
-* GCP allows billing alerts to be configured, but we do not know if GSA ICE will
-  be taking advantage of that.  
-* There is a billing dashboard that can be accessed
-  by Project Owners as well as GSA ICE.
 
 ## Project
 
@@ -52,57 +33,19 @@ branch into the appropriate GCP Project whenever there are changes.
 Currently, our project uses Google App Engine to deploy apps which use Google Cloud SQL and KMS.  It also
 stores the terraform state in an encrypted Cloud Storage bucket.
 
-### Controls
-
-* Separate GCP Projects can allow for fine-grained access controls so that dev/staging/prod can have
-  appropriate sets of users and full to readonly access granted to them.
-* Separate GCP Projects provide logical/physical resource separation so that opportunities to lateral 
-  from a dev environment into prod are not available.
-* The dev/staging/production environments are generally identical except for the data in their
-  databases, and perhaps some additional access granted for debugging in the dev environment.
-* All changes to the environment and apps are done through a defined gitops-style process with 
-  code and automation, so the management of the infrastructure should not require most people to
-  have more than readonly access to anything once the infrastructure is bootstrapped.
-* All changes to the code can be required to have approvals on them with GitHub Protected Branches, so no
-  unilateral unauthorized changes can happen, and all changes that are approved can be reviewed later on
-  in case there is a problem.
-  GitHub Verified checkins could be made required too for additional levels of assurance.  We would expect most
-  projects to allow anybody on the project to push into the dev branch, but require approvals on pull requests
-  into the staging and master branches.
-* As previously mentioned, audit logs are enabled, so we should be able to see infrastructure changes in the
-  GCP Log Viewer.
-* All applications are configured through environment variables, so secrets and other config are generally
-  ephemeral.  The only place where secrets hit the disk is in the encrypted Cloud Storage bucket where terraform
-  stores it's state.
-* Terraform generates all secrets used in the system, so there is generally no opportunity for people to
-  store this data insecurely, and this also makes it easy to rotate secrets.
-* Because the infrastructure is all code, Disaster Recovery into another region should be simple,
-  only requiring a change to the terraform to change the region and a restore of a database
-  backup from the old region.
-
-### Logging/Auditing/Visibility
-
-* CircleCI can provide logs of what the automation is doing if you are a part of the project.
-* GCP Log Viewer provides logs from the other side of what CircleCI is doing with deploys and 
-  infrastructure changes, though perhaps without the context that CircleCI access might give you.
-* Google Stackdriver provides customizable alerts so that IAM changes or changes to infrastructure
-  by something other than the terraform system account can raise alarms.
-* GCP has a security console that does anomaly and vulnerability detection, scanning, alerting,
-  and other interesting services which should provide good visibility into the security posture of
-  the project.
-
 ## App
 
 The applications in this project are extremely simple, meant to be examples for people to look at how they
 are deployed and perhaps how they have been configured to do basic/OIDC authentication.
-They are not in any way useful except as an example.
+They are not in any way useful except as an example.  When others use this template, they will
+delete the example apps and create their own.
 These apps are deployed whenever changes to particular branches
 in github change by the CircleCI CI/CD system.  Whenever such a workflow is triggered, CircleCI will
 configure and deploy the app using the gcloud tool, run tests to verify that the app is functional,
 run a OWASP ZAP scan against the app to ensure that there are not obvious security vulnerabilities,
 and then bring load up on the app.
 
-One app has been configured to run with an oauth2_proxy in front of it that is configured to authenticate
+One example app has been configured to run with an oauth2_proxy in front of it that is configured to authenticate
 users from gsa.gov using login.gov.  The workflow here adds a deploy/test of the oauth2_proxy after the app
 is up, but is otherwise the same.  This seems like it could be useful for people who do not want to implement
 OIDC in their app, but it does require you to be smarter about restricting access on the backend too.  In
@@ -122,37 +65,178 @@ General features that apps deployed into this environment should have are:
   * Apps should have comprehensive tests written for them that can be executed during the
     CircleCI deployment pipeline.
   * All data that the apps store should be stored in a database or other storage service.  Local
-    files are ephemeral at best, and may not be allowed to happen in some app deployment situations.
+    files are ephemeral at best, and may not be allowed to happen for some deployment types.
 
-### Controls
+# Requirements
 
+Summarizing the DevSecOps guide somewhat, we came up with a list of requirements, and under each
+requirement, we listed how this project can fulfill the requirements on GCP.
+
+## Application developers have a pipeline that they can use to deploy software which is considerate of security and visible to operations.
+* CircleCI automates all deployment/testing/scanning/promotion tasks in a pipeline that
+  automatically deploys app and infrastructure changes into the dev/staging/production environments.
+* All changes to the environment and apps are done through a defined gitops-style process with 
+  code and automation, so the management of the infrastructure should not require most people to
+  have more than readonly access to anything once the infrastructure is bootstrapped.
+* Terraform generates all secrets used in the system, so there is generally no opportunity for people to
+  store this data insecurely, and this also makes it easy to rotate secrets.
+* All applications are configured through environment variables, so secrets and other config are generally
+  ephemeral.  The only place where secrets hit the disk is in the encrypted Cloud Storage bucket where terraform
+  stores it's state.
 * All apps/services deployed in Google App Engine are given an SSL cert in the appspot.com domain by default.
   There are provisions for getting a cert for a custom domain as well, which most people will want to
   do for production.
-* App Engine instances are ephemeral.  They are restarted weekly by Google.
+* CircleCI can provide logs of what the app/infrastructure deployment automation is doing.
+* GCP Log Viewer provides logs from the other side of what CircleCI is doing with deploys and 
+  infrastructure changes, though perhaps without the context that CircleCI access might give you.
+
+## Application developers have a clear, self-service intake onto the platform.
+* This project does not directly address how GCP is provisioned and set up, but from discussions with the people within GSA ICE who are developing the process, the rough plan is to have a GSA GCP Organization account run by the ICE folks who will, upon receiving an approved request from a Project Owner, set up GCP Project(s) for the Project Owner with a minimal set of permissions and services provisioned in it.
+
+## The platform services are centralized in its infrastructure and pipeline implementation.
+* The creation of GCP Projects will be controlled by GSA ICE.
+* Users and service accounts in the GCP Project and their permissions are currently managed by GSA ICE.
+* Billing is configured by GSA ICE.
+* Users are required to use 2fa to get into the GCP Console and use GCP resources.  The current 
+  second factor that must be used is a U2F/FIDO key.
+* The infrastructures created in the GCP Projects are fully automated by CircleCI and the code
+  in this project.
+
+## Application developers are provided base OS images and images that provide component-level functionality that has also been hardened (e.g., standard images pre-packaged with hardened components i.e. databases or web/application servers).
+* App Engine instances and containers are provided and updated by google and are not configurable
+  by the developers.
 * App Engine instances are automatically updated/patched/restarted with zero downtime on a weekly basis.
-* Logs are collected from stdout/stderr and stored in the Google Stackdriver Log Viewer automatically,
-  where they are stored read-only.
-* App Engine automatically scales up and down the number of instances according to load.
+* Services used by the application (such as Cloud SQL databases) are also updated and managed
+  by Google to ensure their security.
+
+## Application owners have full access to their application event information with monitoring and alerting flexibility for their own use. An enterprise-wide application logging and monitoring system is available.
+* All logs generated by the apps/services will be pulled into the read-only Google Stackdriver Logs Viewer.
+* App events can be alerted on with Google Stackdriver.
+* Performance data for app instances can be viewed in the GCP Console.
+* CircleCI can provide logs of what the app/infrastructure deployment automation is doing.
+* GCP Log Viewer provides logs from the other side of what CircleCI is doing with deploys and 
+  infrastructure changes, though perhaps without the context that CircleCI access might give you.
+* Google Stackdriver provides customizable alerts so that IAM changes or changes to infrastructure
+  by something other than the terraform system account can raise alarms.
+* GCP has a security console that does anomaly and vulnerability detection, scanning, alerting,
+  and other interesting services which should provide good visibility into the security posture of
+  the project.
+* We believe that GSA ICE will be implementing some level of audit logging and alerting for
+  users and permissions changes across the organization, but do not know specifics.
+* This project attempts to turn on our own audit logs within the project so that we can listen and alert on
+  unusual activity.
+* GCP allows billing alerts to be configured, but we do not know if GSA ICE will
+  be taking advantage of that.  
+* There is a billing dashboard that can be accessed
+  by Project Owners as well as GSA ICE.
 * Read-only log viewing access can be granted to anybody in the project, so temporary access could be
   granted to a developer or security engineer and then taken away.  We would presume that log access
   would probably be granted at the organization level already, but don't know for sure.
+
+## Images and components undergo automatic testing and are pre-approved by security and operations groups.
+* Google is continuously updating their App Engine instances and the containers they build
+  the applications in to ensure the latest security patches are applied.  Instances are updated
+  and relaunched weekly with zero downtime.
+* Apps are not fully rolled out unless they pass a suite of tests that are defined by the developer.
+* Google runs security scans on deployed applictions, and this project also is set up to
+  run authenticated OWASP ZAP scans.
+
+## The platform automatically tests new patches on applications which run on it, informing the appropriate parties if decision points are reached (e.g., if a CVE is raised on an existing piece of software, the platform can automatically update that software, test it, and inform the application developers of the change if the tests pass or indicate that the patch needs to be applied in a particular timeframe). No downtime for patching.
+* Google is continuously updating their App Engine instances and the containers they build
+  the applications in to ensure the latest security patches are applied.  Instances are updated
+  and relaunched weekly with zero downtime.
+* Apps are not fully rolled out unless they pass a suite of tests that are defined by the developer.
+* Google runs security scans on deployed applictions, and this project also is set up to
+  run authenticated OWASP ZAP scans.
+
+## Platform change is conducted through strictly defined processes with clear criteria defined that allow for rapid change; the platform automates changes and endeavors to impact the minimum number of application developers through that automation.
+* Changes to the apps and infrastructure are made through a defined gitops-style process, where particular
+  branches are deployed automatically once an approved change lands.
 * Health checks are standard for every deployment.  If healthchecks fail, traffic will be routed to other
   healthy instances, and eventually will relaunch the instance.
-* Changes to the apps are made through a defined gitops-style process.
-* Apps are not fully rolled out unless they pass a suite of tests that are defined by the developer.
-* App Engine instances are not generally available for logging into and changing.  It is possible
-  to do this for debugging, but this is not a supported workflow, and the changes end up being
-  ephemeral, since the instances are relaunched every time there is a deploy or the google-managed
-  weekly update.
+* Deploys are zero-downtime for production.
+
+## Version control is a key method of managing application lifecycle, has well-defined standards for use such that any user of the platform has a baseline that is shared across all applications.
+* All code for the projects deployed using this template resides in GitHub.
+* Changes to the apps and infrastructure are made through a defined gitops-style process, where particular
+  branches are deployed automatically once an approved change lands.
+* All changes to the code will be required to have approvals on them with GitHub Protected Branches, so no
+  unilateral unauthorized changes can happen, and all changes that are approved can be reviewed later on
+  in case there is a problem.
+* GitHub Verified checkins could be made required too for additional levels of assurance.  We would expect most
+  projects to allow anybody on the project to push into the dev branch, but require approvals on pull requests
+  into the staging and master branches.
+
+## Development and operational environments are identical and immutable. Environments can be stood up and torn down via automation. All changes to the running system are logged and broadly conducted through scripting rather than actual access to the running system. All necessary tests, including security tests, are run as part of the deployment process. Development environments may be instantiated and torn down as needed.
+* Separate dev/staging/production GCP Projects are requested by default.
+* Separate GCP Projects can allow for fine-grained access controls so that dev/staging/prod can have
+  appropriate sets of users and full to readonly access granted to them.
+* Separate GCP Projects provide logical/physical resource separation so that opportunities to lateral 
+  from a dev environment into prod are not available.
+* The dev/staging/production environments are generally identical, since they are deployed from
+  the same code.  The only real differences are the data in their
+  databases, and perhaps some additional access granted for debugging in the dev environment.
+* App Engine instances and images are immutable, but once launched, can be logged into for
+  debugging purposes by authorized users, when the running instance may be changed.  This is 
+  not a normal workflow, and changes are ephemeral, since the instances are relaunched every
+  time there is a deploy or the google-managed weekly update.
+
+## The only manual steps to deployment are those explicitly designed to meet application expectations (e.g., not every push to the master branch necessarily indicates a release, but a product that could be released, if there is a business reason to not automatically update).
+* The only manual steps in this project are done while bootstrapping the environment, change approvals, and
+  infrastructure deployment approvals.
+* We depart from this directive a bit because we will automatically deploy whenever a branch changes.  Our
+  take on this is that if we don't want to deploy to production, those changes should queue up in
+  the staging environment rather than being merged into production.
+
+## User management is self-service with appropriate security limitations. Secrets are created/shared between parts of the platform, without people needing to set/interact with them.
+* Users of the platform are currently managed by ICE.  We hope to have Project Owner IAM roles given to
+  the project owners, so that they can grant access to the different environments in a self-service way.
+* Users of the platform are required to use 2fa to get into the GCP Console and use GCP resources.  The current 
+  second factor that must be used is a U2F/FIDO key.
+* Users of the applications will be managed by the application.  We have an example of how to use login.gov
+  to ensure that users are from gsa.gov, but application developers are free to use whatever system they need
+  to fulfill their mission.
+* Terraform generates all secrets used in the system, so there is generally no opportunity for people to
+  store this data insecurely, and this also makes it easy to rotate secrets.
+* All applications are configured through environment variables, so secrets and other config are generally
+  ephemeral.  The only place where secrets hit the disk is in the encrypted Cloud Storage bucket where terraform
+  stores it's state.
+
+## The platform manages availability for the application owners through automation based on application need. The platform provides direct insight into application health and performance. Applications can be seamlessly moved between hosting regions/zones in reaction to DR or threat activity.
+* App Engine automatically scales up and down the number of instances according to load.
+* Health checks are standard for every deployment.  If healthchecks fail, traffic will be routed to other
+  healthy instances, and eventually will relaunch the instance, so all apps are automatically HA.
 * The production databases have daily backups automatically scheduled for them, and also are
   configured for HA and failover.
+* Because the infrastructure is all code, Disaster Recovery into another region should be simple,
+  only requiring a change to the terraform code to change the region and a restore of a database
+  backup from the old region.
 
-### Logging/Auditing/Visibility
+## The platform governs the overarching infrastructure supporting the applications, with defined and assess separation of network concerns. Application owners can make limited changes to their network environment sufficient to self-manage the deployment of their applications and creation of new components of their application, on their own, with appropriate compliance checks.
+* This is currently a bit of a weak spot.  Google App Engine does not provide very good networking controls.
+* We are hoping that we will be able to leverage GSA IT Security's relationship with the GCP folks to know
+  what they recommend and/or have coming down the pipe.
 
-* All logs generated by the apps/services will be pulled into the Google Stackdriver Logs Viewer.
-* App events can be alerted on with Google Stackdriver.
-* Performance data for app instances can be viewed in the GCP Console.
+## ATO processes are highly automated. Compliant code and process is reused by multiple teams. All ATOs take the same amount of time for the same system and frequent deployment is only interrupted when specific risk triggers are raised through automation. Controls can be continuously monitored and measured with automation.
+* We are still needing some direction on how to manage this.  We hope to use https://pages.nist.gov/OSCAL/
+  or http://opencontrol.cfapps.io/ or something to automate the generation of our compliance documentation.
+* We are hoping to get a P-ATO for this project so that it will be easy to diff this repo against a project
+  derived from it and easily come up with a small subset of changes that need review.
+* It should be easy to tag an ATO'ed revision in github and then review diffs between
+  the tag and what is in staging to see if there is anything that requires an SCR on an ongoing basis.
+
+## Description Backup and data lifecycle management allows application developers to ensure that their data is maintained over time and, in the case of failure of any subsystems, that it can be recovered with potentially some gap in transactional data. Lifecycle management of the data includes capabilities to archive and manage data over a long lifetime.
+* The production databases have daily backups automatically scheduled for them, and also are
+  configured for HA and failover.
+* All changes to the code are retained in github.
+
+## Onboarding is largely self-service (within appropriate legal limits), and application owners have full access to their expenditures at any time. Application owners can set triggers on expenditures to manage their costs appropriately.
+* Billing is configured by GSA ICE.
+* GCP allows billing alerts to be configured, but we do not know if GSA ICE will
+  be taking advantage of this feature.  
+* There is a billing dashboard that can be accessed
+  by Project Owners as well as GSA ICE.
+
 
 # Known Issues
 
