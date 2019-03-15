@@ -67,6 +67,25 @@ General features that apps deployed into this environment should have are:
   * All data that the apps store should be stored in a database or other storage service.  Local
     files are ephemeral at best, and may not be allowed to happen for some deployment types.
 
+## Supporting Systems
+
+There are a number of supporting systems which are used to manage the project which are not part of the
+Google Cloud Platform.
+
+### GitHub
+[GitHub](https://github.com/) is the primary interface for interacting with the project once it has been deployed.
+It is a service that hosts [git](https://git-scm.com/) repos that are used to manage the code for projects.
+We are using a gitops-style workflow which uses GitHub as the single source of truth of what is deployed to what
+environment.  Developers do not manipulate anything in GCP directly, but instead develop code and do
+Pull Requests (which must be approved) to integrate code into specific protected branches, which trigger deploys into
+the appropriate environment.
+
+### CircleCI
+[CircleCI](https://circleci.com/) is a [CI/CD](https://circleci.com/product/#how-it-works) service that
+is used as the automation engine for our project.  When changes to particular branches in GitHub happen,
+CircleCI will kick off jobs that will build, deploy, test, scan, and promote the code to the appropriate
+environment (dev/staging/production, for example).
+
 # Requirements
 
 Summarizing the DevSecOps guide somewhat, we came up with a list of requirements, and under each
