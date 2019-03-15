@@ -88,8 +88,8 @@ environment (dev/staging/production, for example).
 
 # Requirements
 
-Summarizing the DevSecOps guide somewhat, we came up with a list of requirements, and under each
-requirement, we listed how this project can fulfill the requirements on GCP.
+Summarizing the [DevSecOps guide](https://tech.gsa.gov/guides/dev_sec_ops_guide/) somewhat, we came up with
+a list of requirements, and under each requirement, we listed how this project can fulfill the requirements on GCP.
 
 ## Application developers have a pipeline that they can use to deploy software which is considerate of security and visible to operations.
 * CircleCI automates all deployment/testing/scanning/promotion tasks in a pipeline that
