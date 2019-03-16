@@ -23,6 +23,8 @@ GCP Projects are fully compartmentalized subdivisions within a GCP Organization 
 be used for individual application environments like dev/test/prod.  Access to one GCP Project
 does not give you access to any other Project.  Billing is managed on a per-Project basis as well.
 
+![diagram of gcp org, project, apps, and services](https://github.com/18F/gcp-appengine-template/raw/master/gcp_diagram.png)
+
 ## Project
 
 The GCP Project is where the Project Owner will build and deploy their infrastructure and application.
