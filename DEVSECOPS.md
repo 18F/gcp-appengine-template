@@ -11,10 +11,13 @@ automatically use best DevSecOps practices, making it easy for people to get an 
 ## Platform
 
 The platform that people will be deploying to is Google Cloud Platform (GCP).  This project does not 
-directly address how GCP is provisioned and set up, but from discussions with the people within GSA 
-ICE who are developing the process, the rough plan is to have a GSA GCP Organization account run by
-the ICE folks who will, upon receiving an approved request from a Project Owner, set up GCP Project(s)
-for the Project Owner with a minimal set of permissions and services provisioned in it.
+directly address how GCP is provisioned and set up, but we have had discussions with the people within GSA 
+ICE who are developing the process.
+The rough plan is:
+* There is a GSA GCP Organization run by the GSA ICE people.  
+* The GSA ICE group will receive requests for GCP Projects from the Project Owner.
+* The request will require some sort of approval.
+* Once approval is granted, GSA ICE will create GCP Project(s) for the Project Owner and give them access.
 
 GCP Projects are fully compartmentalized subdivisions within a GCP Organization that are meant to
 be used for individual application environments like dev/test/prod.  Access to one GCP Project
