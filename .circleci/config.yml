@@ -357,7 +357,10 @@ jobs:
           name: Run Tests!
           command: |
             echo "Need better tests!  Run a testing script here on $(cat /tmp/workspace/sso_target_url). XXX"
-            curl -f $(cat /tmp/workspace/sso_target_url)/liveness_check
+            echo testing if proxy is alive
+            curl -f $(cat /tmp/workspace/sso_target_url)liveness_check | grep OK || exit 1
+            echo testing if proxy is giving back an authorize redirect
+            curl -f $(cat /tmp/workspace/sso_target_url) | grep authorize || exit 1
   promote-rails-prod:
     docker:
       - image: google/cloud-sdk
