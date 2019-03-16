@@ -355,7 +355,9 @@ jobs:
           at: /tmp/workspace
       - run:
           name: Run Tests!
-          command: echo "not tested! Run a testing script here on $(cat /tmp/workspace/sso_target_url). XXX"
+          command: |
+            echo "Need better tests!  Run a testing script here on $(cat /tmp/workspace/sso_target_url). XXX"
+            curl -f $(cat /tmp/workspace/sso_target_url)/liveness_check
   promote-rails-prod:
     docker:
       - image: google/cloud-sdk
