@@ -35,6 +35,8 @@ CircleCI CI/CD system.  Applications will be configured and deployed as well, us
 CircleCI.  CircleCI will watch a set of branches (usually dev/staging/master) and deploy the code in that
 branch into the appropriate GCP Project whenever there are changes.
 
+![diagram of a CircleCI workflow](https://github.com/18F/gcp-appengine-template/raw/master/workflow.png)
+
 Currently, our project uses Google App Engine to deploy apps which use Google Cloud SQL and KMS.  It also
 stores the terraform state in an encrypted Cloud Storage bucket.
 
