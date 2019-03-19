@@ -30,7 +30,9 @@ To get the app(s) in this repo going, you will need to:
 1. Go to `Console -> IAM & admin` in GCP, click on `View by: Roles`,
    and then add `Project -> Owner` to the terraform service account.
 1. You should be sure to set up master and staging branches as protected branches
-   that require approval for PRs to land in this repo.
+   that require approval for PRs to land in this repo.  You should also enable
+   as many code analysis integrations as are appropriate within the repo to
+   enforce code quality and find vulnerabilities.
 1. Enable circleci on this repo, then add some environment variables to it:
    * `GCLOUD_SERVICE_KEY`:  Set this to the contents of `$HOME/gcloud-service-key.json`
    * `GOOGLE_PROJECT_ID`: Set this to your google project ID

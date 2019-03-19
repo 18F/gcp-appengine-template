@@ -46,6 +46,7 @@ The applications in this project are extremely simple, meant to be examples for 
 are deployed and perhaps how they have been configured to do basic/OIDC authentication.
 They are not in any way useful except as an example.  When others use this template, they will
 delete the example apps and create their own.
+
 These apps are deployed whenever changes to particular branches
 in github change by the CircleCI CI/CD system.  Whenever such a workflow is triggered, CircleCI will
 configure and deploy the app using the gcloud tool, run tests to verify that the app is functional,
@@ -97,7 +98,7 @@ is used as the automation engine for our project.  When changes to particular br
 CircleCI will kick off jobs that will build, deploy, test, scan, and promote the code to the appropriate
 environment (dev/staging/production, for example).
 
-# Requirements
+# DevSecOps Requirements
 
 Summarizing the [DevSecOps guide](https://tech.gsa.gov/guides/dev_sec_ops_guide/) somewhat, we came up with
 a list of requirements, and under each requirement, we listed how this project can fulfill the requirements on GCP.
