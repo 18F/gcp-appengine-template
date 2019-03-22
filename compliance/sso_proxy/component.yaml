@@ -11,6 +11,8 @@ satisfies:
         The SSO proxy component runs oauth2_proxy, which, when configured to work with an OIDC provider
         like login.gov, will verify that a user is an email-verified user from an authorized email domain before
         allowing access to the upstream service that it protects.
+
+        The OIDC provider takes care of user/account management.
 - control_key: AC-3
   standard_key: NIST-800-53
   covered_by: []
@@ -20,3 +22,5 @@ satisfies:
         The SSO proxy component runs oauth2_proxy, which, when configured to work with an OIDC provider
         like login.gov, will verify that a user is an email-verified user from an authorized email domain before
         allowing access to the upstream service that it protects.
+
+        The OIDC provider takes care of user/account management.

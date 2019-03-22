@@ -6,6 +6,8 @@ metadata:
     - timothy.spencer@gsa.gov
 components:
   - ./compliance/sso_proxy
+  - ./compliance/rails-example
+  - ./compliance/dotnet-example
 dependencies:
   certifications:
     - url: https://github.com/18F/GSA-Certifications
