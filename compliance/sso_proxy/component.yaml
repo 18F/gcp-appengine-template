@@ -1,0 +1,22 @@
+documentation_complete: false
+name: sso_proxy
+schema_version: 3.0.0
+satisfies:
+- control_key: AC-2
+  standard_key: NIST-800-53
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        The SSO proxy component runs oauth2_proxy, which, when configured to work with an OIDC provider
+        like login.gov, will verify that a user is an email-verified user from an authorized email domain before
+        allowing access to the upstream service that it protects.
+- control_key: AC-3
+  standard_key: NIST-800-53
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        The SSO proxy component runs oauth2_proxy, which, when configured to work with an OIDC provider
+        like login.gov, will verify that a user is an email-verified user from an authorized email domain before
+        allowing access to the upstream service that it protects.
