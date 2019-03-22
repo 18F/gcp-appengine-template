@@ -1,0 +1,49 @@
+documentation_complete: false
+name: GitHub
+schema_version: 3.0.0
+references:
+  - name: GitHub
+    path: https://github.com/
+    type: URL
+satisfies:
+- control_key: AC-2
+  standard_key: NIST-800-53
+  covered_by: []
+  implementation_status: partial
+  narrative:
+    - text: |
+        Users are managed in GitHub according to the policies of the Organization
+        they belong to:
+        https://help.github.com/en/categories/setting-up-and-managing-organizations-and-teams
+
+        XXX Should probably document policies here
+- control_key: AC-3
+  standard_key: NIST-800-53
+  covered_by: []
+  implementation_status: partial
+  narrative:
+    - text: |
+        GitHub only allows authorized users to make changes to repos.  GitHub repos are, by default,
+        read-only except for the repo owner.  Repos can have teams of people added to them
+        (https://help.github.com/en/articles/managing-team-access-to-an-organization-repository)
+        with different access levels 
+        (https://help.github.com/en/articles/repository-permission-levels-for-an-organization).
+
+        XXX Should document here what policies your org has for managing teams here        
+- control_key: AU-2
+  standard_key: NIST-800-53
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        GitHub retains audit log events for your GitHub Organization for 30 days.
+
+        GitHub allows authorized users to review the audit log for their organization:
+        https://help.github.com/en/articles/reviewing-the-audit-log-for-your-organization
+- control_key: AU-6
+  standard_key: NIST-800-53
+  covered_by: []
+  implementation_status: partial
+  narrative:
+    - text: |
+        XXX Need to document how you review this log periodically (or why you are not?) here.

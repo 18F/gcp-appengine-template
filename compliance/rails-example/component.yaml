@@ -1,6 +1,10 @@
 documentation_complete: false
 name: rails-example
 schema_version: 3.0.0
+references:
+  - name: rails example app
+    path: https://github.com/18F/gcp-appengine-template/tree/master/rails-example
+    type: URL
 satisfies:
 - control_key: AC-2
   standard_key: NIST-800-53
@@ -12,7 +16,7 @@ satisfies:
         The only exception to this is if the sso_proxy has been deployed in front of it, in which
         case the auth is done by the sso_proxy and requests to the app are verified to be coming
         direct from the proxy by checking the HMAC signature header.
-        
+
         The credentials for basic auth are shared with people who are authorized to use the app.
         Since the app itself is just an example for how one might deploy an app, there are no
         actual users.  The basic auth is there to ensure that random people cannot get in.

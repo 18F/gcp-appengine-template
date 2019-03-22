@@ -1,6 +1,10 @@
 documentation_complete: false
 name: sso_proxy
 schema_version: 3.0.0
+references:
+  - name: oauth2_proxy
+    path: https://github.com/pusher/oauth2_proxy
+    type: URL
 satisfies:
 - control_key: AC-2
   standard_key: NIST-800-53

@@ -298,8 +298,14 @@ There are a few known issues with the project:
     or get a P-ATO for
     this project.  There seem to be some interesting oscal/opencontrol things that would fill
     this need, but it's feeling a bit unformed right now.
-  * We need to look at how long logs in Stackdriver are retained.  We may
-    need to set up a storage bucket for log archival and automate that process.
+  * Logs are retained with this schedule:
+    * Admin Activity audit logs 400 days
+    * Data Access audit logs  30 days
+    * System Event audit logs 400 days
+    * Access Transparency logs  400 days
+    * Logs other than audit logs or Access Transparency logs  30 days  
+    We may need to set up a storage bucket for log archival and automate that process,
+    if this retention is not enough.
   * We only just got dev/staging/prod environments provisioned for us, so we have not yet
     implemented the full separated environments yet.  Right now, all environments get deployed
     to our "pilot" GCP project.  This should be fixed soon, but it means that some of the

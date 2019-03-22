@@ -8,6 +8,8 @@ components:
   - ./compliance/sso_proxy
   - ./compliance/rails-example
   - ./compliance/dotnet-example
+  - ./compliance/GCP-Console
+  - ./compliance/GitHub
 dependencies:
   certifications:
     - url: https://github.com/18F/GSA-Certifications
