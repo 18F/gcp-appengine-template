@@ -10,6 +10,7 @@ components:
   - ./compliance/dotnet-example
   - ./compliance/GCP-Console
   - ./compliance/GitHub
+  - ./compliance/CircleCI
 dependencies:
   certifications:
     - url: https://github.com/18F/GSA-Certifications
