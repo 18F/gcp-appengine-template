@@ -1,6 +1,6 @@
 documentation_complete: false
 name: rails-example
-schema_version: 3.0.0
+schema_version: 3.1.0
 references:
   - name: rails example app
     path: https://github.com/18F/gcp-appengine-template/tree/master/rails-example

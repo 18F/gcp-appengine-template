@@ -1,6 +1,6 @@
 documentation_complete: false
 name: GCP-Console
-schema_version: 3.0.0
+schema_version: 3.1.0
 references:
   - name: GCP Console documentation
     path: https://cloud.google.com/compute/docs/console
@@ -28,7 +28,7 @@ satisfies:
         to manage cloud resources centrally.
 
         The resources that users of the GCP Console can manage are specified by GSA ICE.
-- control_key: AC-6
+- control_key: AC-6 (5)
   standard_key: NIST-800-53
   covered_by: []
   implementation_status: complete
@@ -44,10 +44,17 @@ satisfies:
         (https://cloud.google.com/iam/docs/understanding-roles#primitive_role_definitions),
         which does not allow IAM editing, but does allow
         apps/services in the project to be created/managed.
-
+- control_key: AC-6 (9)
+  standard_key: NIST-800-53
+  covered_by: []
+  implementation_status: partial
+  narrative:
+    - text: |
         Changes to IAM roles and other IAM events are stored for 400 days in the GCP 
         Stackdriver log system.  Current status can be audited by using the GCP Console
         to look at the IAM roles or by using the "gcloud iam" commandline tool.
+
+        XXX Document policies here on how often you audit the list of users/admins/etc.
 - control_key: AU-2
   standard_key: NIST-800-53
   covered_by: []

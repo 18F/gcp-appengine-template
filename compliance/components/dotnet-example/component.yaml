@@ -1,6 +1,6 @@
 documentation_complete: false
 name: dotnet-example
-schema_version: 3.0.0
+schema_version: 3.1.0
 references:
   - name: .Net Core example app
     path: https://github.com/18F/gcp-appengine-template/tree/master/dotnet-example
