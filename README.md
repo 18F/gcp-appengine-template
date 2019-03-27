@@ -204,9 +204,62 @@ scans.  More info on that can be found in the
 "Getting Started Guide" on https://github.com/zaproxy/zaproxy/wiki/Downloads.
 
 
-## ATO and launching considerations
+## ATO and compliance considerations
 
-XXX Fill out SSP template or opencontrol stuff?
+Every federal information system must be granted an Authority To Operate (ATO)
+by an Authorizing Official in order to go into production.  A good overview of
+the process can be [found here](https://before-you-ship.18f.gov/ato/).  There
+are currently a few options for getting an ATO:
+* A [FedRAMP Tailored](https://tailored.fedramp.gov/) package.
+* A full [FedRAMP JAB ATO](https://www.fedramp.gov/jab-authorization/).
+* A GSA LATO (Lightweight ATO), which can be found by searching for "Lightweight
+  Security Authorization Guide" on 
+  [this page](https://insite.gsa.gov/topics/information-technology/security-and-privacy/it-security/it-security-procedural-guides)
+* Other agencies may have their own ATO process.
+
+What ATO you get depends on what your project needs.  If you are doing this in
+the GSA, you will probably want to follow the GSA LATO process, and most of the
+compliance data that we have collected here is aimed at fulfilling that process.
+That said, all of these ATO processes all map back to the NIST 800-63 controls,
+so if you decide on a different ATO package, you ought to be able to use the
+GSA LATO compliance data to help speed your ATO journey along.
+
+### Compliance Masonry
+
+We are using [Compliance Masonry](https://github.com/opencontrol/compliance-masonry) to
+document all of the controls and how the different components satisfy them.  Every
+component has a `compliance` directory which contains the documentation for that
+component.  For example, the `rails-example` app has a
+`gcp-appengine-template/rails-example/compliance/component.yaml`
+file, and the whole project has a `gcp-appengine-template/compliance` directory
+where everything is tied together with an `opencontrol.yaml` file, which
+documents all of the components, the certifications (GSA LATO), and the
+standards (NIST-800-63) that we use.  Components that do not have opencontrol
+documentation are also documented in `gcp-appengine-template/compliance/components`.
+
+The idea is that as you create code, you will also be creating and updating the
+compliance documentation at the same time.  You can run the `compliance-masonry diff LATO`
+tool while in the `gcp-appengine-template/compliance` directory to understand
+what you still need to implement, find controls that are incomplete with
+`compliance-masonry info -i partial`, etc.  Consult the 
+[compliance-masonry usage docs](https://github.com/opencontrol/compliance-masonry/blob/master/docs/usage.md)
+for more info.
+
+Down the road, we would like to think that tools like this will evolve into
+a Behaviour Driven Compliance Test suite that can actually test the implementation
+of the controls described and let you know where you have gaps, but this is what
+we have right now.
+
+### Compliance Documentation
+
+Every ATO package has a different set of documentation that it requires.  This
+documentation changes over time, adding/removing controls or getting simpler or
+more complex.  Most of the templates are in formats that we cannot emit or
+edit in any reasonable way, so we have chosen to instead collect all the compliance
+documentation you created with your code in a 
+[GitBook](https://github.com/opencontrol/compliance-masonry/blob/master/docs/gitbook.md)
+or a [PDF](https://github.com/opencontrol/compliance-masonry/blob/master/docs/gitbook.md#export-as-a-pdf)
+that you can consult while filling out your ATO package.
 
 ## Common Workflows
 
@@ -219,7 +272,8 @@ for all changes, and with protected branches and good tests, makes sure that cha
 have oversight and will work.
 
   * You develop locally, pushing changes up to your own feature/fix branch in github
-    and building/running tests locally.
+    and building/running tests locally.  If you are developing code to address
+    compliance needs, be sure to update the [compliance documentation](#Compliance-Masonry).
   * Once you have something that is tested and worthy of going out, you can Pull Request
     (PR) it into the dev branch, where it will be automatically deployed to the dev
     version of the app in gcp and have it's tests run against it.
@@ -254,6 +308,9 @@ for more information.
 Infrastructure updates are driven by circleci and implemented by terraform.
 Your infrastructure should probably not be changing very often, but when you
 do, you should follow this procedure:
+  * Update the terraform code to do what you want it to do.  If you are 
+    developing code to address compliance needs, be sure to update the
+    [compliance documentation](#Compliance-Masonry).
   * go to `Workflows -> gcp-appengine-template -> dev` and look for a
     `dev/terraform` workflow that is "On Hold".
   * Click on that workflow and click on the plan_terraform step.

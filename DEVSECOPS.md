@@ -8,11 +8,14 @@ to automatically provision dev/staging/production environments into those GCP Pr
 with good secrets management, backups, tests, and other controls that make their project 
 automatically use best DevSecOps practices, making it easy for people to get an ATO.
 
+We believe that developing a project with DevSecOps best practices will result in a much
+better experience for the users, developers, and owners of projects derived from this template.
+
 ## Platform
 
 The platform that people will be deploying to is Google Cloud Platform (GCP).  This project does not 
-directly address how GCP is provisioned and set up, but we have had discussions with the people within GSA 
-ICE who are developing the process.
+directly address how GCP is provisioned and set up, but we have had discussions with the people in
+the GSA Enterprise Systems Support Division (ICE) who are developing the process.
 The rough plan is:
 * There is a GSA GCP Organization run by the GSA ICE people.  
 * The GSA ICE group will receive requests for GCP Projects from the Project Owner.
