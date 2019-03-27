@@ -1,5 +1,5 @@
 documentation_complete: false
-name: sso_proxy
+name: oauth2_proxy
 schema_version: 3.1.0
 references:
   - name: oauth2_proxy GitHub repo

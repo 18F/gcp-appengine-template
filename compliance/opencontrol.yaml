@@ -5,9 +5,9 @@ metadata:
   maintainers:
     - timothy.spencer@gsa.gov
 components:
-  - ./components/sso_proxy
-  - ./components/rails-example
-  - ./components/dotnet-example
+  - ../rails-example/compliance
+  - ../dotnet-example/compliance
+  - ./components/oauth2_proxy
   - ./components/GCP-Console
   - ./components/GitHub
 dependencies:
