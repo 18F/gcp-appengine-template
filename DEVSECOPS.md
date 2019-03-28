@@ -41,7 +41,10 @@ branch into the appropriate GCP Project whenever there are changes.
 ![diagram of a CircleCI workflow](https://github.com/18F/gcp-appengine-template/raw/master/workflow.png)
 
 Currently, our project uses Google App Engine to deploy apps which use Google Cloud SQL and KMS.  It also
-stores the terraform state in an encrypted Cloud Storage bucket.
+stores the terraform state in an encrypted Cloud Storage bucket.  All Google App Engine apps are
+deployed on instances that automatically are scaled up according to load, and are automatically updated
+weekly with patched images by GCP, and are only exposed to the world by GCP-supplied
+load balancers which ensure that services are accessed by https.
 
 ## App
 
