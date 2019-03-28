@@ -64,3 +64,11 @@ Here are the roles that the template uses:
 | GSA GCP Org Admins | Internal             | ???                    | Creation/deletion of GCP Projects and GCP User accounts, Project Owner access to GCP Projects | Yes, Google FIDO 2-step |
 
 If you have more roles required to manage your application, you will need to add them too.
+
+### Network Architecture
+
+The actual physical network architecture is something which you could probably extract from the
+[GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google),
+or you might be able to use this:
+
+![A Logical Network Diagram of the project](./GCPNetwork.png)
