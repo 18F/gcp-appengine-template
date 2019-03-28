@@ -143,6 +143,8 @@ jobs:
             cat <<EOF > rails-example/app.yaml
             runtime: ruby
             env: flex
+            secure: always
+            redirect_http_response_code: 301
             service: rails
             automatic_scaling:
               min_num_instances: ${INSTANCES}
@@ -313,6 +315,8 @@ jobs:
             cat <<EOF > app.yaml
             runtime: custom
             env: flex
+            secure: always
+            redirect_http_response_code: 301
             service: default
             automatic_scaling:
               min_num_instances: ${INSTANCES}
@@ -444,6 +448,8 @@ jobs:
             cat <<EOF > app.yaml
             runtime: aspnetcore
             env: flex
+            secure: always
+            redirect_http_response_code: 301
             service: dotnet-example
             automatic_scaling:
               min_num_instances: ${INSTANCES}
