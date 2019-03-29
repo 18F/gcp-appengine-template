@@ -104,7 +104,7 @@ jobs:
           name: Setup Google Cloud SDK
           command: |
             echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
-            export GCLOUD_SDK_VERSION=232
+            export GCLOUD_SDK_VERSION=236
             curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-$GCLOUD_SDK_VERSION.0.0-linux-x86_64.tar.gz -o ./gcloud-sdk.tar.gz
             tar xzf gcloud-sdk.tar.gz -C ~
             rm gcloud-sdk.tar.gz
@@ -411,7 +411,7 @@ jobs:
           name: Setup Google Cloud SDK
           command: |
             echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
-            export GCLOUD_SDK_VERSION=232
+            export GCLOUD_SDK_VERSION=236
             curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-$GCLOUD_SDK_VERSION.0.0-linux-x86_64.tar.gz -o ./gcloud-sdk.tar.gz
             tar xzf gcloud-sdk.tar.gz -C ~
             rm gcloud-sdk.tar.gz
