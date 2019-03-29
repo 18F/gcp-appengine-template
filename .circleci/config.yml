@@ -37,7 +37,7 @@ jobs:
             gcloud projects add-iam-policy-binding ${GOOGLE_PROJECT_ID} --member=serviceAccount:${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com --role=roles/editor
   plan_terraform:
     docker:
-      - image: hashicorp/terraform:0.11.11
+      - image: hashicorp/terraform:0.11.13
     steps:
       - checkout
       - run:
@@ -50,7 +50,7 @@ jobs:
             cd terraform && terraform init -backend-config="bucket=gcp-terraform-state-$GOOGLE_PROJECT_ID" && terraform plan -input=false
   apply_terraform:
     docker:
-      - image: hashicorp/terraform:0.11.11
+      - image: hashicorp/terraform:0.11.13
     steps:
       - checkout
       - run:

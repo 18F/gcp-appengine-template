@@ -125,7 +125,7 @@ We do not maintain hosts on our own.
 | GitHub Enterprise Cloud  | GitHub is a collaborative development platform. | Source code repo, change tracking/control. | Yes | Yes: GitHub 2fa |
 | CircleCI Cloud           | CircleCI is a highly configurable and powerful continuous integration and delivery platform that helps software teams confidently and securely release code by automating the build, test, and deploy process. | Automate code and infrastructure deploy process | Yes | Yes:  GitHub 2fa |
 | oauth2_proxy             | A proxy that authenticates users against an OAUTH2 Identity Provider (we use login.gov) before allowing access to it's protected upstream service. | Master Branch | No | Yes:  The login.gov IDP requires 2fa |
-| terraform                | Infrastructure management tool | 0.11.11 | No | No (not a service) |
+| terraform                | Infrastructure management tool | 0.11.13 | No | No (not a service) |
 | rails-example            | Example app that implements a simple "blog" using Rails that has oauth2_proxy in front of it | Rails 5.2.2 | Yes | Yes:  oauth2_proxy uses login.gov |
 | dotnet-example           | Example app that lets you maintain a list of websites that has basic auth enabled. | .Net Core 2.1 | Yes | No |
 
