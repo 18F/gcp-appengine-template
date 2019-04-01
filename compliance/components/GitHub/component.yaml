@@ -78,7 +78,17 @@ satisfies:
         in the GitHub project repo:  https://github.com/18F/gcp-appengine-template
 
         XXX Plug in your project repo instead of https://github.com/18F/gcp-appengine-template
-- control_key: CM-3
+- control_key: CM-2 (2)
+  standard_key: NIST-800-53
+  covered_by: []
+  implementation_status: partial
+  narrative:
+    - text: |
+        Whenever Pull Requests are approved for a particular environment, the changes in
+        the Pull Requests will be integrated and CircleCI will be notified that it needs
+        to automatically deploy the changes, thus ensuring that what is deployed is what is
+        in the repo.
+- control_key: CM-3 (1)
   standard_key: NIST-800-53
   covered_by: []
   implementation_status: complete
@@ -89,12 +99,17 @@ satisfies:
 
         The quick summary of these workflows is that users will develop locally, but when their
         feature is complete enough to want to integrate, they will submit a Pull Request to the
-        "dev" branch, which must be reviewed and approved by another person before it is
+        "dev" branch, which will notify the GitHub team that changes are available for review.
+        The Pull Request must be individually reviewed and approved by another person before it is
         incorporated into the dev branch.  Any time the code is changed, it will trigger an
         automatic deploy of the new code to the proper environment, kick off tests, scan for
         vulnerabilities, etc.
         If it looks good, the user can submit a Pull Request for review to staging and after that,
         production.
+
+        Unapproved Pull Requests can be closed, or the proposed changes can be improved until
+        they meet the approval of the reviewers.  No unapproved changes will be integrated
+        without approval.
 
         Infrastructure deploys will also require an authorized CircleCI user to log in to CircleCI
         to review the infrastructure changes that terraform is planning to do.

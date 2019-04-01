@@ -86,12 +86,12 @@ this process can be found [here](https://cloud.google.com/appengine/docs/flexibl
 ## System Environment
 
 There are three environments by default:
-* *Dev*:  The dev environment is non-HA and will generally have lower-powered
+* **Dev**:  The dev environment is non-HA and will generally have lower-powered
   instances allocated for it.  Access levels are different for dev vs the other
   environments, as documented in the Types Of Users section.
 
   This environment is generally used by Developers to test out code.
-* *Staging*:  The staging environment is non-HA and will generally have lower-powered
+* **Staging**:  The staging environment is non-HA and will generally have lower-powered
   instances allocated for it, though you might want to make staging be similar to
   production, depending on whether performance is critical for your app.  Access
   levels are different for staging vs the other
@@ -99,7 +99,7 @@ There are three environments by default:
 
   This environment is generally used to validate that code is ready for production,
   possibly with a subset of production or production-like data.
-* *Production*:  The production environment is HA and will have full-power instances
+* **Production**:  The production environment is HA and will have full-power instances
   launched for it.  Access levels are different for prod vs the other environments,
   as documented in the Types Of Users section.
 
