@@ -123,3 +123,16 @@ satisfies:
 
         All changes to the codebase are retained in the git log, and discussions and approval
         records are contained in the GitHub Pull Requests.
+- control_key: AU-6 (1)
+  standard_key: NIST-800-53
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        GitHub retains audit log events for your GitHub Organization for 30 days.
+
+        GitHub allows authorized users to review the audit log for their organization:
+        https://help.github.com/en/articles/reviewing-the-audit-log-for-your-organization
+
+        GitHub allows users to audit the changelog and list of Pull Requests for all
+        changes to the code.

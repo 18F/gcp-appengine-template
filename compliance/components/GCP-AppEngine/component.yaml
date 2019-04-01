@@ -1,0 +1,28 @@
+documentation_complete: false
+name: GCP-AppEngine
+schema_version: 3.1.0
+references:
+  - name: GCP App Engine documentation
+    path: https://cloud.google.com/appengine/
+    type: URL
+satisfies:
+- control_key: CM-6 (1)
+  standard_key: NIST-800-53
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        Configuration for App Engine apps can be verified by viewing the config for App Engine
+        versions/services in the GCP Console, or by using the `gcloud app versions describe`
+        command.
+- control_key: CM-2 (2)
+  standard_key: NIST-800-53
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        Google automatically updates with the latest security patches and relaunches every
+        App Engine instance once a week.
+
+        Every time there is an App Engine deploy, it will build the image with the latest
+        runtime that they have certified.

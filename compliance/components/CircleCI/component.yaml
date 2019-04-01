@@ -12,7 +12,7 @@ references:
     path: https://www.owasp.org/index.php/OWASP_Zed_Attack_Proxy_Project
     type: URL
 satisfies:
-- control_key: CA-8
+- control_key: RA-5
   standard_key: NIST-800-53
   covered_by: []
   implementation_status: partial
@@ -26,6 +26,8 @@ satisfies:
         and oauth2_proxy apps will be scanned unauthenticated.
 
         XXX Change this to talk about your application instead of the example apps.
+        XXX Should probably have some documentation on how you do external pentests
+        with a 3rd party Auditor as well.
 - control_key: CM-2 (2)
   standard_key: NIST-800-53
   covered_by: []
@@ -37,3 +39,25 @@ satisfies:
         DevSecOps practices.  Whenever changes to
         the code are approved and integrated for a particular environment, those changes are
         automatically rolled out.
+- control_key: CM-6 (1)
+  standard_key: NIST-800-53
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        The CircleCI deployment pipeline configures all applications deployed with it
+        by using a Google App Engine `app.yaml` file, which specifies every aspect of
+        how the app is configured.
+        No configuration is ever deployed that is not specified in the code.
+
+        This configuration can be verified by viewing the config for the App Engine
+        deployment in the GCP Console, or by using the `gcloud app versions describe`
+        command.
+- control_key: AU-6 (1)
+  standard_key: NIST-800-53
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        CircleCI retains build and deploy logs for an undocumented amount of time, but
+        at least 12 months.  This allows Admins to audit code deploys.

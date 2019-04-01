@@ -9,6 +9,8 @@ components:
   - ../dotnet-example/compliance
   - ./components/oauth2_proxy
   - ./components/GCP-Console
+  - ./components/GCP-Stackdriver
+  - ./components/GCP-AppEngine
   - ./components/GitHub
 dependencies:
   certifications:
