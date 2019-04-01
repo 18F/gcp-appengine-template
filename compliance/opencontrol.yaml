@@ -12,6 +12,7 @@ components:
   - ./components/GCP-Stackdriver
   - ./components/GCP-AppEngine
   - ./components/GitHub
+  - ./components/CircleCI
 dependencies:
   certifications:
     - url: https://github.com/18F/GSA-Certifications
