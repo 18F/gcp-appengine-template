@@ -9,14 +9,11 @@ satisfies:
 - control_key: AC-2
   standard_key: NIST-800-53
   covered_by: []
-  implementation_status: partial
+  implementation_status: complete
   narrative:
     - text: |
-        Users are managed in GitHub according to the policies of the Organization
-        they belong to:
+        GitHub users are managed with the tools you can find here:
         https://help.github.com/en/categories/setting-up-and-managing-organizations-and-teams
-
-        XXX Document policies here (2fa requirements, user lifecycle processes, etc)
 - control_key: AC-3
   standard_key: NIST-800-53
   covered_by: []

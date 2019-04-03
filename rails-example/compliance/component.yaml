@@ -19,4 +19,4 @@ satisfies:
 
         The credentials for basic auth are shared with people who are authorized to use the app.
         Since the app itself is just an example for how one might deploy an app, there are no
-        actual users.  The basic auth is there to ensure that random people cannot get in.
+        actual users to manage.  The basic auth is there to ensure that random people cannot get in.

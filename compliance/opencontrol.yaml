@@ -13,6 +13,7 @@ components:
   - ./components/GCP-AppEngine
   - ./components/GitHub
   - ./components/CircleCI
+  - ./components/ManualProcedures
 dependencies:
   certifications:
     - url: https://github.com/18F/GSA-Certifications
