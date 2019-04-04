@@ -12,8 +12,6 @@ output "logviewer_key" {
   sensitive = true
 }
 
-
-# log bucket
 resource "google_storage_bucket" "logs-bucket" {
   name     = "logs-bucket-${var.project_id}"
   location = "${var.region}"
