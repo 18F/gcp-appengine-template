@@ -9,6 +9,7 @@ resource "google_service_account_key" "logviewerkey" {
 output "logviewer_key" {
   value = "${base64decode(google_service_account_key.logviewerkey.private_key)}"
   description = "Private key for logviewer service account"
+  sensitive = true
 }
 
 
