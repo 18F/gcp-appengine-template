@@ -532,7 +532,7 @@ jobs:
             export TFOUTPUT=$(gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json -)
 
             # extract data for the app.yaml file
-            export LOGFROM=$(echo ${TFOUTPUT} | jq -r .logs_bucket_${TARGET_VERSION}.value)
+            export LOGFROM=$(echo ${TFOUTPUT} | jq -r .logs_bucket.value)
 
             # set up cron job to trigger the sync
             cat <<EOF > cron.yaml

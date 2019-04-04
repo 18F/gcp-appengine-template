@@ -13,9 +13,9 @@ output "logviewer_key" {
 }
 
 
-# dev log bucket
-resource "google_storage_bucket" "logs-bucket-dev" {
-  name     = "logs-bucket-dev-${var.project_id}"
+# log bucket
+resource "google_storage_bucket" "logs-bucket" {
+  name     = "logs-bucket-${var.project_id}"
   location = "${var.region}"
   storage_class = "REGIONAL"
   versioning = {
@@ -31,79 +31,16 @@ resource "google_storage_bucket" "logs-bucket-dev" {
   }
 }
 
-resource "google_storage_bucket_acl" "logs-bucket-acl-dev" {
-  bucket = "${google_storage_bucket.logs-bucket-dev.name}"
+resource "google_storage_bucket_iam_binding" "binding" {
+  bucket = "${google_storage_bucket.logs-bucket.name}"
+  role        = "roles/storage.objectViewer"
 
-  role_entity = [
-    "READER:${google_service_account.logviewer.email}",
+  members = [
+    "serviceAccount:${google_service_account.logviewer.email}",
   ]
 }
 
-output "logs_bucket_dev" {
-  value = "${google_storage_bucket.logs-bucket-dev.url}"
-  description = "Logs bucket for dev logs that are exported for ingestion by GSA IT Security"
-}
-
-
-# staging log bucket
-resource "google_storage_bucket" "logs-bucket-staging" {
-  name     = "logs-bucket-staging-${var.project_id}"
-  location = "${var.region}"
-  storage_class = "REGIONAL"
-  versioning = {
-    enabled = true
-  }
-  lifecycle_rule = {
-    action = {
-      type = "Delete"
-    }
-    condition = {
-      age = 60
-    }
-  }
-}
-
-resource "google_storage_bucket_acl" "logs-bucket-acl-staging" {
-  bucket = "${google_storage_bucket.logs-bucket-staging.name}"
-
-  role_entity = [
-    "READER:${google_service_account.logviewer.email}",
-  ]
-}
-
-output "logs_bucket_staging" {
-  value = "${google_storage_bucket.logs-bucket-staging.url}"
-  description = "Logs bucket for staging logs that are exported for ingestion by GSA IT Security"
-}
-
-
-# prod log bucket
-resource "google_storage_bucket" "logs-bucket-prod" {
-  name     = "logs-bucket-prod-${var.project_id}"
-  location = "${var.region}"
-  storage_class = "REGIONAL"
-  versioning = {
-    enabled = true
-  }
-  lifecycle_rule = {
-    action = {
-      type = "Delete"
-    }
-    condition = {
-      age = 60
-    }
-  }
-}
-
-resource "google_storage_bucket_acl" "logs-bucket-acl-prod" {
-  bucket = "${google_storage_bucket.logs-bucket-prod.name}"
-
-  role_entity = [
-    "READER:${google_service_account.logviewer.email}",
-  ]
-}
-
-output "logs_bucket_master" {
-  value = "${google_storage_bucket.logs-bucket-prod.url}"
-  description = "Logs bucket for production logs that are exported for ingestion by GSA IT Security"
+output "logs_bucket" {
+  value = "${google_storage_bucket.logs-bucket.url}"
+  description = "Logs bucket for logs that are exported for ingestion by GSA IT Security"
 }
