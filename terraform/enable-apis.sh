@@ -15,6 +15,7 @@ container.googleapis.com
 containerregistry.googleapis.com
 datastore.googleapis.com
 deploymentmanager.googleapis.com
+iam.googleapis.com
 iap.googleapis.com
 logging.googleapis.com
 monitoring.googleapis.com
