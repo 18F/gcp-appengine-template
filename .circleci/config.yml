@@ -497,6 +497,92 @@ jobs:
 
             zap-full-scan.py -m 5 -z "${ZAP_CONFIG}" -t "https://dotnet-${CIRCLE_BRANCH}-dot-${GOOGLE_PROJECT_ID}.appspot.com/"
 
+  deploy-log-sync:
+    docker:
+      - image: google/cloud-sdk
+    steps:
+      - checkout
+      - run:
+          name: Store Service Account key
+          command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+      - run:
+          name: Setup Google Cloud SDK
+          command: |
+            gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
+            gcloud config set project $GOOGLE_PROJECT_ID
+      - run:
+          name: prepare app engine config, build, deploy
+          no_output_timeout: 30m
+          command: |
+            # if LOGTO is set, then we are assuming that we are shipping logs
+            # to GSA IT Security (or whoever) for event correlation/auditing.
+            if [ -z "${LOGTO}" ] ; then
+              echo LOGTO not set, not launching security-logging service
+              exit 0
+            fi
+
+            apt install -y jq
+            cd security-logging
+
+            # set defaults
+            export TARGET_VERSION=logsync-${CIRCLE_BRANCH}
+            export TARGET_URL="https://${TARGET_VERSION}-dot-${GOOGLE_PROJECT_ID}.appspot.com//"
+
+            # put the tf output into a variable so it doesn't hit the disk
+            export TFOUTPUT=$(gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json -)
+
+            # extract data for the app.yaml file
+            export LOGFROM=$(echo ${TFOUTPUT} | jq -r .logs_bucket_${TARGET_VERSION}.value)
+
+            # set up cron job to trigger the sync
+            cat <<EOF > cron.yaml
+            cron:
+            - description: "sync logs from $LOGFROM to $LOGTO"
+              url: /
+              schedule: every 2 minutes
+              target: logsync
+            EOF
+
+            cat <<EOF > app.yaml
+            runtime: custom
+            env: flex
+            service: logsync
+            automatic_scaling:
+              min_num_instances: 1
+
+            env_variables:
+              FROM: ${LOGFROM}
+              TO: ${LOGTO}
+              AWS_CREDS: XXX
+            EOF
+
+            # deploy!
+            gcloud app deploy -q --no-promote --version=${TARGET_VERSION}
+  owaspzap-log-sync:
+    docker:
+      - image: owasp/zap2docker-weekly
+    steps:
+      - checkout
+      - run:
+          name: Run OWASP Zap against the app! (fails if the test takes more than 30 minutes)
+          no_output_timeout: 30m
+          command: |
+            # if LOGTO is set, then we are assuming that we are shipping logs
+            # to GSA IT Security (or whoever) for event correlation/auditing.
+            if [ -z "${LOGTO}" ] ; then
+              echo LOGTO not set, not scanning security-logging service
+              exit 0
+            fi
+
+            export TARGET_URL="https://logsync-${CIRCLE_BRANCH}-dot-${GOOGLE_PROJECT_ID}.appspot.com//"
+
+            export ZAP_CONFIG=" \
+              -config globalexcludeurl.url_list.url\(0\).regex='.*/robots\.txt.*' \
+              -config globalexcludeurl.url_list.url\(0\).description='Exclude robots.txt' \
+              -config globalexcludeurl.url_list.url\(0\).enabled=true
+
+            zap-full-scan.py -m 5 -z "${ZAP_CONFIG}" -t "${TARGET_URL}"
+
 
 
 workflows:
@@ -579,3 +665,17 @@ workflows:
                 # Do not run this against production, lest it fill it with garbage.
                 - dev
                 - staging
+  deploy-log-sync:
+    jobs:
+      - deploy-log-sync:
+          filters:
+            branches:
+              only:
+                # This is the list of branches which will be deployed automatically.
+                # Add more branches here if you want them automatically deployed.
+                - master
+                - staging
+                - dev
+      - owaspzap-log-sync:
+          requires:
+            - deploy-log-sync
