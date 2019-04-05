@@ -15,10 +15,10 @@ resource "google_storage_bucket" "logs-bucket" {
   }
 }
 
-# allow the App Engine service account to read
-resource "google_storage_bucket_iam_binding" "binding" {
+# allow the unique service account to write
+resource "google_storage_bucket_iam_binding" "wite-binding" {
   bucket = "${google_storage_bucket.logs-bucket.name}"
-  role        = "roles/storage.objectViewer"
+  role        = "roles/storage.objectCreator"
 
   members = [
     "${google_logging_project_sink.securitystuff.writer_identity}",
