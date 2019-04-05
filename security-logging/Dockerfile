@@ -16,8 +16,8 @@ COPY --from=builder /go/src/github.com/18F/gcp-appengine-template/security-loggi
 COPY --from=builder /go/src/github.com/18F/gcp-appengine-template/security-logging/google-cloud-sdk /google-cloud-sdk
 RUN apk update && apk add python2
 
-RUN addgroup -S -g 2000 securitylogging && adduser -S -u 2000 securitylogging -G securitylogging
-USER securitylogging
+RUN addgroup -S -g 2000 logsync && adduser -S -u 2000 logsync -G logsync
+USER logsync
 
 ENV PATH="/google-cloud-sdk/bin:/usr/bin"
 ENTRYPOINT ["/bin/security-logging"]
