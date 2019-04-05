@@ -35,7 +35,7 @@ resource "google_logging_project_sink" "securitystuff" {
     name = "securitystuff-sink"
     destination = "storage.googleapis.com/${google_storage_bucket.logs-bucket.name}"
 
-    filter = "resource.type=service_account OR severity>=WARNING OR resource.type=audited_resource OR protoPayload.@type=type.googleapis.com/google.cloud.audit.AuditLog"
+    filter = "resource.type=service_account OR resource.type=audited_resource OR protoPayload.@type=type.googleapis.com/google.cloud.audit.AuditLog OR resource.type=security_scanner_scan_config OR logName=projects/${var.project_id}/logs/appengine.googleapis.com%2Fvm.syslog"
 
     # Use a unique writer (creates a unique service account used for writing)
     unique_writer_identity = true
