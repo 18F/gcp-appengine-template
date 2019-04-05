@@ -1,17 +1,3 @@
-# This is the user that is going to be used for syncing logs
-resource "google_service_account" "logviewer" {
-  account_id   = "logviewer"
-  display_name = "Log viewer"
-}
-resource "google_service_account_key" "logviewerkey" {
-  service_account_id = "${google_service_account.logviewer.name}"
-}
-output "logviewer_key" {
-  value = "${base64decode(google_service_account_key.logviewerkey.private_key)}"
-  description = "Private key for logviewer service account"
-  sensitive = true
-}
-
 resource "google_storage_bucket" "logs-bucket" {
   name     = "logs-bucket-${var.project_id}"
   location = "${var.region}"
@@ -34,7 +20,7 @@ resource "google_storage_bucket_iam_binding" "binding" {
   role        = "roles/storage.objectViewer"
 
   members = [
-    "serviceAccount:${google_service_account.logviewer.email}",
+    "serviceAccount:${var.project_id}@appspot.gserviceaccount.com",
   ]
 }
 
