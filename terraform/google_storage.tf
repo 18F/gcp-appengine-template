@@ -15,9 +15,17 @@ resource "google_storage_bucket" "logs-bucket" {
   }
 }
 
+# # allow the unique service account to write
+# resource "google_storage_bucket_iam_binding" "binding" {
+#   bucket = "${google_storage_bucket.logs-bucket.name}"
+#   role        = "roles/storage.objectCreator"
+
+#   members = [
+#     "${google_logging_project_sink.securitystuff.writer_identity}",
+#   ]
+# }
 # allow the unique service account to write
-resource "google_storage_bucket_iam_binding" "binding" {
-  bucket = "${google_storage_bucket.logs-bucket.name}"
+resource "google_project_iam_binding" "binding" {
   role        = "roles/storage.objectCreator"
 
   members = [
