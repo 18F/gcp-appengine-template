@@ -15,16 +15,28 @@ resource "google_storage_bucket" "logs-bucket" {
   }
 }
 
+# allow the App Engine service account to read
 resource "google_storage_bucket_iam_binding" "binding" {
   bucket = "${google_storage_bucket.logs-bucket.name}"
   role        = "roles/storage.objectViewer"
 
   members = [
-    "serviceAccount:${var.project_id}@appspot.gserviceaccount.com",
+    "${google_logging_project_sink.securitystuff.writer_identity}",
   ]
 }
 
 output "logs_bucket" {
   value = "${google_storage_bucket.logs-bucket.url}"
   description = "Logs bucket for logs that are exported for ingestion by GSA IT Security"
+}
+
+# send logs to the log bucket
+resource "google_logging_project_sink" "securitystuff" {
+    name = "securitystuff-sink"
+    destination = "storage.googleapis.com/${google_storage_bucket.logs-bucket.name}"
+
+    filter = "severity>=WARNING"
+
+    # Use a unique writer (creates a unique service account used for writing)
+    unique_writer_identity = true
 }
