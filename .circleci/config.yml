@@ -574,7 +574,8 @@ jobs:
             export ZAP_CONFIG=" \
               -config globalexcludeurl.url_list.url\(0\).regex='.*/robots\.txt.*' \
               -config globalexcludeurl.url_list.url\(0\).description='Exclude robots.txt' \
-              -config globalexcludeurl.url_list.url\(0\).enabled=true
+              -config globalexcludeurl.url_list.url\(0\).enabled=true \
+              "
 
             zap-full-scan.py -m 5 -z "${ZAP_CONFIG}" -t "${TARGET_URL}"
 
