@@ -524,14 +524,8 @@ jobs:
             apt install -y jq
             cd security-logging
 
-            # set defaults
-            export TARGET_VERSION=logsync-${CIRCLE_BRANCH}
-            export TARGET_URL="https://${TARGET_VERSION}-dot-${GOOGLE_PROJECT_ID}.appspot.com//"
-
-            # put the tf output into a variable so it doesn't hit the disk
-            export TFOUTPUT=$(gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json -)
-
             # extract data for the app.yaml file
+            export TFOUTPUT=$(gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json -)
             export LOGFROM=$(echo ${TFOUTPUT} | jq -r .logs_bucket.value)
 
             # set up cron job to trigger the sync
@@ -557,7 +551,8 @@ jobs:
             EOF
 
             # deploy!
-            gcloud app deploy -q --no-promote --version=${TARGET_VERSION}
+            gcloud app deploy -q --no-promote --version=${CIRCLE_BRANCH}
+            gcloud app deploy -q --no-promote --version=${CIRCLE_BRANCH} cron.yaml
   owaspzap-log-sync:
     docker:
       - image: owasp/zap2docker-weekly
@@ -574,7 +569,7 @@ jobs:
               exit 0
             fi
 
-            export TARGET_URL="https://logsync-${CIRCLE_BRANCH}-dot-${GOOGLE_PROJECT_ID}.appspot.com//"
+            export TARGET_URL="https://${CIRCLE_BRANCH}-dot-logsync-dot-${GOOGLE_PROJECT_ID}.appspot.com//"
 
             export ZAP_CONFIG=" \
               -config globalexcludeurl.url_list.url\(0\).regex='.*/robots\.txt.*' \
