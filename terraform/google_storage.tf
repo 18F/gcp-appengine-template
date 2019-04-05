@@ -16,7 +16,7 @@ resource "google_storage_bucket" "logs-bucket" {
 }
 
 # allow the unique service account to write
-resource "google_storage_bucket_iam_binding" "wite-binding" {
+resource "google_storage_bucket_iam_binding" "binding" {
   bucket = "${google_storage_bucket.logs-bucket.name}"
   role        = "roles/storage.objectCreator"
 
