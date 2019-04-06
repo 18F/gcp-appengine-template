@@ -54,7 +54,7 @@ func logSyncHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// run gsutil rsync to get the logs where they need to go
-	cmd := exec.Command("gsutil", "rsync", "-J", from, to)
+	cmd := exec.Command("gsutil", "rsync", "-rJ", from, to)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Printf("logs failed to sync from %s to %s: %s", from, to, string(output))
