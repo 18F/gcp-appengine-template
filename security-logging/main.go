@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/http/httputil"
 	"os"
 	"os/exec"
 )
@@ -35,6 +36,15 @@ func logSyncHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Make sure that this is a request from the Cloud Scheduler service.
 	if r.Header.Get("X-Appengine-Queuename") != "__scheduler" {
+		// XXX debug
+		dump, err := httputil.DumpRequest(r, true)
+		if err != nil {
+			http.Error(w, fmt.Sprint(err), http.StatusInternalServerError)
+			return
+		}
+		log.Printf("request: %q\n", dump)
+		// XXX end debug
+
 		http.NotFound(w, r)
 		return
 	}
