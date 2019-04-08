@@ -544,7 +544,7 @@ jobs:
 
             # deploy!
             gcloud app deploy -q --no-promote --version=${CIRCLE_BRANCH}
-            gcloud beta scheduler jobs create http logsync-${CIRCLE_BRANCH} --schedule 'every 5 minutes' --relative-url '/' --uri="https://${CIRCLE_BRANCH}-dot-logsync-dot-${GOOGLE_PROJECT_ID}.appspot.com/"
+            gcloud beta scheduler jobs create http logsync-${CIRCLE_BRANCH} --schedule 'every 5 minutes' --uri="https://${CIRCLE_BRANCH}-dot-logsync-dot-${GOOGLE_PROJECT_ID}.appspot.com/"
   owaspzap-log-sync:
     docker:
       - image: owasp/zap2docker-weekly
