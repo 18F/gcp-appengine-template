@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"net/http/httputil"
 	"os"
 	"os/exec"
 )
@@ -34,17 +33,14 @@ func logSyncHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Make sure that this is a request from the Cloud Scheduler service.
-	if r.Header.Get("X-Appengine-Queuename") != "__scheduler" {
-		// XXX debug
-		dump, err := httputil.DumpRequest(r, true)
-		if err != nil {
-			http.Error(w, fmt.Sprint(err), http.StatusInternalServerError)
-			return
-		}
-		log.Printf("request: %q\n", dump)
-		// XXX end debug
-
+	// Make sure that this is a request from something we scheduled
+	auth_info := os.Getenv("AUTH_INFO")
+	if auth_info == "" {
+		log.Printf("AUTH_INFO not set in environment")
+		http.Error(w, "cannot authenticate client", 500)
+		return
+	}
+	if r.Header.Get("GCS-Authorization") != auth_info {
 		http.NotFound(w, r)
 		return
 	}
