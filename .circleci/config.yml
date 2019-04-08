@@ -550,7 +550,7 @@ jobs:
             # deploy the scheduled task that makes the logsync happen
             # You must delete a job before creating it.
             gcloud -q beta scheduler jobs delete logsync-${CIRCLE_BRANCH} || true
-            gcloud beta scheduler jobs create http logsync-${CIRCLE_BRANCH} --schedule 'every 5 minutes' --uri="https://${CIRCLE_BRANCH}-dot-logsync-dot-${GOOGLE_PROJECT_ID}.appspot.com/"
+            gcloud beta scheduler jobs create http logsync-${CIRCLE_BRANCH} --http-method=GET --schedule 'every 5 minutes' --uri="https://${CIRCLE_BRANCH}-dot-logsync-dot-${GOOGLE_PROJECT_ID}.appspot.com/"
   owaspzap-log-sync:
     docker:
       - image: owasp/zap2docker-weekly
