@@ -544,10 +544,9 @@ jobs:
             automatic_scaling:
               min_num_instances: 1
 
-            # XXX document LOGTO stuff
             env_variables:
               FROM: ${LOGFROM}
-              TO: ${LOGTO}
+              TO: ${LOGTO}/${CIRCLE_BRANCH}
               AWS_ACCESS_KEY_ID: ${LOGTO_AWS_ACCESS_KEY_ID}
               AWS_SECRET_ACCESS_KEY: ${LOGTO_AWS_SECRET_ACCESS_KEY}
             EOF

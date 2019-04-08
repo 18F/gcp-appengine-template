@@ -85,6 +85,29 @@ To get the app(s) in this repo going, you will need to:
    workflow, and everything should then deploy fully.  You will then be able to go to
    the frontend URL (something like https://dev-dot-${GOOGLE_PROJECT_ID}.appspot.com/) and experience the SSO login.
 
+### Enabling offsite logging
+
+GSA IT Security Operations has a log sink that gives them visibility into your
+systems and lets them generate alerts when unusual activity happens.  Here is
+how you set that up:
+1. Send an email to GSA IT Security and ask them for an s3 bucket that they
+   can sync logs into.  XXX Get real directions here.
+1. Add these environment variables to the circleci repo:
+   * `LOGTO`: Set this to the s3 bucket that GSA IT Security gives you.
+     (like `s3://gsa-logbucket`)  Make sure there is no `/` at the end.
+   * `LOGTO_AWS_ACCESS_KEY_ID`: Set this to the Access Key ID that GSA IT 
+     Security gives you. (like `AKIAXXXXXXXXXX`)
+   * `LOGTO_AWS_SECRET_ACCESS_KEY`: Set this to the Secret Access Key ID that
+     GSA IT Security gives you.
+     (like `asdfasdfasdf+klwjelkjewlkjrweklrj`)
+1. Rerun the `deploy-log-sync` workflow for the environments you have set up.
+1. Check the logs for the logsync service.  You should see a line like
+   `2019-04-08 12:39:34.000 PDT
+2019/04/08 19:39:34 synced logs from gs://logs-bucket-${GOOGLE_PROJECT_ID} to s3://gsa-logbucket/`
+   if things are going well.  Otherwise, you should see error messages that
+   you can use to diagnose the problem.
+
+
 ## Customization For Your Application
 
 The example applications are very simple, and while it is entirely possible for you
