@@ -33,8 +33,8 @@ func logSyncHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Make sure that this is a request from the cron service.
-	if r.Header.Get("X-Appengine-Cron") != "true" {
+	// Make sure that this is a request from the Cloud Scheduler service.
+	if r.Header.Get("X-Appengine-Queuename") != "__scheduler" {
 		http.NotFound(w, r)
 		return
 	}
