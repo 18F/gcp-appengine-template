@@ -21,6 +21,15 @@ satisfies:
   narrative:
     - text: |
         CircleCI uses GitHub for all of it's authentication and authorization.
+- control_key: AC-3
+  standard_key: NIST-800-53
+  covered_by: []
+  control_origins:
+    - inherited
+  implementation_status: complete
+  narrative:
+    - text: |
+        CircleCI uses GitHub for all of it's authentication and authorization.
 - control_key: RA-5
   standard_key: NIST-800-53
   covered_by: []

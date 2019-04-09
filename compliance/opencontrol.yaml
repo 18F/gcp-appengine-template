@@ -11,6 +11,7 @@ components:
   - ./components/GCP-Console
   - ./components/GCP-Stackdriver
   - ./components/GCP-AppEngine
+  - ./components/GCP-CloudSQL
   - ./components/GitHub
   - ./components/CircleCI
   - ./components/ManualProcedures

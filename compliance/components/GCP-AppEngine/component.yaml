@@ -6,6 +6,30 @@ references:
     path: https://cloud.google.com/appengine/
     type: URL
 satisfies:
+- control_key: AC-3
+  standard_key: NIST-800-53
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        SSH access to instances is only enabled when you turn on debug mode by an
+        GCP authorized Admin, Project Owner, or a Developer who has been granted
+        access in the environment.  When ssh access is requested, GCP generates a
+        short-lived unique key which is then used by the GCP tools or Console to
+        authenticate with the instance.  
+
+        No passwords are used.
+
+        Sudo is required to become root.
+- control_key: AU-2
+  standard_key: NIST-800-53
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        All App Engine events (creation/deletion/update/etc) and the logs generated
+        by the apps are automatically sent to Stackdriver.  This facility is baked
+        into all GCP App Engine instances, with no option to remove or disable.
 - control_key: CM-6 (1)
   standard_key: NIST-800-53
   covered_by: []

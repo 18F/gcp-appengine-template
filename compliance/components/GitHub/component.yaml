@@ -5,6 +5,9 @@ references:
   - name: GitHub
     path: https://github.com/
     type: URL
+  - name: GitHub Authentication Documentation
+    path: https://help.github.com/en/categories/authenticating-to-github
+    type: URL
 satisfies:
 - control_key: AC-2
   standard_key: NIST-800-53
@@ -14,40 +17,44 @@ satisfies:
     - text: |
         GitHub users are managed with the tools you can find here:
         https://help.github.com/en/categories/setting-up-and-managing-organizations-and-teams
-- control_key: AC-3
-  standard_key: NIST-800-53
-  covered_by: []
-  implementation_status: partial
-  narrative:
-    - text: |
-        GitHub only allows authorized users to make changes to repos.  GitHub repos are, by default,
+
+        GitHub repos are, by default,
         read-only except for the repo owner.  Repos can have teams of people added to them
         (https://help.github.com/en/articles/managing-team-access-to-an-organization-repository)
         with different access levels 
         (https://help.github.com/en/articles/repository-permission-levels-for-an-organization).
-
-        XXX Document here what policies your org has for managing teams
+- control_key: AC-3
+  standard_key: NIST-800-53
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        GitHub only allows authorized users to make changes to repos.  GitHub authentication
+        is done through ssh keys and two-factor authentication.
 - control_key: AC-6 (5)
   standard_key: NIST-800-53
   covered_by: []
-  implementation_status: partial
+  implementation_status: complete
   narrative:
     - text: |
         Users are managed in GitHub according to the policies of the Organization
         they belong to:
         https://help.github.com/en/categories/setting-up-and-managing-organizations-and-teams
 
-        XXX Document policies here (2fa requirements, user lifecycle processes, etc)
+        Generally, this means that Project Owners will be granted Owner permissions,
+        Admins will be granted Admin permissions,
+        Developers will be granted Write permissions,
+        and everybody else will be read-only, or no access, if the repo is a private repo.
 - control_key: AC-6 (9)
   standard_key: NIST-800-53
   covered_by: []
-  implementation_status: partial
+  implementation_status: complete
   narrative:
     - text: |
-        GitHub allows administrators to audit the current status of users by looking at the
-        Organization and Repo settings to see who are admins/owners/etc.
+        GitHub retains audit log events for your GitHub Organization for 30 days.
 
-        XXX Document policies here on how often you do this.
+        GitHub allows authorized users to review the audit log for their organization:
+        https://help.github.com/en/articles/reviewing-the-audit-log-for-your-organization
 - control_key: AU-2
   standard_key: NIST-800-53
   covered_by: []

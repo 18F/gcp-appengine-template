@@ -5,18 +5,21 @@ references:
   - name: GCP Console documentation
     path: https://cloud.google.com/compute/docs/console
     type: URL
+  - name: GCP role documentation
+    path: https://cloud.google.com/iam/docs/understanding-roles
+    type: URL
 satisfies:
 - control_key: AC-2
   standard_key: NIST-800-53
   covered_by: []
-  implementation_status: complete
+  implementation_status: partial
   narrative:
     - text: |
         The users who are authorized to use GCP are added and removed by GSA ICE
-        through a process that they are still developing.
+        through a process that they are still developing. 
 
-        The users of GCP are required by GSA ICE to use strong 2-factor 
-        authentication to log in:  A password and a FIDO/U2F key.
+        XXX Should check with GSA ICE
+        to see if they have updated their process.
 - control_key: AC-3
   standard_key: NIST-800-53
   covered_by: []
@@ -27,7 +30,13 @@ satisfies:
         who can take action on specific resources, giving you full control and visibility
         to manage cloud resources centrally.
 
-        The resources that users of GCP can manage are specified by GSA ICE.
+        The resources that users of GCP can manage, and what types of changes are allowed
+        are specified by GSA ICE.
+
+        There are no shared user accounts.
+
+        The users of GCP are required by GSA ICE to use strong 2-factor 
+        authentication to log in:  A password and a FIDO/U2F key.
 - control_key: AC-6 (5)
   standard_key: NIST-800-53
   covered_by: []
@@ -40,10 +49,28 @@ satisfies:
 
         The resources that users of GCP can manage are specified by GSA ICE to
         be as restrictive as possible.  Currently that means that the project owner is
-        granted the Editor role 
-        (https://cloud.google.com/iam/docs/understanding-roles#primitive_role_definitions),
+        granted the Editor role,
         which does not allow IAM editing, but does allow
-        apps/services in the project to be created/managed.
+        apps/services in the project to be created/managed.  Additional users and roles
+        can be added by GSA ICE.
+
+        Eventually, we hope to change this so that Project Owners are given the
+        `roles/owner` IAM role, Admins are
+        given the `roles/editor` role, Developers may be given `roles/viewer` or
+        `roles/editor` roles (or no roles) depending on what they need,
+        and Users are not granted GCP accounts/roles.
+
+        Each GCP Project will have it's own set of permissions, so Developers can be
+        granted `roles/editor` access in the dev environment to allow for more debugging,
+        or they can be granted temporary `roles/viewer` access to production to help
+        debug a problem, etc.
+- control_key: AU-2
+  standard_key: NIST-800-53
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        All GCP Console events are automatically sent to Stackdriver.
 - control_key: RA-5
   standard_key: NIST-800-53
   covered_by: []

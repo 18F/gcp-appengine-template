@@ -1,4 +1,4 @@
-documentation_complete: false
+documentation_complete: true
 name: dotnet-example
 schema_version: 3.1.0
 references:
@@ -12,8 +12,15 @@ satisfies:
   implementation_status: complete
   narrative:
     - text: |
+        Since the app itself is just an example for how one might deploy an app, there are no
+        actual users to manage.
+- control_key: AC-3
+  standard_key: NIST-800-53
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
         The dotnet example app requires basic auth before it will allow users to access the app.
         The credentials for basic auth are shared with people who are authorized to use the app.
 
-        Since the app itself is just an example for how one might deploy an app, there are no
-        actual users to manage.  The basic auth is there to ensure that random people cannot get in.
+        The basic auth is there to ensure that random people cannot get in.
