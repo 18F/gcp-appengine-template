@@ -89,7 +89,7 @@ To get the app(s) in this repo going, you will need to:
 
 GSA IT Security Operations has a log sink that gives them visibility into your
 systems and lets them generate alerts when unusual activity happens.  Here is
-how you set that up:
+how you turn that on:
 1. Send an email to GSA IT Security and ask them for an s3 bucket that they
    can sync logs into.  XXX Get real directions here.
 1. Add these environment variables to the circleci repo:
@@ -103,7 +103,7 @@ how you set that up:
 1. Rerun the `deploy-log-sync` workflow for the environments you have set up.
 1. Check the logs for the logsync service.  You should see a line like
    `2019-04-08 12:39:34.000 PDT
-2019/04/08 19:39:34 synced logs from gs://logs-bucket-${GOOGLE_PROJECT_ID} to s3://gsa-logbucket/`
+2019/04/08 19:39:34 synced logs from gs://logs-bucket-${GOOGLE_PROJECT_ID} to s3://gsa-logbucket/dev`
    if things are going well.  Otherwise, you should see error messages that
    you can use to diagnose the problem.
 
@@ -225,6 +225,18 @@ You can also use the proxy on your computer in GUI mode, which is much more like
 app, and thus less tricky to customize than the docker version, which is better for automated 
 scans.  More info on that can be found in the 
 "Getting Started Guide" on https://github.com/zaproxy/zaproxy/wiki/Downloads.
+
+### Offsite Logging
+Logs are collected by [GCP Stackdriver](https://console.cloud.google.com/logs/viewer).
+They are exported to a [GCP Cloud Storage](https://console.cloud.google.com/storage/browser)
+bucket, which is then periodically synced with an s3 bucket maintained by the GSA
+IT Security people, where it is slurped into their logging system.
+
+If you want to customize what logs get exported, then you will want to edit the 
+`"google_logging_project_sink" "securitystuff"` resource
+in `terraform/google_storage.tf`.  Right now, it just sends the logs that the 
+[GSA Logging and Audit Compliance Guidance document](https://docs.google.com/document/d/1MkaYZr6633vobLkYpNZcqPfQTvCUgR4XNahcmeryXgg/edit)
+requires.
 
 
 ## ATO and launching considerations
