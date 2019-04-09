@@ -1,27 +1,40 @@
-resource "google_storage_bucket" "log-bucket" {
-  name     = "log-bucket-${var.project_id}"
-  location = "${var.region}"
-  storage_class = "REGIONAL"
-}
-
-resource "google_storage_bucket" "storage-bucket" {
-  name     = "storage-bucket-${var.project_id}"
+resource "google_storage_bucket" "logs-bucket" {
+  name     = "logs-bucket-${var.project_id}"
   location = "${var.region}"
   storage_class = "REGIONAL"
   versioning = {
     enabled = true
   }
-  logging =  {
-    log_bucket = "${google_storage_bucket.log-bucket.name}"
+  lifecycle_rule = {
+    action = {
+      type = "Delete"
+    }
+    condition = {
+      age = 60
+    }
   }
 }
 
 output "logs_bucket" {
-  value = "${google_storage_bucket.log-bucket.url}"
-  description = "Stores logs from ${google_storage_bucket.storage-bucket.name}"
+  value = "${google_storage_bucket.logs-bucket.url}"
+  description = "Logs bucket for logs that are exported for ingestion by GSA IT Security"
 }
 
-output "pilot_bucket" {
-  value = "${google_storage_bucket.storage-bucket.url}"
-  description = "Example Google Storage bucket"
+# allow the unique service account to write to the logs bucket
+resource "google_project_iam_binding" "binding" {
+  role        = "roles/storage.objectCreator"
+  members = [
+    "${google_logging_project_sink.securitystuff.writer_identity}",
+  ]
+}
+
+# send logs to the log bucket
+resource "google_logging_project_sink" "securitystuff" {
+    name = "securitystuff-sink"
+    destination = "storage.googleapis.com/${google_storage_bucket.logs-bucket.name}"
+
+    filter = "resource.type=service_account OR resource.type=audited_resource OR protoPayload.@type=type.googleapis.com/google.cloud.audit.AuditLog OR resource.type=security_scanner_scan_config OR logName=projects/${var.project_id}/logs/appengine.googleapis.com%2Fvm.syslog"
+
+    # Use a unique writer (creates a unique service account used for writing)
+    unique_writer_identity = true
 }
