@@ -22,7 +22,7 @@ satisfies:
 
         XXX Should check with GSA ICE
         to see if they have updated their process.
-        
+
         See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
         for the inherited controls.
 - control_key: AC-3
@@ -101,6 +101,48 @@ satisfies:
     - text: |
         GCP's Security Command Center will automatically scan App Engine apps for web
         vulnerabilities.
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
+- control_key: IA-2
+  standard_key: NIST-800-53
+  control_origins:
+    - inherited
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        The users of GCP are required by GSA ICE to use strong 2-factor 
+        authentication to log in:  A password and a FIDO/U2F key.
+        All services inside of GCP require this authentication for access:  ssh, API, console, etc.
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
+- control_key: IA-2 (1)
+  standard_key: NIST-800-53
+  control_origins:
+    - inherited
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        The users of GCP are required by GSA ICE to use strong 2-factor 
+        authentication to log in:  A password and a FIDO/U2F key.
+        All services inside of GCP require this authentication for access:  ssh, API, console, etc.
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
+- control_key: IA-2 (2)
+  standard_key: NIST-800-53
+  control_origins:
+    - inherited
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        The users of GCP are required by GSA ICE to use strong 2-factor 
+        authentication to log in:  A password and a FIDO/U2F key.
+        All services inside of GCP require this authentication for access:  ssh, API, console, etc.
 
         See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
         for the inherited controls.

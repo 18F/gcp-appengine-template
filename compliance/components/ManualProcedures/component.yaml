@@ -38,3 +38,12 @@ satisfies:
         XXX Document your pentest procedures and the pentest report here.  You will
         probably have to procure a 3rd Party Assessment Organization (3PAO) to do a
         pentest on your apps and systems.
+- control_key: CP-7 (1)
+  standard_key: NIST-800-53
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        Because the infrastructure is all code, Disaster Recovery into another region
+        should be simple, only requiring a change to the terraform code to change the
+        region and a restore of a database backup from the old region.

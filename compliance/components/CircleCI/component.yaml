@@ -88,3 +88,30 @@ satisfies:
     - text: |
         CircleCI retains build and deploy logs for an undocumented amount of time, but
         at least 12 months.  This allows Admins to audit code deploys.
+- control_key: IA-2
+  standard_key: NIST-800-53
+  control_origins:
+    - inherited
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        CircleCI uses GitHub for all of it's authentication and authorization.
+- control_key: IA-2 (1)
+  standard_key: NIST-800-53
+  control_origins:
+    - inherited
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        CircleCI uses GitHub for all of it's authentication and authorization.
+- control_key: IA-2 (2)
+  standard_key: NIST-800-53
+  control_origins:
+    - inherited
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        CircleCI uses GitHub for all of it's authentication and authorization.

@@ -127,3 +127,51 @@ satisfies:
 
         All changes to the codebase are retained in the git log, and discussions and approval
         records are contained in GitHub Pull Requests.
+- control_key: IA-2
+  standard_key: NIST-800-53
+  control_origins:
+    - inherited
+  covered_by: []
+  implementation_status: partial
+  narrative:
+    - text: |
+        All users of GitHub are required to use strong 2-factor 
+        authentication to log in.
+
+        XXX You should be able to show in your organization's policies that you require this, like
+        it does on https://handbook.18f.gov/github/#set-up-two-factor-authentication
+
+        See the [GitHub FedRAMP Package](https://marketplace.fedramp.gov/#/product/github-enterprise-cloud)
+        for the inherited controls.
+- control_key: IA-2 (1)
+  standard_key: NIST-800-53
+  control_origins:
+    - inherited
+  covered_by: []
+  implementation_status: partial
+  narrative:
+    - text: |
+        All users of GitHub are required to use strong 2-factor 
+        authentication to log in.
+
+        XXX You should be able to show in your organization's policies that you require this, like
+        it does on https://handbook.18f.gov/github/#set-up-two-factor-authentication
+
+        See the [GitHub FedRAMP Package](https://marketplace.fedramp.gov/#/product/github-enterprise-cloud)
+        for the inherited controls.
+- control_key: IA-2 (2)
+  standard_key: NIST-800-53
+  control_origins:
+    - inherited
+  covered_by: []
+  implementation_status: partial
+  narrative:
+    - text: |
+        All users of GitHub are required to use strong 2-factor 
+        authentication to log in.
+
+        XXX You should be able to show in your organization's policies that you require this, like
+        it does on https://handbook.18f.gov/github/#set-up-two-factor-authentication
+
+        See the [GitHub FedRAMP Package](https://marketplace.fedramp.gov/#/product/github-enterprise-cloud)
+        for the inherited controls.
