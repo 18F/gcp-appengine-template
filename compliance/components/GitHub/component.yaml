@@ -175,3 +175,14 @@ satisfies:
 
         See the [GitHub FedRAMP Package](https://marketplace.fedramp.gov/#/product/github-enterprise-cloud)
         for the inherited controls.
+- control_key: SA-11 (1)
+  standard_key: NIST-800-53
+  covered_by: []
+  implementation_status: partial
+  narrative:
+    - text: |
+        XXX GitHub supports many code analysis integrations, which should be set up in the
+        GitHub branch setup step in the
+        [bootstrap process](https://github.com/18F/gcp-appengine-template/blob/master/README.md#bootstrap-process).
+        Document that here.  What integrations you use will depend on what you write your app in, but
+        they should employ static code analysis tools to identify common flaws and document the results of the analysis.

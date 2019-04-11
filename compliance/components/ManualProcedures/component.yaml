@@ -47,3 +47,28 @@ satisfies:
         Because the infrastructure is all code, Disaster Recovery into another region
         should be simple, only requiring a change to the terraform code to change the
         region and a restore of a database backup from the old region.
+- control_key: PL-8
+  standard_key: NIST-800-53
+  covered_by: []
+  implementation_status: partial
+  narrative:
+    - text: |
+        The [DevSecOps Architecture](https://github.com/18F/gcp-appengine-template/blob/master/DEVSECOPS.md)
+        describes the overall system and security architecture.  In particular, the
+        [DevSecOps Requirements](https://github.com/18F/gcp-appengine-template/blob/master/DEVSECOPS.md#devsecops-requirements)
+        section goes into details about the DevSecOps security requirements that this project
+        fulfills.
+
+        XXX Be sure to add information about your app's security architecture either here or in
+        the [DevSecOps Architecture](https://github.com/18F/gcp-appengine-template/blob/master/DEVSECOPS.md)
+        document.
+- control_key: SA-22
+  standard_key: NIST-800-53
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        XXX CircleCI requires you to specify a few specific component versions,
+        such as terraform, the Cloud SDK, any environments you use to do builds/deploys.
+        None are currently old, but you might want to create and document a periodic
+        process to check that all things that have versions are updated if they need to be.

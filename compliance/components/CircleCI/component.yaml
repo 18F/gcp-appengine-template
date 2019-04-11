@@ -44,8 +44,6 @@ satisfies:
         and oauth2_proxy apps will be scanned unauthenticated.
 
         XXX Change this to talk about your application instead of the example apps.
-        XXX Should probably have some documentation on how you do external pentests
-        with a 3rd party Auditor as well.
 - control_key: CM-2 (2)
   standard_key: NIST-800-53
   covered_by: []
