@@ -11,6 +11,8 @@ references:
 satisfies:
 - control_key: AC-2
   standard_key: NIST-800-53
+  control_origins:
+    - inherited
   covered_by: []
   implementation_status: partial
   narrative:
@@ -20,8 +22,13 @@ satisfies:
 
         XXX Should check with GSA ICE
         to see if they have updated their process.
+        
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
 - control_key: AC-3
   standard_key: NIST-800-53
+  control_origins:
+    - inherited
   covered_by: []
   implementation_status: complete
   narrative:
@@ -33,12 +40,17 @@ satisfies:
         The resources that users of GCP can manage, and what types of changes are allowed
         are specified by GSA ICE.
 
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
+
         There are no shared user accounts.
 
         The users of GCP are required by GSA ICE to use strong 2-factor 
         authentication to log in:  A password and a FIDO/U2F key.
 - control_key: AC-6 (5)
   standard_key: NIST-800-53
+  control_origins:
+    - inherited
   covered_by: []
   implementation_status: complete
   narrative:
@@ -64,18 +76,31 @@ satisfies:
         granted `roles/editor` access in the dev environment to allow for more debugging,
         or they can be granted temporary `roles/viewer` access to production to help
         debug a problem, etc.
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
 - control_key: AU-2
   standard_key: NIST-800-53
   covered_by: []
+  control_origins:
+    - inherited
   implementation_status: complete
   narrative:
     - text: |
         All GCP Console events are automatically sent to Stackdriver.
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
 - control_key: RA-5
   standard_key: NIST-800-53
   covered_by: []
+  control_origins:
+    - inherited
   implementation_status: complete
   narrative:
     - text: |
         GCP's Security Command Center will automatically scan App Engine apps for web
         vulnerabilities.
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.

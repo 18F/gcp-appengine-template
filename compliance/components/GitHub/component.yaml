@@ -65,13 +65,9 @@ satisfies:
 
         GitHub allows authorized users to review the audit log for their organization:
         https://help.github.com/en/articles/reviewing-the-audit-log-for-your-organization
-- control_key: AU-6
-  standard_key: NIST-800-53
-  covered_by: []
-  implementation_status: partial
-  narrative:
-    - text: |
-        XXX Need to document how you review the GitHub audit log periodically (or why you are not?) here.
+
+        GitHub allows users to audit the changelog and list of Pull Requests for all
+        changes to the code.
 - control_key: CM-2
   standard_key: NIST-800-53
   covered_by: []
@@ -85,10 +81,10 @@ satisfies:
 - control_key: CM-2 (2)
   standard_key: NIST-800-53
   covered_by: []
-  implementation_status: partial
+  implementation_status: complete
   narrative:
     - text: |
-        Whenever Pull Requests are approved for a particular environment, the changes in
+        Whenever Pull Requests are approved for a particular branch/environment, the changes in
         the Pull Requests will be integrated and CircleCI will be notified that it needs
         to automatically deploy the changes, thus ensuring that what is deployed is what is
         in the repo.
@@ -115,6 +111,10 @@ satisfies:
         they meet the approval of the reviewers.  No unapproved changes will be integrated
         without approval.
 
+        Pull Requests and approval/integration actions will result in email notifications to
+        the GitHub repo Admins and others who have elected to watch the repo, so that they
+        can review the Pull Requests or know when a change was integrated.
+
         Infrastructure deploys will also require an authorized CircleCI user to log in to CircleCI
         to review the infrastructure changes that terraform is planning to do.
         If approved, terraform will apply the changes.
@@ -126,17 +126,4 @@ satisfies:
         can be required, allowing for automated code security reviews, etc.
 
         All changes to the codebase are retained in the git log, and discussions and approval
-        records are contained in the GitHub Pull Requests.
-- control_key: AU-6 (1)
-  standard_key: NIST-800-53
-  covered_by: []
-  implementation_status: complete
-  narrative:
-    - text: |
-        GitHub retains audit log events for your GitHub Organization for 30 days.
-
-        GitHub allows authorized users to review the audit log for their organization:
-        https://help.github.com/en/articles/reviewing-the-audit-log-for-your-organization
-
-        GitHub allows users to audit the changelog and list of Pull Requests for all
-        changes to the code.
+        records are contained in GitHub Pull Requests.

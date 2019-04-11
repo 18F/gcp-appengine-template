@@ -9,6 +9,8 @@ satisfies:
 - control_key: AC-3
   standard_key: NIST-800-53
   covered_by: []
+  control_origins:
+    - inherited
   implementation_status: complete
   narrative:
     - text: |
@@ -16,14 +18,35 @@ satisfies:
         to connect to the databases.  No other entities are allowed to connect to
         the databases at all.
 
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
+
         Terraform creates and manages database credentials for the applications, but
         these credentials are effectively just a second (or third) factor for authentication.
 - control_key: AU-2
   standard_key: NIST-800-53
   covered_by: []
+  control_origins:
+    - inherited
   implementation_status: complete
   narrative:
     - text: |
         All Cloud SQL events (creation/deletion/update/etc) and the logs generated
         by the database are automatically sent to Stackdriver.  This facility is baked
         into all Cloud SQL instances, with no option to remove or disable.
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
+- control_key: CM-6 (1)
+  standard_key: NIST-800-53
+  control_origins:
+    - inherited
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        Google automatically updates Cloud SQL instances with the latest security
+        patches as they are released.  https://cloud.google.com/sql/faq#version
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.

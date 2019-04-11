@@ -9,6 +9,8 @@ satisfies:
 - control_key: AC-3
   standard_key: NIST-800-53
   covered_by: []
+  control_origins:
+    - inherited
   implementation_status: complete
   narrative:
     - text: |
@@ -21,17 +23,27 @@ satisfies:
         No passwords are used.
 
         Sudo is required to become root.
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
 - control_key: AU-2
   standard_key: NIST-800-53
   covered_by: []
+  control_origins:
+    - inherited
   implementation_status: complete
   narrative:
     - text: |
         All App Engine events (creation/deletion/update/etc) and the logs generated
         by the apps are automatically sent to Stackdriver.  This facility is baked
         into all GCP App Engine instances, with no option to remove or disable.
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
 - control_key: CM-6 (1)
   standard_key: NIST-800-53
+  control_origins:
+    - inherited
   covered_by: []
   implementation_status: complete
   narrative:
@@ -39,14 +51,30 @@ satisfies:
         Configuration for App Engine apps can be verified by viewing the config for App Engine
         versions/services in the GCP Console, or by using the `gcloud app versions describe`
         command.
+
+        Google automatically hardens it's App Engine images with the latest security
+        patches and relaunches every App Engine instance using them once a week.
+
+        In general, changes to running App Engine instances are only allowed when debug
+        mode is turned on, and once debug mode is turned off, the instance is deleted
+        and relaunched from the base image, so configuration changes on individual instances
+        are ephemeral.
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
 - control_key: CM-2 (2)
   standard_key: NIST-800-53
   covered_by: []
+  control_origins:
+    - inherited
   implementation_status: complete
   narrative:
     - text: |
         Google automatically updates with the latest security patches and relaunches every
-        App Engine instance once a week.
+        App Engine instance using them once a week.
 
         Every time there is an App Engine deploy, it will build the image with the latest
         runtime that they have certified.
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
