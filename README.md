@@ -87,18 +87,23 @@ To get the app(s) in this repo going, you will need to:
 
 ### Enabling offsite logging
 
-GSA IT Security Operations has a log sink that gives them visibility into your
+GSA SecOps has a log sink that gives them visibility into your
 systems and lets them generate alerts when unusual activity happens.  Here is
 how you turn that on:
-1. Send an email to GSA IT Security and ask them for an s3 bucket that they
-   can sync logs into.  XXX Get real directions here.
+1. Get onboarded by GSA SecOps by following the process in the
+   [GSA Logging and Audit Compliance Guidance](https://docs.google.com/document/d/1MkaYZr6633vobLkYpNZcqPfQTvCUgR4XNahcmeryXgg/edit)
+   document.  As of now, they have a
+   [Google Form](https://docs.google.com/a/gsa.gov/forms/d/e/1FAIpQLSdm4kODpvMXbJ5xqxImAIJTtIP6uuVqSzzULuwREq_02ZEP3Q/viewform)
+   which you need to fill out.
+1. After onboarding, you should have received an S3 bucket and some credentials
+   that will allow you to write to that bucket.
 1. Add these environment variables to the circleci repo:
-   * `LOGTO`: Set this to the s3 bucket that GSA IT Security gives you.
+   * `LOGTO`: Set this to the S3 bucket that GSA SecOps gives you.
      (like `s3://gsa-logbucket`)  Make sure there is no `/` at the end.
-   * `LOGTO_AWS_ACCESS_KEY_ID`: Set this to the Access Key ID that GSA IT 
-     Security gives you. (like `AKIAXXXXXXXXXX`)
+   * `LOGTO_AWS_ACCESS_KEY_ID`: Set this to the Access Key ID that GSA SecOps
+     gives you. (like `AKIAXXXXXXXXXX`)
    * `LOGTO_AWS_SECRET_ACCESS_KEY`: Set this to the Secret Access Key ID that
-     GSA IT Security gives you.
+     GSA SecOps gives you.
      (like `asdfasdfasdf+klwjelkjewlkjrweklrj`)
 1. Rerun the `deploy-log-sync` workflow for the environments you have set up.
 1. Check the logs for the logsync service.  You should see a line like
