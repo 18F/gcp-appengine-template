@@ -96,6 +96,9 @@ satisfies:
   implementation_status: complete
   narrative:
     - text: |
+        GCP Admins can run the `gcloud app instances list` command to see what App
+        Engine instances are running, or look in the GCP Console.
+
         See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
         for the inherited controls.
 - control_key: CP-7 (1)
@@ -124,6 +127,40 @@ satisfies:
 
         Every time there is an App Engine deploy, it will build the image with the latest
         runtime that they have certified.
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
+- control_key: SC-7
+  standard_key: NIST-800-53
+  covered_by: []
+  control_origins:
+    - inherited
+  implementation_status: complete
+  narrative:
+    - text: |
+        App Engine only allows inbound connections to it's applications through a loadbalancer on port 443/80.
+        All other access is denied unless debug mode is enabled, in which case ssh is allowed.
+
+        Connectivity between instances is denied.
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
+- control_key: SC-8 (1)
+  standard_key: NIST-800-53
+  covered_by: []
+  control_origins:
+    - inherited
+  implementation_status: complete
+  narrative:
+    - text: |
+        All administrative functions of App Engine are accessed through the Google Cloud SDK,
+        which uses https.
+
+        App Engine automatically creates SSL certificates that allow all apps to be accessed
+        over https.
+
+        If debug mode is enabled for an instance, the user is allowed to use ssh to access the
+        instance.
 
         See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
         for the inherited controls.

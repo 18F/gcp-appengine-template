@@ -50,6 +50,19 @@ satisfies:
 
         See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
         for the inherited controls.
+- control_key: CM-8 (2)
+  standard_key: NIST-800-53
+  control_origins:
+    - inherited
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        GCP Admins can run the `gcloud sql instances list` command to see what Cloud
+        SQL instances are running, or look in the GCP Console.
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
 - control_key: CP-7 (1)
   standard_key: NIST-800-53
   covered_by: []
@@ -61,5 +74,46 @@ satisfies:
         The production databases have daily backups automatically scheduled
         for them, and also are configured for HA and failover.
 
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
+- control_key: SC-7
+  standard_key: NIST-800-53
+  covered_by: []
+  control_origins:
+    - inherited
+  implementation_status: complete
+  narrative:
+    - text: |
+        GCP denies access to all Cloud SQL instances unless it is one of the App Engine apps
+        that we have specifically connected it to in the `app.yaml` file used to deploy it.
+
+        GCP Admins and Project Owners can be granted temporary access using an authenticated
+        `gcloud beta sql connect` command, which proxies a connection back to the database
+        through an encrypted tunnel.
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
+- control_key: SC-8 (1)
+  standard_key: NIST-800-53
+  covered_by: []
+  control_origins:
+    - inherited
+  implementation_status: complete
+  narrative:
+    - text: |
+        Cloud SQL encrypts all of it's data in transit:  https://cloud.google.com/sql/faq#encryption-manage-transit
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
+- control_key: SC-28 (1)
+  standard_key: NIST-800-53
+  covered_by: []
+  control_origins:
+    - inherited
+  implementation_status: complete
+  narrative:
+    - text: |
+        Cloud SQL encrypts all of it's data at rest:  https://cloud.google.com/sql/faq#encryption-manage-rest
+        
         See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
         for the inherited controls.

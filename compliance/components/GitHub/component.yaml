@@ -186,3 +186,10 @@ satisfies:
         [bootstrap process](https://github.com/18F/gcp-appengine-template/blob/master/README.md#bootstrap-process).
         Document that here.  What integrations you use will depend on what you write your app in, but
         they should employ static code analysis tools to identify common flaws and document the results of the analysis.
+- control_key: SC-8 (1)
+  standard_key: NIST-800-53
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        All GitHub access is done over https.
