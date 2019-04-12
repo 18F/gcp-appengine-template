@@ -114,6 +114,6 @@ satisfies:
   narrative:
     - text: |
         Cloud SQL encrypts all of it's data at rest:  https://cloud.google.com/sql/faq#encryption-manage-rest
-        
+
         See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
         for the inherited controls.

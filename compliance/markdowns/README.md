@@ -2,16 +2,20 @@
 
 This document is meant to collect most of the data that you will need to complete a
 GSA LATO package.  Since the documents that you must fill out are all Word documents,
-and the requirements may change over time, we believe that it would be more useful
+and the requirements may change over time, we believe that it would be better
 for us to collect the data that you need to fill out the package in a useful way
 and let you consult it as you fill the actual templates out.
+
+We have highlighted where you will probably need to edit/add data, or at
+least think carefully about the contents of that section with "XXX".
+
 
 # GSA LATO SSP Template
 
 As you fill out sections in the GSA LATO SSP Template, you should be able to search for
 the section name to receive guidance on how to fill it out.
 
-Not all sections have comments.  Those sections should be relatively
+Not all sections in the LATO doc have a section here.  Those sections should be relatively
 self-explanatory.
 
 ## Information System Categorization
@@ -40,7 +44,7 @@ Some good documentation on how to understand the roles can be found in the
 
 The template does not have a pre-built section here for GCP, but you ought to be able
 to fill in the information about the 
-[GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+[GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure)
 here.
 
 ## General System Description
@@ -165,4 +169,4 @@ need to document it here.
 
 # Minimum Security Controls
 
-Below here are all the security controls and their documentation.
+Below here are all the security controls and their documentation.  
