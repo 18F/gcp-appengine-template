@@ -278,7 +278,11 @@ tool while in the `gcp-appengine-template/compliance` directory to understand
 what you still need to implement, find controls that are incomplete with
 `compliance-masonry info -i partial`, etc.  Consult the 
 [compliance-masonry usage docs](https://github.com/opencontrol/compliance-masonry/blob/master/docs/usage.md)
-for more info.
+for more info.  
+
+You can also use git tools to see what has changed between releases or
+over time to see if changes are worthy of a Significant Change Request or
+whatever.  For instance: `git checkout master ; git diff staging $(find . -name compliance -type d)`
 
 Down the road, we would like to think that tools like this will evolve into
 a Behaviour Driven Compliance Test suite that can actually test the implementation
