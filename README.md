@@ -243,7 +243,7 @@ requires.
 
 Every federal information system must be granted an Authority To Operate (ATO)
 by an Authorizing Official in order to go into production.  A good overview of
-the process can be found in this [excellent ATO overview](https://docs.google.com/presentation/d/1cLHxGfAYzfg13hm6FlAiJQ0pUqPbkBMw4XZFFsVZosI/edit?ts=5cb0dff0#slide=id.g1f710bd7ce_0_847)
+the process can be found in this [excellent ATO overview](https://docs.google.com/presentation/d/1x-Bt8uyW-szHarglY57fFcC6PRCpUGFLe07uOvt93uk/edit#slide=id.g1f710bd7ce_0_847)
 and a more in-depth look can be found in [18F's before-you-ship docs](https://before-you-ship.18f.gov/ato/).  There
 are currently a few options for getting an ATO:
 * A [FedRAMP Tailored](https://tailored.fedramp.gov/) package.
