@@ -301,6 +301,67 @@ documentation you created with your code in a
 or a [PDF](https://github.com/opencontrol/compliance-masonry/blob/master/docs/gitbook.md#export-as-a-pdf)
 that you can consult while filling out your ATO package.
 
+### GSA LATO Process
+
+The process that we are documenting here is aimed at getting a 
+"One year Limited ATO" or "Three-year Full ATO", depending on whether your
+system is classified as FIPS 199 Moderate or FIPS 199 Low.  There is also an
+option to get a 90 day ATO simply by getting pentested, but after that 90 day
+ATO expires, you cannot renew it, and must step up to the 1 or 3 year ATO.
+
+Other ATO types can probably roughly follow this process and use the GSA
+LATO data to fill out their SSP template.  There will probably be additional
+controls that you will need to document for those, as well as different
+documents to follow, different Authorizing Officials and other contacts,
+etc.  You will have to figure that out.
+
+To apply for a GSA LATO, you should:
+1. Download the [Lightweight Security Authorization Guide](https://insite.gsa.gov/cdnstatic/insite/Lightweight_Security_Authorization_Process_%5BCIO_IT_Security_14-68_Rev_6%5D_04-25-2018.docx)
+   from [insite](https://insite.gsa.gov/topics/information-technology/security-and-privacy/it-security/it-security-procedural-guides)
+   and read it over.  This is the generic process for getting a LATO.
+1. Read the 18F [Before You Ship](https://before-you-ship.18f.gov/ato/) document.
+   It is much better at explaining what you should do in regular language, but
+   has some cloud.gov-specific sections in it that you might need to
+   work around, so keep that in mind as you follow the process.  If you are
+   not in 18F, you may also have to skip some of the 18F-specific processes,
+   and instead use your own local ATO-related processes.
+1. Begin following the process outlined in https://before-you-ship.18f.gov/ato/.
+1. When selecting controls, you will select the controls contained in Appendix B of the 
+   [Lightweight Security Authorization Guide](https://insite.gsa.gov/cdnstatic/insite/Lightweight_Security_Authorization_Process_%5BCIO_IT_Security_14-68_Rev_6%5D_04-25-2018.docx).
+1. When documenting the controls, be aware that much of the controls are
+   [already documented](#compliance-documentation).  You will only need
+   to additionally document the controls relevant to your application that
+   you have deployed using this template, as well as any changes to the
+   infrastructure (if any).
+1. When you get to where you are filling out the [SSP](https://before-you-ship.18f.gov/ato/ssp/),
+   you will want to generate the [compliance documentation](#compliance-documentation)
+   from your project and use that information to help you understand what/how
+   to fill out the different sections.
+
+   A quick summary of how to generate the [GitBook](https://github.com/opencontrol/compliance-masonry/blob/master/docs/gitbook.md)
+   that lets you see the controls and other compliance information is:
+     2. `cd gcp-appengine-template/compliance && (rm -rf exports ; compliance-masonry get ; compliance-masonry docs gitbook LATO ; npm install -g gitbook-cli ; cd exports ; gitbook serve ; cd ../..)`
+     2. Go to http://localhost:4000/ in your web browser.
+
+   Most of the sections in the [SSP Template](https://docs.google.com/document/d/1ye-MUIq_0cmv8-Lkd41Gx_V0adIiLEho96GwYI_H_8g/edit#heading=h.nc0r2rvqrwc4)
+   (which you can find in Appendix A of the [Lightweight Security Authorization Guide](https://insite.gsa.gov/cdnstatic/insite/Lightweight_Security_Authorization_Process_%5BCIO_IT_Security_14-68_Rev_6%5D_04-25-2018.docx))
+   will have some text in the [GitBook](https://github.com/opencontrol/compliance-masonry/blob/master/docs/gitbook.md)
+   that you can copy or use as a guide to fill out the various sections
+   and controls, in addition to the more general guidance in the
+   [SSP documentation](https://before-you-ship.18f.gov/ato/ssp/).
+1. Continue executing the process outlined in the 18F [Before You Ship](https://before-you-ship.18f.gov/ato/)
+   document until you have your ATO!
+
+### Continuing Maintenance of GSA LATO
+
+You may need to re-authorize your ATO if you make significant changes to
+the system, especially if they change the security posture of the system.
+You will also need to renew your ATO once a year.
+
+These processes are also documented at a high level in the
+18F [Before You Ship](https://before-you-ship.18f.gov/ato/) document.
+
+
 ## Common Workflows
 
 ### Normal Development Workflow
