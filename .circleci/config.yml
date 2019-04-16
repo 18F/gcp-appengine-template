@@ -269,10 +269,8 @@ jobs:
           no_output_timeout: 30m
           command: |
             apt install -y jq
-            # XXX should probably lock version or turn it into a submodule
-            git clone https://github.com/timothy-spencer/oauth2_proxy-1 oauth2_proxy
+            git clone https://github.com/pusher/oauth2_proxy
             cd oauth2_proxy
-            git checkout tspencerrepo
 
             # set defaults
             export TARGET_VERSION=${CIRCLE_BRANCH}
