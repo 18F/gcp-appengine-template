@@ -640,29 +640,29 @@ workflows:
             branches:
               only:
                 - master
-  # deploy-dotnet-example:
-  #   jobs:
-  #     - deploy-dotnet:
-  #         filters:
-  #           branches:
-  #             only:
-  #               # This is the list of branches which will be deployed automatically.
-  #               # Add more branches here if you want them automatically deployed.
-  #               - master
-  #               - staging
-  #               - dev
-  #     - test-dotnet:
-  #         requires:
-  #           - deploy-dotnet
-  #     - owaspzap-dotnet:
-  #         requires:
-  #           - deploy-dotnet
-  #         filters:
-  #           branches:
-  #             only:
-  #               # Do not run this against production, lest it fill it with garbage.
-  #               - dev
-  #               - staging
+  deploy-dotnet-example:
+    jobs:
+      - deploy-dotnet:
+          filters:
+            branches:
+              only:
+                # This is the list of branches which will be deployed automatically.
+                # Add more branches here if you want them automatically deployed.
+                - master
+                - staging
+                - dev
+      - test-dotnet:
+          requires:
+            - deploy-dotnet
+      - owaspzap-dotnet:
+          requires:
+            - deploy-dotnet
+          filters:
+            branches:
+              only:
+                # Do not run this against production, lest it fill it with garbage.
+                - dev
+                - staging
   deploy-log-sync:
     jobs:
       - deploy-log-sync:
