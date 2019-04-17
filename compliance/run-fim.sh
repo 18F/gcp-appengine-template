@@ -23,6 +23,7 @@ echo "${INSTANCES}" | jq -r '.[] | .id + " " +  .service + " " + .version + " " 
 	ssh -o StrictHostKeyChecking=no "$(whoami)"@"${IP}" -o CheckHostIP=no -o HostKeyAlias=gae."${PROJECT}"."${INSTANCE}" -o IdentitiesOnly=yes -o UserKnownHostsFile=~/.ssh/google_compute_known_hosts hostname </dev/null
 
 	# execute the commands to get the fim.sh script out there and run.
+	# The FIM output also gets sent to syslog, so you can look for it in stackdriver.
 	gcloud -q beta app instances scp --version="${VERSION}" --service="${SERVICE}" fim.sh "${INSTANCE}":fim.sh
 	rm -f /tmp/fimout.$$
 	gcloud -q app instances ssh --version="${VERSION}" --service="${SERVICE}" "${INSTANCE}" -- "./fim.sh | logger -sp syslog.crit 2>&1" > /tmp/fimout.$$
