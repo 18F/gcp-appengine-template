@@ -26,3 +26,10 @@ satisfies:
         The only exception to this is if the sso_proxy has been deployed in front of it, in which
         case the auth is done by the sso_proxy and requests to the app are verified to be coming
         direct from the proxy by checking the HMAC signature header.
+- control_key: SI-10
+  standard_key: NIST-800-53
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        Rails does model level validation, and we use that to ensure that the input is proper:  https://guides.rubyonrails.org/active_record_validations.html

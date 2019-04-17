@@ -24,3 +24,10 @@ satisfies:
         The credentials for basic auth are shared with people who are authorized to use the app.
 
         The basic auth is there to ensure that random people cannot get in.
+- control_key: SI-10
+  standard_key: NIST-800-53
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        .NET Core does validation, and we use that to ensure that the input is proper:  https://docs.microsoft.com/en-us/aspnet/core/tutorials/first-mvc-app/validation?view=aspnetcore-2.2
