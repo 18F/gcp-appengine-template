@@ -120,3 +120,22 @@ satisfies:
   narrative:
     - text: |
         All CircleCI access is done over https.
+- control_key: SI-2
+  standard_key: NIST-800-53
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        The CircleCI deployment pipeline for all example apps deployed with this template will
+        be automatically scanned by the OWASP ZAP scanner: 
+        https://www.owasp.org/index.php/OWASP_Zed_Attack_Proxy_Project
+
+        The CircleCI deployment pipeline for all example apps deployed with this template will
+        have tests run against them so that as new deployments get deployed with
+        updated runtimes to verify that the updates are non-breaking.
+
+        These scans and tests are run in the dev/staging environments upon deployment,
+        so if there are problems, they can be resolved in the lower environments before they
+        reach production.
+
+        If flaws are noticed by OWASP ZAP or the tests, CircleCI will notify the Admins.

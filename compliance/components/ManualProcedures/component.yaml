@@ -72,3 +72,20 @@ satisfies:
         such as terraform, the Cloud SDK, any environments you use to do builds/deploys.
         None are currently old, but you might want to create and document a periodic
         process to check that all things that have versions are updated if they need to be.
+- control_key: IA-2 (12)
+  standard_key: NIST-800-53
+  covered_by: []
+  implementation_status: none
+  narrative:
+    - text: |
+        XXX If your app uses PIV, through login.gov or other mechanism, document that
+        in your app.  Otherwise, say something like
+        "PIV card access is not applicable for this system".
+- control_key: SI-2
+  standard_key: NIST-800-53
+  covered_by: []
+  implementation_status: none
+  narrative:
+    - text: |
+        XXX Document what your policies and procedures for when you receive an OWASP
+        Zap finding that needs remediation.
