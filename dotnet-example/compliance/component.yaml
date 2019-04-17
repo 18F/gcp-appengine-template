@@ -30,4 +30,4 @@ satisfies:
   implementation_status: complete
   narrative:
     - text: |
-        .NET Core does validation, and we use that to ensure that the input is proper:  https://docs.microsoft.com/en-us/aspnet/core/tutorials/first-mvc-app/validation?view=aspnetcore-2.2
+        .NET Core does validation, and we use that to ensure that the input is proper:  https://docs.microsoft.com/en-us/aspnet/core/tutorials/first-mvc-app/validation?view=aspnetcore-2.1
