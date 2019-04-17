@@ -355,6 +355,8 @@ jobs:
           name: Run Tests!
           command: |
             echo "Need better tests!  Run a testing script here on $(cat /tmp/workspace/sso_target_url). XXX"
+            echo sleeping a bit to try to make this test more robust
+            sleep 30
             echo testing if proxy is alive
             curl -f $(cat /tmp/workspace/sso_target_url)liveness_check | grep OK || exit 1
             echo testing if proxy is giving back an authorize redirect

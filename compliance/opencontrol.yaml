@@ -1,0 +1,26 @@
+schema_version: "1.0.0"
+name: GCP Template
+metadata:
+  description: "Template for deploying an application into GCP"
+  maintainers:
+    - timothy.spencer@gsa.gov
+components:
+  - ../rails-example/compliance
+  - ../dotnet-example/compliance
+  - ./components/oauth2_proxy
+  - ./components/GCP-Console
+  - ./components/GCP-Stackdriver
+  - ./components/GCP-AppEngine
+  - ./components/GCP-CloudSQL
+  - ./components/GCP-CloudStorage
+  - ./components/GitHub
+  - ./components/CircleCI
+  - ./components/ManualProcedures
+dependencies:
+  certifications:
+    - url: https://github.com/18F/GSA-Certifications
+      revision: master
+  standards:
+    - url: https://github.com/opencontrol/standards
+      revision: master
+

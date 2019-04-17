@@ -1,0 +1,175 @@
+documentation_complete: false
+name: GCP-Console
+schema_version: 3.1.0
+references:
+  - name: GCP Console documentation
+    path: https://cloud.google.com/compute/docs/console
+    type: URL
+  - name: GCP role documentation
+    path: https://cloud.google.com/iam/docs/understanding-roles
+    type: URL
+satisfies:
+- control_key: AC-2
+  standard_key: NIST-800-53
+  control_origins:
+    - inherited
+  covered_by: []
+  implementation_status: partial
+  narrative:
+    - text: |
+        The users who are authorized to use GCP are added and removed by GSA ICE
+        through a process that they are still developing. 
+
+        XXX Should check with GSA ICE
+        to see if they have updated their process.
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
+- control_key: AC-3
+  standard_key: NIST-800-53
+  control_origins:
+    - inherited
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        GCP's Cloud Identity & Access Management (Cloud IAM) lets administrators authorize
+        who can take action on specific resources, giving you full control and visibility
+        to manage cloud resources centrally.
+
+        The resources that users of GCP can manage, and what types of changes are allowed
+        are specified by GSA ICE.
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
+
+        There are no shared user accounts.
+
+        The users of GCP are required by GSA ICE to use strong 2-factor 
+        authentication to log in:  A password and a FIDO/U2F key.
+- control_key: AC-6 (5)
+  standard_key: NIST-800-53
+  control_origins:
+    - inherited
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        GCP's Cloud Identity & Access Management (Cloud IAM) lets administrators authorize
+        who can take action on specific resources, giving you full control and visibility
+        to manage cloud resources centrally.
+
+        The resources that users of GCP can manage are specified by GSA ICE to
+        be as restrictive as possible.  Currently that means that the project owner is
+        granted the Editor role,
+        which does not allow IAM editing, but does allow
+        apps/services in the project to be created/managed.  Additional users and roles
+        can be added by GSA ICE.
+
+        Eventually, we hope to change this so that Project Owners are given the
+        `roles/owner` IAM role, Admins are
+        given the `roles/editor` role, Developers may be given `roles/viewer` or
+        `roles/editor` roles (or no roles) depending on what they need,
+        and Users are not granted GCP accounts/roles.
+
+        Each GCP Project will have it's own set of permissions, so Developers can be
+        granted `roles/editor` access in the dev environment to allow for more debugging,
+        or they can be granted temporary `roles/viewer` access to production to help
+        debug a problem, etc.
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
+- control_key: AU-2
+  standard_key: NIST-800-53
+  covered_by: []
+  control_origins:
+    - inherited
+  implementation_status: complete
+  narrative:
+    - text: |
+        All GCP Console events are automatically sent to Stackdriver.
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
+- control_key: RA-5
+  standard_key: NIST-800-53
+  covered_by: []
+  control_origins:
+    - inherited
+  implementation_status: complete
+  narrative:
+    - text: |
+        GCP's Security Command Center will automatically scan App Engine apps for web
+        vulnerabilities.
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
+- control_key: IA-2
+  standard_key: NIST-800-53
+  control_origins:
+    - inherited
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        The users of GCP are required by GSA ICE to use strong 2-factor 
+        authentication to log in:  A password and a FIDO/U2F key.
+        All services inside of GCP require this authentication for access:  ssh, API, console, etc.
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
+- control_key: IA-2 (1)
+  standard_key: NIST-800-53
+  control_origins:
+    - inherited
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        The users of GCP are required by GSA ICE to use strong 2-factor 
+        authentication to log in:  A password and a FIDO/U2F key.
+        All services inside of GCP require this authentication for access:  ssh, API, console, etc.
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
+- control_key: IA-2 (2)
+  standard_key: NIST-800-53
+  control_origins:
+    - inherited
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        The users of GCP are required by GSA ICE to use strong 2-factor 
+        authentication to log in:  A password and a FIDO/U2F key.
+        All services inside of GCP require this authentication for access:  ssh, API, console, etc.
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
+- control_key: SC-8 (1)
+  standard_key: NIST-800-53
+  covered_by: []
+  control_origins:
+    - inherited
+  implementation_status: complete
+  narrative:
+    - text: |
+        The GCP console is accessed exclusively over https.
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
+- control_key: SI-4 (5)
+  standard_key: NIST-800-53
+  covered_by: []
+  control_origins:
+    - inherited
+  implementation_status: complete
+  narrative:
+    - text: |
+        GCP can generate alerts from [threat data](https://cloud.google.com/security-command-center/docs/how-to-view-vulnerabilities-threats)
+        and send them to Admins and Project Owners by using a
+        [notifier](https://cloud.google.com/security-command-center/docs/how-to-install-notifier).
+        XXX This is currently not implemented in this template.
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.

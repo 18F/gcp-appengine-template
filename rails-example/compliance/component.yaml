@@ -1,0 +1,35 @@
+documentation_complete: true
+name: rails-example
+schema_version: 3.1.0
+references:
+  - name: rails example app
+    path: https://github.com/18F/gcp-appengine-template/tree/master/rails-example
+    type: URL
+satisfies:
+- control_key: AC-2
+  standard_key: NIST-800-53
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        Since the app itself is just an example for how one might deploy an app, there are no
+        actual users to manage.  The basic auth is there to ensure that random people cannot get in.
+- control_key: AC-3
+  standard_key: NIST-800-53
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        The rails example app requires basic auth before it will allow users to access the app.
+        The credentials for basic auth are shared with people who are authorized to use the app.
+
+        The only exception to this is if the sso_proxy has been deployed in front of it, in which
+        case the auth is done by the sso_proxy and requests to the app are verified to be coming
+        direct from the proxy by checking the HMAC signature header.
+- control_key: SI-10
+  standard_key: NIST-800-53
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        Rails does model level validation, and we use that to ensure that the input is proper:  https://guides.rubyonrails.org/active_record_validations.html

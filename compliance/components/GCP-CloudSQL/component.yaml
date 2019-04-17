@@ -1,0 +1,142 @@
+documentation_complete: false
+name: GCP-CloudSQL
+schema_version: 3.1.0
+references:
+  - name: GCP Cloud SQL documentation
+    path: https://cloud.google.com/sql/docs/
+    type: URL
+satisfies:
+- control_key: AC-3
+  standard_key: NIST-800-53
+  covered_by: []
+  control_origins:
+    - inherited
+  implementation_status: complete
+  narrative:
+    - text: |
+        Only GCP authorized Admins, Developers, or App Engine instances are allowed
+        to connect to the databases.  No other entities are allowed to connect to
+        the databases at all.
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
+
+        Terraform creates and manages database credentials for the applications, but
+        these credentials are effectively just a second (or third) factor for authentication.
+- control_key: AU-2
+  standard_key: NIST-800-53
+  covered_by: []
+  control_origins:
+    - inherited
+  implementation_status: complete
+  narrative:
+    - text: |
+        All Cloud SQL events (creation/deletion/update/etc) and the logs generated
+        by the database are automatically sent to Stackdriver.  This facility is baked
+        into all Cloud SQL instances, with no option to remove or disable.
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
+- control_key: CM-6 (1)
+  standard_key: NIST-800-53
+  control_origins:
+    - inherited
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        Google automatically updates Cloud SQL instances with the latest security
+        patches as they are released.  https://cloud.google.com/sql/faq#version
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
+- control_key: CM-8 (2)
+  standard_key: NIST-800-53
+  control_origins:
+    - inherited
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        GCP Admins can run the `gcloud sql instances list` command to see what Cloud
+        SQL instances are running, or look in the GCP Console.
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
+- control_key: CP-7 (1)
+  standard_key: NIST-800-53
+  covered_by: []
+  control_origins:
+    - inherited
+  implementation_status: complete
+  narrative:
+    - text: |
+        The production databases have daily backups automatically scheduled
+        for them, and also are configured for HA and failover.
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
+- control_key: SC-7
+  standard_key: NIST-800-53
+  covered_by: []
+  control_origins:
+    - inherited
+  implementation_status: complete
+  narrative:
+    - text: |
+        GCP denies access to all Cloud SQL instances unless it is one of the App Engine apps
+        that we have specifically connected it to in the `app.yaml` file used to deploy it.
+
+        GCP Admins and Project Owners can be granted temporary access using an authenticated
+        `gcloud beta sql connect` command, which proxies a connection back to the database
+        through an encrypted tunnel.
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
+- control_key: SC-8 (1)
+  standard_key: NIST-800-53
+  covered_by: []
+  control_origins:
+    - inherited
+  implementation_status: complete
+  narrative:
+    - text: |
+        Cloud SQL encrypts all of it's data in transit:  https://cloud.google.com/sql/faq#encryption-manage-transit
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
+- control_key: SC-28 (1)
+  standard_key: NIST-800-53
+  covered_by: []
+  control_origins:
+    - inherited
+  implementation_status: complete
+  narrative:
+    - text: |
+        Cloud SQL encrypts all of it's data at rest:  https://cloud.google.com/sql/faq#encryption-manage-rest
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
+- control_key: SI-2
+  standard_key: NIST-800-53
+  control_origins:
+    - inherited
+  covered_by: []
+  implementation_status: complete
+  narrative:
+    - text: |
+        Google automatically updates Cloud SQL instances with the latest security
+        patches as they are released.  https://cloud.google.com/sql/faq#version
+
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.
+- control_key: SI-7
+  standard_key: NIST-800-53
+  covered_by: []
+  control_origins:
+    - inherited
+  implementation_status: complete
+  narrative:
+    - text: |
+        See the [GCP Fedramp Package](https://marketplace.fedramp.gov/#/product/google-services-google-cloud-platform-products-and-underlying-infrastructure?sort=productName&productNameSearch=google)
+        for the inherited controls.

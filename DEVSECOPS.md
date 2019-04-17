@@ -8,11 +8,14 @@ to automatically provision dev/staging/production environments into those GCP Pr
 with good secrets management, backups, tests, and other controls that make their project 
 automatically use best DevSecOps practices, making it easy for people to get an ATO.
 
+We believe that developing a project with DevSecOps best practices will result in a much
+better experience for the users, developers, and owners of projects derived from this template.
+
 ## Platform
 
 The platform that people will be deploying to is Google Cloud Platform (GCP).  This project does not 
-directly address how GCP is provisioned and set up, but we have had discussions with the people within GSA 
-ICE who are developing the process.
+directly address how GCP is provisioned and set up, but we have had discussions with the people in
+the GSA Enterprise Systems Support Division (ICE) who are developing the process.
 The rough plan is:
 * There is a GSA GCP Organization run by the GSA ICE people.  
 * The GSA ICE group will receive requests for GCP Projects from the Project Owner.
@@ -38,7 +41,10 @@ branch into the appropriate GCP Project whenever there are changes.
 ![diagram of a CircleCI workflow](https://github.com/18F/gcp-appengine-template/raw/master/workflow.png)
 
 Currently, our project uses Google App Engine to deploy apps which use Google Cloud SQL and KMS.  It also
-stores the terraform state in an encrypted Cloud Storage bucket.
+stores the terraform state in an encrypted Cloud Storage bucket.  All Google App Engine apps are
+deployed on instances that automatically are scaled up according to load, and are automatically updated
+weekly with patched images by GCP, and are only exposed to the world by GCP-supplied
+load balancers which ensure that services are accessed by https.
 
 ## App
 
@@ -303,7 +309,7 @@ There are a few known issues with the project:
     * Data Access audit logs  30 days
     * System Event audit logs 400 days
     * Access Transparency logs  400 days
-   * Logs other than audit logs or Access Transparency logs  30 days  
+    * Logs other than audit logs or Access Transparency logs  30 days  
     We may need to set up a storage bucket for log archival and automate that process,
     if this retention is not enough.
   * We only just got dev/staging/prod environments provisioned for us, so we have not yet
