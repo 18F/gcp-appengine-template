@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace dotnet_example.Models
 {
