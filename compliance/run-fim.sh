@@ -19,12 +19,16 @@ echo "${INSTANCES}" | jq -r '.[] | .id + " " +  .service + " " + .version + " " 
 	# This is a bit of a hack.  Collect the ssh key ahead of time automatically, since gcloud cannot:
 	# https://stackoverflow.com/questions/51822551/gcloud-app-instances-ssh-command-disable-ssh-host-key-checking
 	# Also, the ssh key changes when you turn off debug and it relaunches the instance.
+	#    open ssh up with an scp
+	timeout 20 gcloud -q app instances scp --version="${VERSION}" --service="${SERVICE}" fim.sh "${INSTANCE}":fim.sh </dev/null
+	#    get rid of the old key, if it exists
 	ssh-keygen -f ~/.ssh/google_compute_known_hosts -R gae."${PROJECT}"."${INSTANCE}"
+	#    collect the current host key
 	ssh -o StrictHostKeyChecking=no "$(whoami)"@"${IP}" -o CheckHostIP=no -o HostKeyAlias=gae."${PROJECT}"."${INSTANCE}" -o IdentitiesOnly=yes -o UserKnownHostsFile=~/.ssh/google_compute_known_hosts hostname </dev/null
 
 	# execute the commands to get the fim.sh script out there and run.
 	# The FIM output also gets sent to syslog, so you can look for it in stackdriver.
-	gcloud -q beta app instances scp --version="${VERSION}" --service="${SERVICE}" fim.sh "${INSTANCE}":fim.sh
+	gcloud -q app instances scp --version="${VERSION}" --service="${SERVICE}" fim.sh "${INSTANCE}":fim.sh
 	rm -f /tmp/fimout.$$
 	gcloud -q app instances ssh --version="${VERSION}" --service="${SERVICE}" "${INSTANCE}" -- "./fim.sh | logger -sp syslog.crit 2>&1" > /tmp/fimout.$$
 
@@ -34,7 +38,7 @@ echo "${INSTANCES}" | jq -r '.[] | .id + " " +  .service + " " + .version + " " 
 		touch /tmp/foundfim.$$
 	else
 		echo "========== Found no unexpected changes for ${INSTANCE}: disabling debug, which will cause the instance to relaunch"
-		gcloud -q app instances disable-debug --version="${VERSION}" --service="${SERVICE}" "${INSTANCE}"
+		(gcloud -q app instances disable-debug --version="${VERSION}" --service="${SERVICE}" "${INSTANCE}") </dev/null
 	fi
 done
 
