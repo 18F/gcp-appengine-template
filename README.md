@@ -261,7 +261,7 @@ are currently a few options for getting an ATO:
 What ATO you get depends on what your project needs.  If you are doing this in
 the GSA, you will probably want to follow the GSA LATO process, and most of the
 compliance data that we have collected here is aimed at fulfilling that process.
-That said, all of these ATO processes all map back to the NIST 800-63 controls,
+That said, all of these ATO processes all map back to the NIST 800-53 controls,
 so if you decide on a different ATO package, you ought to be able to use the
 GSA LATO compliance data to help speed your ATO journey along.
 
