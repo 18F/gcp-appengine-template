@@ -15,11 +15,6 @@ resource "google_storage_bucket" "logs-bucket" {
   }
 }
 
-output "logs_bucket" {
-  value = "${google_storage_bucket.logs-bucket.url}"
-  description = "Logs bucket for logs that are exported for ingestion by GSA IT Security"
-}
-
 # allow the unique service account to write to the logs bucket
 resource "google_project_iam_binding" "binding" {
   role        = "roles/storage.objectCreator"

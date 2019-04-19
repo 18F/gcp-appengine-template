@@ -14,6 +14,7 @@ jobs:
             gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
             gcloud config set project $GOOGLE_PROJECT_ID
             gsutil mb gs://gcp-terraform-state-$GOOGLE_PROJECT_ID || true
+            gsutil versioning set on gs://gcp-terraform-state-$GOOGLE_PROJECT_ID || true
             gcloud app create --region=us-west2 || true
       - run:
           name: Enabling APIs
@@ -47,6 +48,8 @@ jobs:
           name: Initialize and plan Terraform (check plan out here before approving!)
           command: |
             export TF_VAR_project_id=$GOOGLE_PROJECT_ID
+            export TF_VAR_staging_project_id=$STAGING_GOOGLE_PROJECT_ID
+            export TF_VAR_dev_project_id=$DEV_GOOGLE_PROJECT_ID
             cd terraform && terraform init -backend-config="bucket=gcp-terraform-state-$GOOGLE_PROJECT_ID" && terraform plan -input=false
   apply_terraform:
     docker:
@@ -60,6 +63,8 @@ jobs:
           name: Apply Terraform
           command: |
             export TF_VAR_project_id=$GOOGLE_PROJECT_ID
+            export TF_VAR_staging_project_id=$STAGING_GOOGLE_PROJECT_ID
+            export TF_VAR_dev_project_id=$DEV_GOOGLE_PROJECT_ID
             mkdir /tmp/workspace
             cd terraform && terraform init -backend-config="bucket=gcp-terraform-state-$GOOGLE_PROJECT_ID" && terraform apply -input=false -auto-approve
             terraform output -json > /tmp/workspace/tf-output.json
@@ -133,11 +138,11 @@ jobs:
 
             # put the tf output into a variable so it doesn't hit the disk
             export TFOUTPUT=$(gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json -)
-            export SECRET_KEY_BASE=$(echo ${TFOUTPUT} | jq -r .rails_secret_${RAILS_ENV}.value)
-            export CLOUDSQL_USERNAME=$(echo ${TFOUTPUT} | jq -r .postgres_username_${RAILS_ENV}.value)
-            export CLOUDSQL_PASSWORD=$(echo ${TFOUTPUT} | jq -r .postgres_password_${RAILS_ENV}.value)
-            export CONNECTION_NAME=$(echo ${TFOUTPUT} | jq -r .postgres_instance_${RAILS_ENV}.value)
-            export SIGNATURE_KEY=$(echo ${TFOUTPUT} | jq -r .signature_key_${TARGET_ENV}.value)
+            export SECRET_KEY_BASE=$(echo ${TFOUTPUT} | jq -r .module.${RAILS_ENV}.rails_secret.value)
+            export CLOUDSQL_USERNAME=$(echo ${TFOUTPUT} | jq -r .module.${RAILS_ENV}.postgres_username.value)
+            export CLOUDSQL_PASSWORD=$(echo ${TFOUTPUT} | jq -r .module.${RAILS_ENV}.postgres_password.value)
+            export CONNECTION_NAME=$(echo ${TFOUTPUT} | jq -r .module.${RAILS_ENV}.postgres_instance.value)
+            export SIGNATURE_KEY=$(echo ${TFOUTPUT} | jq -r .module.${RAILS_ENV}.signature_key.value)
 
             # set the google app engine config file up
             cat <<EOF > rails-example/app.yaml
@@ -302,11 +307,11 @@ jobs:
             export TFOUTPUT=$(gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json -)
 
             # extract data for the app.yaml file
-            export COOKIE_SECRET=$(echo ${TFOUTPUT} | jq -r .sso_cookie_secret_${TARGET_ENV}.value)
-            export SIGNATURE_KEY=$(echo ${TFOUTPUT} | jq -r .signature_key_${TARGET_ENV}.value)
+            export COOKIE_SECRET=$(echo ${TFOUTPUT} | jq -r .module.${TARGET_ENV}.sso_cookie_secret.value)
+            export SIGNATURE_KEY=$(echo ${TFOUTPUT} | jq -r .module.${TARGET_ENV}.signature_key.value)
             export SOURCE="${TARGET_URL}"
             export DEST=$(cat /tmp/workspace/rails_target_url)
-            echo ${TFOUTPUT} | jq -r .sso_key_${TARGET_ENV}.value > jwt_signing_key.pem
+            echo ${TFOUTPUT} | jq -r .module.${TARGET_ENV}.sso_key.value > jwt_signing_key.pem
 
             cat <<EOF > app.yaml
             runtime: custom
@@ -437,9 +442,9 @@ jobs:
 
             # put the tf output into a variable so it doesn't hit the disk
             export TFOUTPUT=$(gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json -)
-            export CLOUDSQL_USERNAME=$(echo ${TFOUTPUT} | jq -r .postgres_username_${DEPLOY_ENV}.value)
-            export CLOUDSQL_PASSWORD=$(echo ${TFOUTPUT} | jq -r .postgres_password_${DEPLOY_ENV}.value)
-            export CONNECTION_NAME=$(echo ${TFOUTPUT} | jq -r .postgres_instance_${DEPLOY_ENV}.value)
+            export CLOUDSQL_USERNAME=$(echo ${TFOUTPUT} | jq -r .module.${DEPLOY_ENV}.postgres_username.value)
+            export CLOUDSQL_PASSWORD=$(echo ${TFOUTPUT} | jq -r .module.${DEPLOY_ENV}.postgres_password.value)
+            export CONNECTION_NAME=$(echo ${TFOUTPUT} | jq -r .module.${DEPLOY_ENV}.postgres_instance.value)
 
             cat <<EOF > app.yaml
             runtime: aspnetcore
@@ -523,12 +528,17 @@ jobs:
               exit 0
             fi
 
+            if [ "${CIRCLE_BRANCH}" = "master" ] ; then
+              TARGET_ENV="production"
+            else
+              TARGET_ENV="${CIRCLE_BRANCH}"
+            fi
             apt install -y jq
             cd security-logging
 
             # extract data for the app.yaml file
             export TFOUTPUT=$(gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json -)
-            export LOGFROM=$(echo ${TFOUTPUT} | jq -r .logs_bucket.value)
+            export LOGFROM=$(echo ${TFOUTPUT} | jq -r .module.${TARGET_ENV}.logs_bucket.value)
             export AUTH_HEADER="GCS-Authorization"
             export AUTH_INFO="$(cat /proc/sys/kernel/random/uuid)_$(date +%s)"
             export TARGET_URL="https://${CIRCLE_BRANCH}-dot-logsync-dot-${GOOGLE_PROJECT_ID}.appspot.com/"

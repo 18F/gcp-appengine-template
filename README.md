@@ -14,28 +14,37 @@ up and running and get an ATO.
 To get the app(s) in this repo going, you will need to:
 
 1. Procure a [CircleCI](https://circleci.com/) account.
-1. Procure a GCP project and gain access to the [GCP console](https://console.cloud.google.com/).
 1. Fork or copy this repo into your github org.  Make your changes to this
    new repo.
 1. Consider your application load on the database and change the
    parameters in `terraform/google_sql.tf` to size your databases
    properly.  The default `db-f1-micro` db size is probably not sufficient
    for most production systems.
-1. Create a Terraform service account via
-   `Console -> IAM & admin -> Service Accounts` in GCP
-1. Save the JSON credentials to `$HOME/gcloud-service-key.json`
-   This file should either be stored securely by the administrators
-   of the system, or (even better) deleted after circleci has been seeded with
-   it's data.
-1. Go to `Console -> IAM & admin` in GCP, click on `View by: Roles`,
-   and then add `Project -> Owner` to the terraform service account.
+1. Procure three GCP projects and gain access to the [GCP console](https://console.cloud.google.com/)
+   on them all.  For each project, do the following:
+  1. Create a Terraform service account via
+     `Console -> IAM & admin -> Service Accounts` in GCP
+  1. Save the JSON credentials to `$HOME/gcloud-service-key.json` for
+     your production GCP Project, `$HOME/staging-gcloud-service-key.json` for
+     your staging GCP Project, or `$HOME/dev-gcloud-service-key.json` for
+     your dev GCP Project.
+
+     These files should either be stored securely by the administrators
+     of the system, or (even better) deleted after circleci has been seeded with
+     it's data.
+  1. Go to `Console -> IAM & admin` in GCP, click on `View by: Roles`,
+     and then add `Project -> Owner` to the terraform service account.
 1. You should be sure to set up master and staging branches as protected branches
    that require approval for PRs to land in this repo.  You should also enable
    as many code analysis integrations as are appropriate within the repo to
    enforce code quality and find vulnerabilities.
 1. Enable circleci on this repo, then add some environment variables to it:
    * `GCLOUD_SERVICE_KEY`:  Set this to the contents of `$HOME/gcloud-service-key.json`
-   * `GOOGLE_PROJECT_ID`: Set this to your google project ID
+   * `STAGING_GCLOUD_SERVICE_KEY`:  Set this to the contents of `$HOME/staging-gcloud-service-key.json`
+   * `DEV_GCLOUD_SERVICE_KEY`:  Set this to the contents of `$HOME/dev-gcloud-service-key.json`
+   * `GOOGLE_PROJECT_ID`: Set this to your production google project ID
+   * `STAGING_GOOGLE_PROJECT_ID`: Set this to your staging google project ID
+   * `DEV_GOOGLE_PROJECT_ID`: Set this to your dev google project ID
    * `BASICAUTH_PASSWORD`: Set this to a basic auth password to frontend non-SSO apps with.
      If it is not set, then your non-SSO app will be public.
    * `BASICAUTH_USER`: Set this to the basic auth username you want.
