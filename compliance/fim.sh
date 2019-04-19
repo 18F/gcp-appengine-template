@@ -19,6 +19,27 @@ A /app/tmp/restart.txt$
 C /var$
 C /var/log$
 A /var/log/app_engine$
+C /home$
+C /home/logsync$
+A /home/logsync/.config$
+A /home/logsync/.config/gcloud$
+A /home/logsync/.config/gcloud/.last_update_check.json$
+A /home/logsync/.config/gcloud/active_config$
+A /home/logsync/.config/gcloud/configurations$
+A /home/logsync/.config/gcloud/configurations/config_default$
+A /home/logsync/.config/gcloud/gce$
+A /home/logsync/.gsutil$
+A /home/logsync/.gsutil/credstore2.lock$
+A /home/logsync/.gsutil/gcecredcache$
+A /home/logsync/.gsutil/gcecredcache.lock$
+A /home/logsync/.gsutil/tracker-files$
+A /home/logsync/.gsutil/credstore2$
+C /root$
+A /root/.aspnet$
+A /root/.aspnet/DataProtection-Keys$
+A /root/.aspnet/DataProtection-Keys/key
+C /tmp$
+A /tmp/clr-debug-pipe-
 EOF
 
 # Find the differences for all the containers that are not google-appengine
