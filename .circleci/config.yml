@@ -6,8 +6,12 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Store Service Account key
-          command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+          name: set up job variables and key
+          command: |
+            keyvar=GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}
+            echo ${!keyvar} > ${HOME}/gcloud-service-key.json
+            projectvar=GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}
+            export GOOGLE_PROJECT_ID=${!projectvar}
       - run:
           name: Setup Google Cloud SDK
           command: |
@@ -42,14 +46,17 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Store Service Account
-          command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+          name: set up job variables and key
+          command: |
+            keyvar=GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}
+            echo ${!keyvar} > ${HOME}/gcloud-service-key.json
+            projectvar=GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}
+            export GOOGLE_PROJECT_ID=${!projectvar}
       - run:
           name: Initialize and plan Terraform (check plan out here before approving!)
           command: |
-            export TF_VAR_project_id=$GOOGLE_PROJECT_ID
-            export TF_VAR_staging_project_id=$STAGING_GOOGLE_PROJECT_ID
-            export TF_VAR_dev_project_id=$DEV_GOOGLE_PROJECT_ID
+            export TF_VAR_project_id=${GOOGLE_PROJECT_ID}
+            export TF_VAR_environment=${CIRCLE_BRANCH}
             cd terraform && terraform init -backend-config="bucket=gcp-terraform-state-$GOOGLE_PROJECT_ID" && terraform plan -input=false
   apply_terraform:
     docker:
@@ -57,14 +64,17 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Store Service Account
-          command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+          name: set up job variables and key
+          command: |
+            keyvar=GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}
+            echo ${!keyvar} > ${HOME}/gcloud-service-key.json
+            projectvar=GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}
+            export GOOGLE_PROJECT_ID=${!projectvar}
       - run:
           name: Apply Terraform
           command: |
             export TF_VAR_project_id=$GOOGLE_PROJECT_ID
-            export TF_VAR_staging_project_id=$STAGING_GOOGLE_PROJECT_ID
-            export TF_VAR_dev_project_id=$DEV_GOOGLE_PROJECT_ID
+            export TF_VAR_environment=${CIRCLE_BRANCH}
             mkdir /tmp/workspace
             cd terraform && terraform init -backend-config="bucket=gcp-terraform-state-$GOOGLE_PROJECT_ID" && terraform apply -input=false -auto-approve
             terraform output -json > /tmp/workspace/tf-output.json
@@ -81,7 +91,11 @@ jobs:
       - run:
           name: set up google cloud sdk and copy tf output into bucket
           command: |
-            echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+            keyvar=GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}
+            echo ${!keyvar} > ${HOME}/gcloud-service-key.json
+            projectvar=GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}
+            export GOOGLE_PROJECT_ID=${!projectvar}
+
             gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
             gcloud config set project $GOOGLE_PROJECT_ID
             gsutil cp /tmp/workspace/tf-output.json gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json
@@ -108,8 +122,12 @@ jobs:
       - run:
           name: Setup Google Cloud SDK
           command: |
-            echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
-            export GCLOUD_SDK_VERSION=236
+            keyvar=GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}
+            echo ${!keyvar} > ${HOME}/gcloud-service-key.json
+            projectvar=GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}
+            export GOOGLE_PROJECT_ID=${!projectvar}
+
+            export GCLOUD_SDK_VERSION=242
             curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-$GCLOUD_SDK_VERSION.0.0-linux-x86_64.tar.gz -o ./gcloud-sdk.tar.gz
             tar xzf gcloud-sdk.tar.gz -C ~
             rm gcloud-sdk.tar.gz
@@ -123,26 +141,23 @@ jobs:
           command: |
             if [ "${CIRCLE_BRANCH}" = "master" ] ; then
               export RAILS_ENV=production
-              # This is kinda like google's default version naming
-              export TARGET_VERSION=$(date +%Y%m%d)t$(printf "%05d" $(expr $(date +%s) % 86400))
-              export TARGET_URL="https://rails-${GOOGLE_PROJECT_ID}.appspot.com/"
-              export PROXY_URL="https://${GOOGLE_PROJECT_ID}.appspot.com/"
               export INSTANCES=2
             else
               export RAILS_ENV=${CIRCLE_BRANCH}
-              export TARGET_VERSION=${CIRCLE_BRANCH}
-              export TARGET_URL="https://${TARGET_VERSION}-dot-rails-dot-${GOOGLE_PROJECT_ID}.appspot.com/"
-              export PROXY_URL="https://${TARGET_VERSION}-dot-${GOOGLE_PROJECT_ID}.appspot.com/"
               export INSTANCES=1
             fi
+            # This is kinda like google's default version naming
+            export TARGET_VERSION=$(date +%Y%m%d)t$(printf "%05d" $(expr $(date +%s) % 86400))
+            export TARGET_URL="https://rails-${GOOGLE_PROJECT_ID}.appspot.com/"
+            export PROXY_URL="https://${GOOGLE_PROJECT_ID}.appspot.com/"
 
             # put the tf output into a variable so it doesn't hit the disk
             export TFOUTPUT=$(gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json -)
-            export SECRET_KEY_BASE=$(echo ${TFOUTPUT} | jq -r .module.${RAILS_ENV}.rails_secret.value)
-            export CLOUDSQL_USERNAME=$(echo ${TFOUTPUT} | jq -r .module.${RAILS_ENV}.postgres_username.value)
-            export CLOUDSQL_PASSWORD=$(echo ${TFOUTPUT} | jq -r .module.${RAILS_ENV}.postgres_password.value)
-            export CONNECTION_NAME=$(echo ${TFOUTPUT} | jq -r .module.${RAILS_ENV}.postgres_instance.value)
-            export SIGNATURE_KEY=$(echo ${TFOUTPUT} | jq -r .module.${RAILS_ENV}.signature_key.value)
+            export SECRET_KEY_BASE=$(echo ${TFOUTPUT} | jq -r .rails_secret.value)
+            export CLOUDSQL_USERNAME=$(echo ${TFOUTPUT} | jq -r .postgres_username.value)
+            export CLOUDSQL_PASSWORD=$(echo ${TFOUTPUT} | jq -r .postgres_password.value)
+            export CONNECTION_NAME=$(echo ${TFOUTPUT} | jq -r .postgres_instance.value)
+            export SIGNATURE_KEY=$(echo ${TFOUTPUT} | jq -r .signature_key.value)
 
             # set the google app engine config file up
             cat <<EOF > rails-example/app.yaml
@@ -186,7 +201,7 @@ jobs:
             bundle exec rake appengine:exec GAE_SERVICE=rails GAE_VERSION=${TARGET_VERSION} -- bundle exec rake db:create db:migrate
 
             # clean up old production versions (leave the last two, so you can roll back)
-            VERSIONS=$(gcloud app versions list --service=rails --format=list | egrep -v '\/dev$|\/staging$' | sort -rn | tail -n +3 | sed 's/^.*\///') || true
+            VERSIONS=$(gcloud app versions list --service=rails --format=list | sort -rn | tail -n +3 | sed 's/^.*\///') || true
             if [ ! -z ${VERSIONS} ] ; then
               gcloud app versions delete ${VERSIONS} || true
               echo cleaned up ${VERSIONS}
@@ -261,7 +276,11 @@ jobs:
       - checkout
       - run:
           name: Store Service Account key
-          command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+          command: |
+            keyvar=GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}
+            echo ${!keyvar} > ${HOME}/gcloud-service-key.json
+            projectvar=GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}
+            export GOOGLE_PROJECT_ID=${!projectvar}
       - run:
           name: Setup Google Cloud SDK
           command: |
@@ -278,40 +297,28 @@ jobs:
             cd oauth2_proxy
 
             # set defaults
-            export TARGET_VERSION=${CIRCLE_BRANCH}
-            export COOKIE_DOMAIN="${TARGET_VERSION}-dot-${GOOGLE_PROJECT_ID}.appspot.com"
+            # This is kinda like google's default version naming
+            export TARGET_VERSION=$(date +%Y%m%d)t$(printf "%05d" $(expr $(date +%s) % 86400))
+            export COOKIE_DOMAIN="${GOOGLE_PROJECT_ID}.appspot.com"
             export TARGET_URL="https://${COOKIE_DOMAIN}/"
-            export TARGET_ENV=${CIRCLE_BRANCH}
             export INSTANCES=1
+            idpclientidvar=IDP_CLIENT_ID_${CIRCLE_BRANCH}
+            export IDP_CLIENT_ID=${!idpclientidvar}
 
             # override defaults depending on environment
-            case "${CIRCLE_BRANCH}" in
-            "master")
-              # This is kinda like google's default version naming
-              export TARGET_VERSION=$(date +%Y%m%d)t$(printf "%05d" $(expr $(date +%s) % 86400))
-              export COOKIE_DOMAIN="${GOOGLE_PROJECT_ID}.appspot.com"
-              export TARGET_URL="https://${COOKIE_DOMAIN}/"
-              export TARGET_ENV=production
+            if [ "${CIRCLE_BRANCH}" = "master" ] ; then
               export INSTANCES=2
-              export IDP_CLIENT_ID=${IDP_CLIENT_ID_PRODUCTION}
-              ;;
-            "staging")
-              export IDP_CLIENT_ID=${IDP_CLIENT_ID_STAGING}
-              ;;
-            "dev")
-              export IDP_CLIENT_ID=${IDP_CLIENT_ID_DEV}
-              ;;
-            esac
+            fi
 
             # put the tf output into a variable so it doesn't hit the disk
             export TFOUTPUT=$(gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json -)
 
             # extract data for the app.yaml file
-            export COOKIE_SECRET=$(echo ${TFOUTPUT} | jq -r .module.${TARGET_ENV}.sso_cookie_secret.value)
-            export SIGNATURE_KEY=$(echo ${TFOUTPUT} | jq -r .module.${TARGET_ENV}.signature_key.value)
+            export COOKIE_SECRET=$(echo ${TFOUTPUT} | jq -r .sso_cookie_secret.value)
+            export SIGNATURE_KEY=$(echo ${TFOUTPUT} | jq -r .signature_key.value)
             export SOURCE="${TARGET_URL}"
             export DEST=$(cat /tmp/workspace/rails_target_url)
-            echo ${TFOUTPUT} | jq -r .module.${TARGET_ENV}.sso_key.value > jwt_signing_key.pem
+            echo ${TFOUTPUT} | jq -r .sso_key.value > jwt_signing_key.pem
 
             cat <<EOF > app.yaml
             runtime: custom
@@ -372,7 +379,11 @@ jobs:
     steps:
       - run:
           name: Store Service Account key
-          command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+          command: |
+            keyvar=GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}
+            echo ${!keyvar} > ${HOME}/gcloud-service-key.json
+            projectvar=GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}
+            export GOOGLE_PROJECT_ID=${!projectvar}
       - run:
           name: Setup Google Cloud SDK
           command: |
@@ -415,8 +426,12 @@ jobs:
       - run:
           name: Setup Google Cloud SDK
           command: |
-            echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
-            export GCLOUD_SDK_VERSION=236
+            keyvar=GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}
+            echo ${!keyvar} > ${HOME}/gcloud-service-key.json
+            projectvar=GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}
+            export GOOGLE_PROJECT_ID=${!projectvar}
+
+            export GCLOUD_SDK_VERSION=242
             curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-$GCLOUD_SDK_VERSION.0.0-linux-x86_64.tar.gz -o ./gcloud-sdk.tar.gz
             tar xzf gcloud-sdk.tar.gz -C ~
             rm gcloud-sdk.tar.gz
@@ -442,9 +457,9 @@ jobs:
 
             # put the tf output into a variable so it doesn't hit the disk
             export TFOUTPUT=$(gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json -)
-            export CLOUDSQL_USERNAME=$(echo ${TFOUTPUT} | jq -r .module.${DEPLOY_ENV}.postgres_username.value)
-            export CLOUDSQL_PASSWORD=$(echo ${TFOUTPUT} | jq -r .module.${DEPLOY_ENV}.postgres_password.value)
-            export CONNECTION_NAME=$(echo ${TFOUTPUT} | jq -r .module.${DEPLOY_ENV}.postgres_instance.value)
+            export CLOUDSQL_USERNAME=$(echo ${TFOUTPUT} | jq -r .postgres_username.value)
+            export CLOUDSQL_PASSWORD=$(echo ${TFOUTPUT} | jq -r .postgres_password.value)
+            export CONNECTION_NAME=$(echo ${TFOUTPUT} | jq -r .postgres_instance.value)
 
             cat <<EOF > app.yaml
             runtime: aspnetcore
@@ -509,7 +524,11 @@ jobs:
       - checkout
       - run:
           name: Store Service Account key
-          command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+          command: |
+            keyvar=GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}
+            echo ${!keyvar} > ${HOME}/gcloud-service-key.json
+            projectvar=GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}
+            export GOOGLE_PROJECT_ID=${!projectvar}
       - run:
           name: Setup Google Cloud SDK
           command: |
@@ -538,7 +557,7 @@ jobs:
 
             # extract data for the app.yaml file
             export TFOUTPUT=$(gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json -)
-            export LOGFROM=$(echo ${TFOUTPUT} | jq -r .module.${TARGET_ENV}.logs_bucket.value)
+            export LOGFROM=$(echo ${TFOUTPUT} | jq -r .logs_bucket.value)
             export AUTH_HEADER="GCS-Authorization"
             export AUTH_INFO="$(cat /proc/sys/kernel/random/uuid)_$(date +%s)"
             export TARGET_URL="https://${CIRCLE_BRANCH}-dot-logsync-dot-${GOOGLE_PROJECT_ID}.appspot.com/"

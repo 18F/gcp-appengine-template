@@ -21,7 +21,7 @@ resource "tls_self_signed_cert" "sso" {
   private_key_pem = "${tls_private_key.sso.private_key_pem}"
 
   subject {
-    common_name  = "XXX"
+    common_name  = "${var.environment}"
     organization = "GSA"
   }
 

@@ -3,6 +3,10 @@ variable "region" {
   default = "us-east1"
 }
 
+variable "environment" {
+	type = "string"
+}
+
 variable "project_id" {
-  type = "string"
+  type "string"
 }

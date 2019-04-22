@@ -24,7 +24,7 @@ To get the app(s) in this repo going, you will need to:
    on them all.  For each project, do the following:
   1. Create a Terraform service account via
      `Console -> IAM & admin -> Service Accounts` in GCP
-  1. Save the JSON credentials to `$HOME/gcloud-service-key.json` for
+  1. Save the JSON credentials to `$HOME/master-gcloud-service-key.json` for
      your production GCP Project, `$HOME/staging-gcloud-service-key.json` for
      your staging GCP Project, or `$HOME/dev-gcloud-service-key.json` for
      your dev GCP Project.
@@ -39,12 +39,12 @@ To get the app(s) in this repo going, you will need to:
    as many code analysis integrations as are appropriate within the repo to
    enforce code quality and find vulnerabilities.
 1. Enable circleci on this repo, then add some environment variables to it:
-   * `GCLOUD_SERVICE_KEY`:  Set this to the contents of `$HOME/gcloud-service-key.json`
-   * `STAGING_GCLOUD_SERVICE_KEY`:  Set this to the contents of `$HOME/staging-gcloud-service-key.json`
-   * `DEV_GCLOUD_SERVICE_KEY`:  Set this to the contents of `$HOME/dev-gcloud-service-key.json`
-   * `GOOGLE_PROJECT_ID`: Set this to your production google project ID
-   * `STAGING_GOOGLE_PROJECT_ID`: Set this to your staging google project ID
-   * `DEV_GOOGLE_PROJECT_ID`: Set this to your dev google project ID
+   * `GCLOUD_SERVICE_KEY_master`:  Set this to the contents of `$HOME/master-gcloud-service-key.json`
+   * `GCLOUD_SERVICE_KEY_staging`:  Set this to the contents of `$HOME/staging-gcloud-service-key.json`
+   * `GCLOUD_SERVICE_KEY_dev`:  Set this to the contents of `$HOME/dev-gcloud-service-key.json`
+   * `GOOGLE_PROJECT_ID_master`: Set this to your production google project ID
+   * `GOOGLE_PROJECT_ID_staging`: Set this to your staging google project ID
+   * `GOOGLE_PROJECT_ID_dev`: Set this to your dev google project ID
    * `BASICAUTH_PASSWORD`: Set this to a basic auth password to frontend non-SSO apps with.
      If it is not set, then your non-SSO app will be public.
    * `BASICAUTH_USER`: Set this to the basic auth username you want.
