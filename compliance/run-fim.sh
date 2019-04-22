@@ -39,6 +39,7 @@ echo "${INSTANCES}" | jq -r '.[] | .id + " " +  .service + " " + .version + " " 
 			break
 		fi
 		sleep "$loopsleep"
+		((loopcount = loopcount + 1))
 	done
 	if [ "$break" = "true" ] ; then
 		echo "skipping to next instance"
