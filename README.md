@@ -22,9 +22,9 @@ To get the app(s) in this repo going, you will need to:
    for most production systems.
 1. Procure three GCP projects and gain access to the [GCP console](https://console.cloud.google.com/)
    on them all.  For each project, do the following:
-  1. Create a Terraform service account via
+  2. Create a Terraform service account via
      `Console -> IAM & admin -> Service Accounts` in GCP
-  1. Save the JSON credentials to `$HOME/master-gcloud-service-key.json` for
+  2. Save the JSON credentials to `$HOME/master-gcloud-service-key.json` for
      your production GCP Project, `$HOME/staging-gcloud-service-key.json` for
      your staging GCP Project, or `$HOME/dev-gcloud-service-key.json` for
      your dev GCP Project.
@@ -32,8 +32,10 @@ To get the app(s) in this repo going, you will need to:
      These files should either be stored securely by the administrators
      of the system, or (even better) deleted after circleci has been seeded with
      it's data.
-  1. Go to `Console -> IAM & admin` in GCP, click on `View by: Roles`,
+  2. Go to `Console -> IAM & admin` in GCP, click on `View by: Roles`,
      and then add `Project -> Owner` to the terraform service account.
+     If you cannot edit roles in your GCP Project, you may need to ask
+     GSA ICE for help with this.
 1. You should be sure to set up master and staging branches as protected branches
    that require approval for PRs to land in this repo.  You should also enable
    as many code analysis integrations as are appropriate within the repo to
@@ -135,10 +137,14 @@ KMS or share secrets or whatever.
     [few frameworks](https://cloud.google.com/appengine/docs/flexible/).
     Be sure you use a supported version of the framework.
   * You will need to customize the `.circleci/config.yml` file to remove the
-    example apps and add yours in.  **This is the core of automation in this project.**
+    example apps and add yours in.  **This file is the core of automation in this project.**
+    The example deployment pipelines in there do a lot of work, and you should copy from
+    them liberally to be sure that you are still following the DevSecOps best
+    practices that they implement.
+
     If you are not using a framework that has
     an example app, you may have to write your own deployment pipeline from
-    scratch.  Also, delete the `*-example` directories.
+    scratch.
   * We are trying to keep the secrets mostly managed by terraform so that they
     are relatively easy to rotate and are not kept by operators.  These secrets
     and other config are passed into the applications via environment variables
@@ -404,10 +410,6 @@ have oversight and will work.
     accessing/adding data using the old code/schema/etc.  This is something that
     you could change in the circleci pipelines or your app code.
 
-### Manual Deploy Workflow
-
-XXX You can run some stuff by hand if you want to.
-
 ### Logging/Debugging
 
 Logs can be watched either by using the [GCP Console](https://console.cloud.google.com/logs/),
@@ -439,25 +441,9 @@ do, you should follow this procedure:
   * You can watch the rollout by looking at the `apply_terraform` step once
     it gets going.
 
- **Be aware!  Infrastructure updates are common to _all_ environments.  If
- you make a change to terraform, that change could impact production.  There
- is just one infrastructure into which dev/staging/prod is deployed.**
-
-If you would like to test out a new, potentially dangerous infrastructure
-change, you could:
-  * Create a new repo from the existing one, preferably by forking it.
-  * Procure a new GCP project and bootstrap it using the new repo.
-    If production is using large instance sizes or other expensive
-    options, you might want to make them smaller before you do this.
-  * Make sure that everything works, load example data, etc.
-  * Make your changes to the new repo and test rolling them out.
-  * When done, you should delete everything to save $$.  **Be sure that
-    you delete everything in the _new_ GCP project, not the real
-    production one.**
-
-XXX When we can provision more than one GCP Project, we hope to restructure
-this so that infrastructure will not be shared, and can be branched just like
-the apps, simplifying the infrastructure testing considerably.
+Once you are sure that everything is happy, you can then create a Pull
+Request to roll your changes into the staging branch, seek approval, and
+then PR your code into the master branch to have it go into production.
 
 ### Secrets Rotation Workflow
 
