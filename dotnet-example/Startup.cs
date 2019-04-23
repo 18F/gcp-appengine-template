@@ -81,6 +81,7 @@ namespace dotnet_example
             }
 
             // set up basic auth here if there is a user
+            // NIST-800-53-AC-3
             var basicauthuser = Configuration["BASICAUTH_USER"];
             var basicauthpw = Configuration["BASICAUTH_PASSWORD"];
             if (! String.IsNullOrEmpty(basicauthuser))
@@ -131,6 +132,7 @@ namespace dotnet_example
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             // If we have a basic auth user, turn on authentication.
+            // NIST-800-53-AC-3
             var basicauthuser = Configuration["BASICAUTH_USER"];
             if (! String.IsNullOrEmpty(basicauthuser))
             {
