@@ -529,6 +529,3 @@ antiforgery keys, and has basic auth enabled.
 
 To test locally, `cd dotnet-example && dotnet run`.
 This will operate on a local `blogging.db` sqlite db.
-
-### Java Spring Boot / App Engine
-XXX
