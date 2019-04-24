@@ -320,6 +320,9 @@ controls that you will need to document for those, as well as different
 documents to follow, different Authorizing Officials and other contacts,
 etc.  You will have to figure that out.
 
+Here is the rough idea, followed by more detailed steps:
+![diagram of GSA LATO Process](https://github.com/18F/gcp-appengine-template/raw/master/LATOProcess.png)
+
 To apply for a GSA LATO, you should:
 1. Download the [Lightweight Security Authorization Guide](https://insite.gsa.gov/cdnstatic/insite/Lightweight_Security_Authorization_Process_%5BCIO_IT_Security_14-68_Rev_6%5D_04-25-2018.docx)
    from [insite](https://insite.gsa.gov/topics/information-technology/security-and-privacy/it-security/it-security-procedural-guides)
