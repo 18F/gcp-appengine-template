@@ -343,9 +343,11 @@ To apply for a GSA LATO, you should:
    from your project and use that information to help you understand what/how
    to fill out the different sections.
 
-   A quick summary of how to generate the [GitBook](https://github.com/opencontrol/compliance-masonry/blob/master/docs/gitbook.md)
+   A quick way to generate the [GitBook](https://github.com/opencontrol/compliance-masonry/blob/master/docs/gitbook.md)
    that lets you see the controls and other compliance information is:
-     2. `cd gcp-appengine-template/compliance && (rm -rf exports ; compliance-masonry get ; compliance-masonry docs gitbook LATO ; npm install -g gitbook-cli ; cd exports ; gitbook serve ; cd ../..)`
+     2. Make sure you have [Docker Desktop](https://www.docker.com/products/docker-desktop)
+        installed.
+     2. `cd gcp-appengine-template && (docker build -f compliance/Dockerfile . -t gcp-compliance ; docker run -p 4000:4000 gcp-compliance)`
      2. Go to http://localhost:4000/ in your web browser.
 
    Most of the sections in the [SSP Template](https://docs.google.com/document/d/1ye-MUIq_0cmv8-Lkd41Gx_V0adIiLEho96GwYI_H_8g/edit#heading=h.nc0r2rvqrwc4)

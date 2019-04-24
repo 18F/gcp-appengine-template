@@ -1,0 +1,13 @@
+compliance/opencontrols/
+compliance/exports/
+dotnet-example/bin
+dotnet-example/obj
+dotnet-example/*.db
+**/*.pem
+**/*.key
+**/*.swp
+**/.DS_Store
+**/*.sqlite3
+rails-example/log
+rails-example/tmp
+
