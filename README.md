@@ -67,10 +67,11 @@ To get the app(s) in this repo going, you will need to:
 1. Sign up as a developer for [login.gov](https://developers.login.gov/) and
    create dev, staging, and production apps in the login.gov dashboard using their 
    directions and the following guidance:
-   1. Look at the output from the `apply_terraform` job in circleci to get the Public Keys.
-      Look for the `sso_cert_XXX` outputs.  If you have the gcloud utility working and
+   1. Look at the output from the `apply_terraform` job for each environment in
+      circleci to get the Public Keys.
+      Look for the `sso_cert` output.  If you have the gcloud utility working and
       have `jq` installed, you can use this command to get the dev cert, for example:  
-      `gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json - | jq -r .sso_cert_dev.value`.
+      `gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID_dev/tf-output.json - | jq -r .sso_cert.value`.
       Change `dev` to `staging` and `production`, and you will have all the certs.
    1. Make the `Return to App URL` be something like `https://dev-dot-${GOOGLE_PROJECT_ID}.appspot.com/oauth2/sign_in`
       for dev, and change dev to `staging` and `production` for those apps too.
@@ -116,7 +117,9 @@ how you turn that on:
    * `LOGTO_AWS_SECRET_ACCESS_KEY`: Set this to the Secret Access Key ID that
      GSA SecOps gives you.
      (like `asdfasdfasdf+klwjelkjewlkjrweklrj`)
-1. Rerun the `deploy-log-sync` workflow for the environments you have set up.
+1. Uncomment the `deploy-log-sync` workflow in the `.circleci/config.yml` file and
+   push the code to GitHub, which should cause the workflow to deploy
+   the service.
 1. Check the logs for the logsync service.  You should see a line like
    `2019-04-08 12:39:34.000 PDT
 2019/04/08 19:39:34 synced logs from gs://logs-bucket-${GOOGLE_PROJECT_ID} to s3://gsa-logbucket/dev`
