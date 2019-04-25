@@ -21,9 +21,6 @@ jobs:
             gsutil versioning set on gs://gcp-terraform-state-$GOOGLE_PROJECT_ID || true
             gcloud app create --region=us-west2 || true
       - run:
-          name: Enabling APIs
-          command: ./terraform/enable-apis.sh
-      - run:
           name: Enable Audit Logging
           command: ./terraform/enable-audit-logs.sh
       - run:
