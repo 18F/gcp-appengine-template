@@ -40,7 +40,8 @@ To get the app(s) in this repo going, you will need to:
    that require approval for PRs to land in this repo.  You should also enable
    as many code analysis integrations as are appropriate within the repo to
    enforce code quality and find vulnerabilities.
-1. Enable circleci on this repo, then add some environment variables to it:
+1. [Enable circleci on this repo](https://circleci.com/docs/2.0/project-build/),
+   then [add some environment variables](https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project) to it:
    * `GCLOUD_SERVICE_KEY_master`:  Set this to the contents of `$HOME/master-gcloud-service-key.json`
    * `GCLOUD_SERVICE_KEY_staging`:  Set this to the contents of `$HOME/staging-gcloud-service-key.json`
    * `GCLOUD_SERVICE_KEY_dev`:  Set this to the contents of `$HOME/dev-gcloud-service-key.json`
@@ -50,10 +51,12 @@ To get the app(s) in this repo going, you will need to:
    * `BASICAUTH_PASSWORD`: Set this to a basic auth password to frontend non-SSO apps with.
      If it is not set, then your non-SSO app will be public.
    * `BASICAUTH_USER`: Set this to the basic auth username you want.
-1. Watch as circleci deploys the infrastructure.  The apps will all fail
+1. Watch as circleci deploys the infrastructure.  Watch the terraform job,
+   and approve it when it's plan is complete, then wait until it is done.
+   The apps will all fail
    because it takes much longer for the databases to be created than the apps,
    and because you will need to get some info from terraform to make the
-   oauth2_proxy work.
+   oauth2_proxy work.  This is fine.
 1. Go to the failed app deploy workflows in circleci and click on `Rerun`.
    Everything should fully deploy this time, though the rails app SSO proxy jobs
    will fail unless you completed the SSO proxy steps too.  This is fine.
