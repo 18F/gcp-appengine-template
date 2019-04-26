@@ -32,10 +32,10 @@ To get the app(s) in this repo going, you will need to:
      These files should either be stored securely by the administrators
      of the system, or (even better) deleted after circleci has been seeded with
      it's data.
-  2. Go to `Console -> IAM & admin` in GCP, click on `View by: Roles`,
-     and then add `Project -> Owner` to the terraform service account.
-     If you cannot edit roles in your GCP Project, you may need to ask
-     GSA ICE for help with this.
+  2. Get GSA ICE to enable all of the APIs and roles you need for your GCP
+     Project.  They should be able to check this repo out and cd into `gcp_setup`
+     and run `./ice_enable_everything.sh`.  Or at least they can look the scripts
+     over and understand what needs to be done on their end.
 1. You should be sure to set up master and staging branches as protected branches
    that require approval for PRs to land in this repo.  You should also enable
    as many code analysis integrations as are appropriate within the repo to
