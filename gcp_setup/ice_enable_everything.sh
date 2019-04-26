@@ -23,13 +23,13 @@ if [ -z "${PROJECT_OWNER}" ] ; then
 	exit 1
 fi
 
-echo enabling APIs
+echo enabling services/APIs
 ./enable-apis.sh
 
 echo enabling audit logs
 ./enable-audit-logs.sh
 
-echo creating/updating roles
+echo "creating/updating roles:  You may have to say 'Y' a few times for this"
 ./enable-roles.sh -c
 
 if gcloud iam service-accounts describe "terraform@${GOOGLE_PROJECT_ID}.iam.gserviceaccount.com" >/dev/null 2>&1 ; then

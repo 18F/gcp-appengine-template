@@ -19,10 +19,17 @@ storage-component.googleapis.com
 websecurityscanner.googleapis.com
 )
 
+# save the list of services that are actually available
+gcloud services list > /tmp/services.$$
+
 for api in "${APILIST[@]}"; do
-  if [ $(gcloud services list --filter "${api}" | wc -l) -eq 0 ]; then
+  # check that the service actually exists before enabling it
+  if grep -E "^${api}" "/tmp/services.$$" >/dev/null ; then
     gcloud services enable "${api}"
   fi
 done
+
+# clean up
+rm /tmp/services.$$
 
 exit 0
