@@ -10,6 +10,7 @@ if [ -z "${GOOGLE_PROJECT_ID}" ] ; then
 	echo "the GOOGLE_PROJECT_ID environment variable has not been set: set this to the GCP project ID that you want to add these roles to"
 	exit 1
 fi
+gcloud config set project ${GOOGLE_PROJECT_ID}
 
 # make sure we are in the proper directory
 if [ ! -f ./enable-apis.sh ] ; then
