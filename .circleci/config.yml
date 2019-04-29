@@ -16,20 +16,8 @@ jobs:
             gsutil mb gs://gcp-terraform-state-$GOOGLE_PROJECT_ID || true
             gcloud app create --region=us-west2 || true
       - run:
-          name: Enabling APIs
-          command: ./terraform/enable-apis.sh
-      - run:
-          name: Enable Audit Logging
-          command: ./terraform/enable-audit-logs.sh
-      - run:
           name: make sure jq is installed
           command: apt-get install -y jq
-      - run:
-          name: Enable KMS
-          command: ./terraform/enable-kms.sh
-      - run:
-          name: enable app engine if not already done
-          command: gcloud app create || true
       - run:
           name: Enable app to do schema migrations
           command: |
