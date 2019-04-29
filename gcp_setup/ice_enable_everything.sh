@@ -58,6 +58,7 @@ add_roles () {
 # enable terraform
 echo "attaching roles to terraform"
 ROLES="
+	roles/iam.securityReviewer
 	roles/cloudsql.admin
 	roles/appengine.appAdmin
 	roles/cloudkms.admin
@@ -74,6 +75,7 @@ gcloud projects add-iam-policy-binding "${GOOGLE_PROJECT_ID}" \
   --role "roles/cloudsql.client" >/dev/null
 
 # enable appEngine to use KMS
+echo "attaching roles to allow appengine to use KMS"
 ROLES="
 	roles/cloudkms.admin
 	roles/cloudkms.cryptoKeyEncrypterDecrypter
@@ -85,7 +87,6 @@ echo "attaching roles to Project Owners"
 ROLES="
 	roles/viewer
 	roles/monitoring.viewer
-	roles/iam.securityReviewer
 	roles/cloudsql.admin
 	roles/appengine.appAdmin
 	roles/cloudkms.admin
