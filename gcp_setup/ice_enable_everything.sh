@@ -14,7 +14,7 @@ gcloud config set project "${GOOGLE_PROJECT_ID}"
 PROJECT_NUMBER=$(gcloud projects describe "${GOOGLE_PROJECT_ID}" --format=text | awk '/^projectNumber:/ {print $2}')
 
 # make sure we are in the proper directory
-if [ ! -f ./enable-apis.sh ] ; then
+if [ ! -f ./enable-roles.sh ] ; then
 	echo this script must be run from the gcp_setup directory
 	exit 1
 fi
@@ -25,15 +25,51 @@ if [ -z "${PROJECT_OWNER}" ] ; then
 	exit 1
 fi
 
+############################################################
 echo enabling services/APIs
-./enable-apis.sh
+APILIST="
+	appengineflex.googleapis.com
+	cloudapis.googleapis.com
+	cloudbuild.googleapis.com
+	clouddebugger.googleapis.com
+	cloudkms.googleapis.com
+	cloudresourcemanager.googleapis.com
+	cloudscheduler.googleapis.com
+	cloudtrace.googleapis.com
+	iamcredentials.googleapis.com
+	logging.googleapis.com
+	monitoring.googleapis.com
+	oslogin.googleapis.com
+	sql-component.googleapis.com
+	sqladmin.googleapis.com
+	storage-api.googleapis.com
+	storage-component.googleapis.com
+	websecurityscanner.googleapis.com
+"
+# save the list of services that are actually available
+gcloud services list > /tmp/services.$$
+for api in ${APILIST} ; do
+  # check that the service actually exists before enabling it
+  if grep -E "^${api}" "/tmp/services.$$" >/dev/null ; then
+    gcloud services enable "${api}"
+  fi
+done
+# clean up
+rm /tmp/services.$$
 
+############################################################
+echo "enabling appEngine"
+gcloud app create --region=us-west2 >/dev/null 2>&1 || true
+
+############################################################
 echo enabling audit logs
 ./enable-audit-logs.sh
 
+############################################################
 echo "creating/updating roles:  You may have to say 'Y' a few times for this"
 ./enable-roles.sh -c
 
+############################################################
 if gcloud iam service-accounts describe "terraform@${GOOGLE_PROJECT_ID}.iam.gserviceaccount.com" >/dev/null 2>&1 ; then
 	echo terraform service account has already been created
 else
@@ -41,6 +77,7 @@ else
 	gcloud iam service-accounts create terraform --display-name "Terraform admin account"
 fi
 
+############################################################
 # function to add roles to a user/group
 # Be sure to set ROLES variable before running
 # usage:  add_roles <user|group|serviceAccount> <username or groupname>
@@ -55,12 +92,17 @@ add_roles () {
 }
 
 
+############################################################
 # enable terraform
 echo "attaching roles to terraform"
 ROLES="
 	roles/iam.securityReviewer
 	roles/cloudsql.admin
 	roles/appengine.appAdmin
+	roles/appengine.deployer
+	roles/cloudbuild.builds.editor
+	roles/cloudbuild.builds.builder
+	roles/compute.storageAdmin
 	roles/cloudkms.admin
 	roles/cloudscheduler.admin
 	roles/storage.admin
@@ -68,12 +110,14 @@ ROLES="
 "
 add_roles serviceAccount "terraform@${GOOGLE_PROJECT_ID}.iam.gserviceaccount.com"
 
+############################################################
 # Enable app to do schema migrations 
 echo "attaching roles to enable schema migrations"
 gcloud projects add-iam-policy-binding "${GOOGLE_PROJECT_ID}" \
   --member "serviceAccount:${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com" \
   --role "roles/cloudsql.client" >/dev/null
 
+############################################################
 # enable appEngine to use KMS
 echo "attaching roles to allow appengine to use KMS"
 ROLES="
@@ -82,6 +126,7 @@ ROLES="
 "
 add_roles serviceAccount "${GOOGLE_PROJECT_ID}@appspot.gserviceaccount.com"
 
+############################################################
 # enable project owner, or the owner group if set.
 echo "attaching roles to Project Owners"
 ROLES="
@@ -102,6 +147,7 @@ else
 	add_roles group "${PROJECT_OWNER_GROUP}"
 fi
 
+############################################################
 # Enable project admin
 echo "attaching roles to Project Admins"
 ROLES="
@@ -121,6 +167,7 @@ else
 	add_roles group "${PROJECT_ADMIN_GROUP}"
 fi
 
+############################################################
 # Enable project dev read/write
 echo "attaching roles to Developers who need r/w access"
 if [ -z "${PROJECT_DEVRW_GROUP}" ] ; then
@@ -140,6 +187,7 @@ else
 	add_roles group "${PROJECT_DEVRW_GROUP}"
 fi
 
+############################################################
 # Enable project dev readonly
 echo "attaching roles to Developers who need readonly access"
 if [ -z "${PROJECT_DEV_GROUP}" ] ; then
