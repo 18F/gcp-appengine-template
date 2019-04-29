@@ -78,6 +78,7 @@ echo "attaching roles to Project Owners"
 ROLES="
 	roles/viewer
 	roles/monitoring.viewer
+	roles/iam.securityReviewer
 	roles/cloudsql.admin
 	roles/appengine.appAdmin
 	roles/cloudkms.admin
