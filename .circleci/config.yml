@@ -1,28 +1,5 @@
 version: 2
 jobs:
-  enable_apis:
-    docker:
-      - image: google/cloud-sdk
-    steps:
-      - checkout
-      - run:
-          name: Store Service Account key
-          command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
-      - run:
-          name: Setup Google Cloud SDK
-          command: |
-            gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
-            gcloud config set project $GOOGLE_PROJECT_ID
-            gsutil mb gs://gcp-terraform-state-$GOOGLE_PROJECT_ID || true
-            gcloud app create --region=us-west2 || true
-      - run:
-          name: make sure jq is installed
-          command: apt-get install -y jq
-      - run:
-          name: Enable app to do schema migrations
-          command: |
-            export PROJECT_NUMBER=$(gcloud projects describe ${GOOGLE_PROJECT_ID} --format=json | jq -r .projectNumber)
-            gcloud projects add-iam-policy-binding ${GOOGLE_PROJECT_ID} --member=serviceAccount:${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com --role=roles/editor
   plan_terraform:
     docker:
       - image: hashicorp/terraform:0.11.13
@@ -575,7 +552,7 @@ workflows:
   version: 2
   terraform:
     jobs:
-      - enable_apis:
+      - plan_terraform:
           filters:
             branches:
               only:
@@ -583,9 +560,6 @@ workflows:
                 - master
                 - staging
                 - dev
-      - plan_terraform:
-          requires: 
-            - enable_apis
       - hold_terraform:
           type: approval
           requires:
