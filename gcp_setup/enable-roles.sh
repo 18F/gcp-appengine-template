@@ -17,6 +17,17 @@ if [ -z "${GOOGLE_PROJECT_ID}" ] ; then
 	exit 1
 fi
 
+# These are bad permissions that need to be filtered out because they
+# exist in a source role, but cannot be added to a custom role for some
+# reason.  Suspect that stackdriver isn't quite enabled, and we aren't
+# allowed project listing because we are part of an org.
+BADPERMS="
+resourcemanager.projects.list
+stackdriver.projects.edit
+serviceusage.services.enable
+"
+echo "${BADPERMS}" | sed '/^$/d' > /tmp/badperms.$$
+
 # This is the function that pulls down the base policies, removes the
 # permissions that are improper, and creates/updates the custom policies in the
 # GCP Project
@@ -24,7 +35,7 @@ create_policy () {
 	rm -f /tmp/iam_permissions.$$
 
 	for i in ${ROLES} ; do
-		gcloud iam roles describe "$i" | grep -v serviceusage.services.enable | grep -E '^- ' >> /tmp/iam_permissions.$$
+		gcloud iam roles describe "$i" | grep -v serviceusage.services.enable | grep -v -Ff /tmp/badperms.$$ | grep -E '^- ' >> /tmp/iam_permissions.$$
 	done
 
 	rm -f /tmp/new_role.$$
@@ -39,7 +50,7 @@ EOF
 
 	if [ "$1" = "-c" ] ; then
 		# update the role if it exists, otherwise create it
-		if gcloud iam roles describe "$NAME" >/dev/null 2>&1 ; then
+		if gcloud iam roles describe "$NAME" --project "${GOOGLE_PROJECT_ID}" >/dev/null 2>&1 ; then
 			gcloud iam roles update "$NAME" --project "${GOOGLE_PROJECT_ID}" --file /tmp/new_role.$$
 		else
 			gcloud iam roles create "$NAME" --project "${GOOGLE_PROJECT_ID}" --file /tmp/new_role.$$
@@ -53,62 +64,11 @@ EOF
 }
 
 ####################################################
-# create the terraform policy
+# create the monitoring.admin role
 ROLES="
- roles/editor
- roles/logging.admin
-"
-TITLE="GSA Project Terraform"
-DESCRIPTION=$(echo "$ROLES without serviceusage.services.enable" | tr -d '\n' )
-NAME=gsa_project_terraform
-create_policy "$1"
-
-####################################################
-# create the project owner policy
-ROLES="
- roles/editor
- roles/logging.admin
- roles/securitycenter.adminEditor
- roles/monitoring.admin
- roles/billing.viewer
-"
-TITLE="GSA Project Owner"
-DESCRIPTION=$(echo "$ROLES without serviceusage.services.enable" | tr -d '\n' )
-NAME=gsa_project_owner
-create_policy "$1"
-
-####################################################
-# create the project admin policy
-ROLES="
- roles/editor
- roles/logging.admin
- roles/securitycenter.adminEditor
- roles/monitoring.admin
- roles/billing.viewer
-"
-TITLE="GSA Project Admin"
-DESCRIPTION=$(echo "$ROLES without serviceusage.services.enable" | tr -d '\n' )
-NAME=gsa_project_admin
-create_policy "$1"
-
-####################################################
-# create the project dev read/write policy
-ROLES="
- roles/editor
  roles/monitoring.admin
 "
-TITLE="GSA Project Developer - rw"
+TITLE="GSA Project Monitoring Admin"
 DESCRIPTION=$(echo "$ROLES without serviceusage.services.enable" | tr -d '\n' )
-NAME=gsa_project_dev_rw
-create_policy "$1"
-
-####################################################
-# create the project dev readonly policy
-ROLES="
- roles/viewer
- roles/monitoring.viewer
-"
-TITLE="GSA Project Developer - rw"
-DESCRIPTION=$(echo "$ROLES without serviceusage.services.enable" | tr -d '\n' )
-NAME=gsa_project_dev_ro
+NAME=gsa.monitoring.admin
 create_policy "$1"

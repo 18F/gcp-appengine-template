@@ -20,17 +20,6 @@ jobs:
             gsutil mb gs://gcp-terraform-state-$GOOGLE_PROJECT_ID || true
             gsutil versioning set on gs://gcp-terraform-state-$GOOGLE_PROJECT_ID || true
             gcloud app create --region=us-west2 || true
-      - run:
-          name: make sure jq is installed
-          command: apt-get install -y jq
-      - run:
-          name: enable app engine if not already done
-          command: gcloud app create || true
-      - run:
-          name: Enable app to do schema migrations
-          command: |
-            export PROJECT_NUMBER=$(gcloud projects describe ${GOOGLE_PROJECT_ID} --format=json | jq -r .projectNumber)
-            gcloud projects add-iam-policy-binding ${GOOGLE_PROJECT_ID} --member=serviceAccount:${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com --role=roles/editor
   plan_terraform:
     docker:
       - image: hashicorp/terraform:0.11.13
