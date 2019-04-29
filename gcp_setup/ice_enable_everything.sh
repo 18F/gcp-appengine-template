@@ -73,6 +73,13 @@ gcloud projects add-iam-policy-binding "${GOOGLE_PROJECT_ID}" \
   --member "serviceAccount:${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com" \
   --role "roles/cloudsql.client" >/dev/null
 
+# enable appEngine to use KMS
+ROLES="
+	roles/cloudkms.admin
+	roles/cloudkms.cryptoKeyEncrypterDecrypter
+"
+add_roles serviceAccount "${GOOGLE_PROJECT_ID}@appspot.gserviceaccount.com"
+
 # enable project owner, or the owner group if set.
 echo "attaching roles to Project Owners"
 ROLES="
