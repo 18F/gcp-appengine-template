@@ -11,7 +11,7 @@ jobs:
           command: |
             echo $(env | grep -E "^GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}=" | sed "s/^GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}=//") > ${HOME}/gcloud-service-key.json
             export GOOGLE_PROJECT_ID=$(env | awk -F= "/^GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}=/ {print \$2}")
-            echo 'export GOOGLE_PROJECT_ID="$GOOGLE_PROJECT_ID"' >> $BASH_ENV
+            echo "export GOOGLE_PROJECT_ID='$GOOGLE_PROJECT_ID'" >> $BASH_ENV
             echo BASH_ENV is $BASH_ENV
       - run: &setupcloudsdk
           name: Setup Google Cloud SDK
