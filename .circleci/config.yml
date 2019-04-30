@@ -11,6 +11,8 @@ jobs:
           command: |
             echo $(env | grep -E "^GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}=" | sed "s/^GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}=//") > ${HOME}/gcloud-service-key.json
             export GOOGLE_PROJECT_ID=$(env | awk -F= "/^GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}=/ {print \$2}")
+            echo GOOGLE_PROJECT_ID is "${GOOGLE_PROJECT_ID}"
+            echo gcloud-service-key.json has this content: $(wc ${HOME}/gcloud-service-key.json)
       - run:
           name: set up google cloud sdk and create terraform state bucket
           command: |
