@@ -32,8 +32,6 @@ jobs:
           name: Initialize and plan Terraform (check plan out here before approving!)
           command: |
             . "${BASH_ENV}"
-            echo GOOGLE_PROJECT_ID is ${GOOGLE_PROJECT_ID} XXX
-            echo contents of BASH_ENV is $(cat $BASH_ENV) XXX
             export TF_VAR_project_id=${GOOGLE_PROJECT_ID}
             export TF_VAR_environment=${CIRCLE_BRANCH}
             cd terraform && terraform init -backend-config="bucket=gcp-terraform-state-$GOOGLE_PROJECT_ID" && terraform plan -input=false
@@ -47,6 +45,7 @@ jobs:
       - run:
           name: Apply Terraform
           command: |
+            . "${BASH_ENV}"
             export TF_VAR_project_id=$GOOGLE_PROJECT_ID
             export TF_VAR_environment=${CIRCLE_BRANCH}
             mkdir /tmp/workspace
