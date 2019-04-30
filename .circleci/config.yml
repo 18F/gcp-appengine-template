@@ -8,10 +8,8 @@ jobs:
       - run:
           name: set up job variables and key
           command: |
-            keyvar=GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}
-            echo ${!keyvar} > ${HOME}/gcloud-service-key.json
-            projectvar=GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}
-            export GOOGLE_PROJECT_ID=${!projectvar}
+            echo $(env | grep -E "^GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}=" | sed "s/^GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}=//") > ${HOME}/gcloud-service-key.json
+            export GOOGLE_PROJECT_ID=$(env | awk -F= "/^GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}=/ {print \$2}")
       - run:
           name: Initialize and plan Terraform (check plan out here before approving!)
           command: |
@@ -26,10 +24,8 @@ jobs:
       - run:
           name: set up job variables and key
           command: |
-            keyvar=GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}
-            echo ${!keyvar} > ${HOME}/gcloud-service-key.json
-            projectvar=GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}
-            export GOOGLE_PROJECT_ID=${!projectvar}
+            echo $(env | grep -E "^GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}=" | sed "s/^GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}=//") > ${HOME}/gcloud-service-key.json
+            export GOOGLE_PROJECT_ID=$(env | awk -F= "/^GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}=/ {print \$2}")
       - run:
           name: Apply Terraform
           command: |
@@ -51,10 +47,8 @@ jobs:
       - run:
           name: set up google cloud sdk and copy tf output into bucket
           command: |
-            keyvar=GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}
-            echo ${!keyvar} > ${HOME}/gcloud-service-key.json
-            projectvar=GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}
-            export GOOGLE_PROJECT_ID=${!projectvar}
+            echo $(env | grep -E "^GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}=" | sed "s/^GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}=//") > ${HOME}/gcloud-service-key.json
+            export GOOGLE_PROJECT_ID=$(env | awk -F= "/^GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}=/ {print \$2}")
 
             gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
             gcloud config set project $GOOGLE_PROJECT_ID
@@ -82,10 +76,8 @@ jobs:
       - run:
           name: Setup Google Cloud SDK
           command: |
-            keyvar=GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}
-            echo ${!keyvar} > ${HOME}/gcloud-service-key.json
-            projectvar=GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}
-            export GOOGLE_PROJECT_ID=${!projectvar}
+            echo $(env | grep -E "^GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}=" | sed "s/^GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}=//") > ${HOME}/gcloud-service-key.json
+            export GOOGLE_PROJECT_ID=$(env | awk -F= "/^GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}=/ {print \$2}")
 
             export GCLOUD_SDK_VERSION=242
             curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-$GCLOUD_SDK_VERSION.0.0-linux-x86_64.tar.gz -o ./gcloud-sdk.tar.gz
@@ -234,10 +226,8 @@ jobs:
       - run:
           name: Store Service Account key
           command: |
-            keyvar=GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}
-            echo ${!keyvar} > ${HOME}/gcloud-service-key.json
-            projectvar=GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}
-            export GOOGLE_PROJECT_ID=${!projectvar}
+            echo $(env | grep -E "^GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}=" | sed "s/^GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}=//") > ${HOME}/gcloud-service-key.json
+            export GOOGLE_PROJECT_ID=$(env | awk -F= "/^GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}=/ {print \$2}")
       - run:
           name: Setup Google Cloud SDK
           command: |
@@ -334,10 +324,8 @@ jobs:
       - run:
           name: Store Service Account key
           command: |
-            keyvar=GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}
-            echo ${!keyvar} > ${HOME}/gcloud-service-key.json
-            projectvar=GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}
-            export GOOGLE_PROJECT_ID=${!projectvar}
+            echo $(env | grep -E "^GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}=" | sed "s/^GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}=//") > ${HOME}/gcloud-service-key.json
+            export GOOGLE_PROJECT_ID=$(env | awk -F= "/^GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}=/ {print \$2}")
       - run:
           name: Setup Google Cloud SDK
           command: |
@@ -380,10 +368,8 @@ jobs:
       - run:
           name: Setup Google Cloud SDK
           command: |
-            keyvar=GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}
-            echo ${!keyvar} > ${HOME}/gcloud-service-key.json
-            projectvar=GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}
-            export GOOGLE_PROJECT_ID=${!projectvar}
+            echo $(env | grep -E "^GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}=" | sed "s/^GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}=//") > ${HOME}/gcloud-service-key.json
+            export GOOGLE_PROJECT_ID=$(env | awk -F= "/^GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}=/ {print \$2}")
 
             export GCLOUD_SDK_VERSION=242
             curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-$GCLOUD_SDK_VERSION.0.0-linux-x86_64.tar.gz -o ./gcloud-sdk.tar.gz
@@ -479,10 +465,8 @@ jobs:
       - run:
           name: Store Service Account key
           command: |
-            keyvar=GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}
-            echo ${!keyvar} > ${HOME}/gcloud-service-key.json
-            projectvar=GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}
-            export GOOGLE_PROJECT_ID=${!projectvar}
+            echo $(env | grep -E "^GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}=" | sed "s/^GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}=//") > ${HOME}/gcloud-service-key.json
+            export GOOGLE_PROJECT_ID=$(env | awk -F= "/^GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}=/ {print \$2}")
       - run:
           name: Setup Google Cloud SDK
           command: |
