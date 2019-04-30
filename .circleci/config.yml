@@ -52,6 +52,7 @@ jobs:
 
             gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
             gcloud config set project $GOOGLE_PROJECT_ID
+            gsutil mb gs://gcp-terraform-state-$GOOGLE_PROJECT_ID || true
             gsutil cp /tmp/workspace/tf-output.json gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json
  
   deploy-rails:
