@@ -22,7 +22,7 @@ jobs:
       - image: hashicorp/terraform:0.11.13
     steps:
       - checkout
-      -run:
+      - run:
         <<: *setupjobvarsandkey
       - run:
           name: Initialize and plan Terraform (check plan out here before approving!)
