@@ -1,25 +1,5 @@
 version: 2
 jobs:
-  enable_apis:
-    docker:
-      - image: google/cloud-sdk
-    steps:
-      - checkout
-      - run:
-          name: set up job variables and key
-          command: |
-            keyvar=GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}
-            echo ${!keyvar} > ${HOME}/gcloud-service-key.json
-            projectvar=GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}
-            export GOOGLE_PROJECT_ID=${!projectvar}
-      - run:
-          name: Setup Google Cloud SDK
-          command: |
-            gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
-            gcloud config set project $GOOGLE_PROJECT_ID
-            gsutil mb gs://gcp-terraform-state-$GOOGLE_PROJECT_ID || true
-            gsutil versioning set on gs://gcp-terraform-state-$GOOGLE_PROJECT_ID || true
-            gcloud app create --region=us-west2 || true
   plan_terraform:
     docker:
       - image: hashicorp/terraform:0.11.13
@@ -165,13 +145,13 @@ jobs:
             EOF
 
             # do the deploy!  Store the version so that we can promote it later.
+            mkdir /tmp/workspace
             cd rails-example
             bundle exec bin/rails assets:precompile
             gcloud app deploy -q --no-promote --format=json | jq -r .versions.id > /tmp/workspace/rails_target_version
             export TARGET_VERSION=$(cat /tmp/workspace/rails_target_version)
 
             # Store signature key and URL so that we can test it later on.
-            mkdir /tmp/workspace
             echo ${SIGNATURE_KEY} > /tmp/workspace/rails_signature_key
             echo "https://${TARGET_VERSION}-dot-rails-dot-${GOOGLE_PROJECT_ID}.appspot.com/" > /tmp/workspace/rails_target_url
 
@@ -590,7 +570,7 @@ workflows:
   version: 2
   terraform:
     jobs:
-      - enable_apis:
+      - plan_terraform:
           filters:
             branches:
               only:
@@ -598,9 +578,6 @@ workflows:
                 - master
                 - staging
                 - dev
-      - plan_terraform:
-          requires: 
-            - enable_apis
       - hold_terraform:
           type: approval
           requires:

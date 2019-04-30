@@ -96,6 +96,7 @@ add_roles () {
 # enable terraform
 echo "attaching roles to terraform"
 ROLES="
+	roles/viewer
 	roles/iam.securityReviewer
 	roles/cloudsql.admin
 	roles/appengine.appAdmin
