@@ -31,6 +31,7 @@ jobs:
       - run:
           name: Initialize and plan Terraform (check plan out here before approving!)
           command: |
+            . "${BASH_ENV}"
             echo GOOGLE_PROJECT_ID is ${GOOGLE_PROJECT_ID} XXX
             echo contents of BASH_ENV is $(cat $BASH_ENV) XXX
             export TF_VAR_project_id=${GOOGLE_PROJECT_ID}
@@ -91,7 +92,7 @@ jobs:
             - rails-example/vendor/bundle
       - run:
           <<: *setupjobvarsandkey
-      - run:
+      - run: &setupcloudsdk-nongoogle
           name: Setup Google Cloud SDK
           command: |
             export GCLOUD_SDK_VERSION=242
@@ -241,10 +242,7 @@ jobs:
       - run:
           <<: *setupjobvarsandkey
       - run:
-          name: Setup Google Cloud SDK
-          command: |
-            gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
-            gcloud config set project $GOOGLE_PROJECT_ID
+          <<: *setupcloudsdk
       - attach_workspace:
           at: /tmp/workspace
       - run:
@@ -336,10 +334,7 @@ jobs:
       - run:
           <<: *setupjobvarsandkey
       - run:
-          name: Setup Google Cloud SDK
-          command: |
-            gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
-            gcloud config set project $GOOGLE_PROJECT_ID
+          <<: *setupcloudsdk
       - attach_workspace:
           at: /tmp/workspace
       - run:
@@ -377,19 +372,12 @@ jobs:
       - run:
           <<: *setupjobvarsandkey
       - run:
-          name: Setup Google Cloud SDK
+          <<: *setupcloudsdk-nongoogle
+      - run:
+          name: install required software
           command: |
-            export GCLOUD_SDK_VERSION=242
-            curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-$GCLOUD_SDK_VERSION.0.0-linux-x86_64.tar.gz -o ./gcloud-sdk.tar.gz
-            tar xzf gcloud-sdk.tar.gz -C ~
-            rm gcloud-sdk.tar.gz
-            export PATH=~/google-cloud-sdk/bin:$PATH
             apt-get update
             apt install -y python python-dev python3 python3-dev python-pip git jq
-            gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
-            gcloud config set project $GOOGLE_PROJECT_ID
-            echo 'export PATH=~/google-cloud-sdk/bin:$PATH' >> $BASH_ENV
-            source $BASH_ENV
       - run:
           name: prepare app engine config, build, deploy
           command: |
@@ -473,10 +461,7 @@ jobs:
       - run:
           <<: *setupjobvarsandkey
       - run:
-          name: Setup Google Cloud SDK
-          command: |
-            gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
-            gcloud config set project $GOOGLE_PROJECT_ID
+          <<: *setupcloudsdk
       - run:
           name: prepare app engine config, build, deploy
           no_output_timeout: 30m
