@@ -73,7 +73,7 @@ echo "creating/updating roles:  You may have to say 'Y' a few times for this"
 if gcloud iam service-accounts describe "terraform@${GOOGLE_PROJECT_ID}.iam.gserviceaccount.com" >/dev/null 2>&1 ; then
 	echo terraform service account has already been created
 else
-	echo creating terraform service service account
+	echo creating terraform service account
 	gcloud iam service-accounts create terraform --display-name "Terraform admin account"
 fi
 
@@ -83,11 +83,11 @@ fi
 # usage:  add_roles <user|group|serviceAccount> <username or groupname>
 # example: ROLES="roles/viewer roles/cloudsql.admin" add_roles group gsa_admin_group
 add_roles () {
-	for i in ${ROLES} ; do
-		echo "  adding $i to $1 $2"
+	for role in ${ROLES} ; do
+		echo "  adding $role to $1 $2"
 		gcloud projects add-iam-policy-binding "${GOOGLE_PROJECT_ID}" \
 		  --member "$1:$2" \
-		  --role "$i" >/dev/null
+		  --role "$role" >/dev/null
 	done
 }
 
