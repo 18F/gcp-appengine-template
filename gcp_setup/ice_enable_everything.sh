@@ -51,7 +51,7 @@ gcloud services list > /tmp/services.$$
 for api in ${APILIST} ; do
   # check that the service actually exists before enabling it
   if grep -E "^${api}" "/tmp/services.$$" >/dev/null ; then
-  	enabling "${api}"
+	echo enabling "${api}"
     gcloud services enable "${api}" --project "${GOOGLE_PROJECT_ID}"
   fi
 done
