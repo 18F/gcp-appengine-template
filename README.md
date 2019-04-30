@@ -22,8 +22,12 @@ To get the app(s) in this repo going, you will need to:
    for most production systems.
 1. Procure three GCP projects and gain access to the [GCP console](https://console.cloud.google.com/)
    on them all.  For each project, do the following:
-  2. Create a Terraform service account via
-     `Console -> IAM & admin -> Service Accounts` in GCP
+  2. Get GSA ICE to enable all of the APIs and roles you need for your GCP
+     Project.  They should be able to check this repo out and cd into `gcp_setup`
+     and run `./ice_enable_everything.sh`.  Or at least they can look the scripts
+     over and understand what needs to be done on their end.
+  2. Generate a key for the Terraform service account via
+     `Console -> IAM & admin -> Service Accounts -> terraform -> Create Key` in GCP.
   2. Save the JSON credentials to `$HOME/master-gcloud-service-key.json` for
      your production GCP Project, `$HOME/staging-gcloud-service-key.json` for
      your staging GCP Project, or `$HOME/dev-gcloud-service-key.json` for
@@ -32,10 +36,6 @@ To get the app(s) in this repo going, you will need to:
      These files should either be stored securely by the administrators
      of the system, or (even better) deleted after circleci has been seeded with
      it's data.
-  2. Get GSA ICE to enable all of the APIs and roles you need for your GCP
-     Project.  They should be able to check this repo out and cd into `gcp_setup`
-     and run `./ice_enable_everything.sh`.  Or at least they can look the scripts
-     over and understand what needs to be done on their end.
 1. You should be sure to set up master and staging branches as protected branches
    that require approval for PRs to land in this repo.  You should also enable
    as many code analysis integrations as are appropriate within the repo to
@@ -53,6 +53,7 @@ To get the app(s) in this repo going, you will need to:
    * `BASICAUTH_USER`: Set this to the basic auth username you want.
 1. Watch as circleci deploys the infrastructure.  Watch the terraform job,
    and approve it when it's plan is complete, then wait until it is done.
+
    The apps will all fail
    because it takes much longer for the databases to be created than the apps,
    and because you will need to get some info from terraform to make the
