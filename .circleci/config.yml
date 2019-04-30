@@ -12,8 +12,7 @@ jobs:
             echo $(env | grep -E "^GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}=" | sed "s/^GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}=//") > ${HOME}/gcloud-service-key.json
             export GOOGLE_PROJECT_ID=$(env | awk -F= "/^GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}=/ {print \$2}")
             echo 'export GOOGLE_PROJECT_ID="$GOOGLE_PROJECT_ID"' >> $BASH_ENV
-            echo GOOGLE_PROJECT_ID is "${GOOGLE_PROJECT_ID}"
-            echo gcloud-service-key.json has this content: $(wc ${HOME}/gcloud-service-key.json)
+            echo BASH_ENV is $BASH_ENV
       - run: &setupcloudsdk
           name: Setup Google Cloud SDK
           command: |
@@ -35,7 +34,8 @@ jobs:
           command: |
             export TF_VAR_project_id=${GOOGLE_PROJECT_ID}
             export TF_VAR_environment=${CIRCLE_BRANCH}
-            echo GOOGLE_PROJECT_ID is ${GOOGLE_PROJECT_ID}
+            echo GOOGLE_PROJECT_ID is ${GOOGLE_PROJECT_ID} XXX
+            echo contents of BASH_ENV is "$(cat BASH_ENV)" XXX
             cd terraform && terraform init -backend-config="bucket=gcp-terraform-state-$GOOGLE_PROJECT_ID" && terraform plan -input=false
   apply_terraform:
     docker:
