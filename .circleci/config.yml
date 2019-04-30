@@ -579,7 +579,7 @@ workflows:
                 - dev
       - plan_terraform:
           requires:
-            - init_terraform_statebucket
+            - init_terraform_state
       - hold_terraform:
           type: approval
           requires:
