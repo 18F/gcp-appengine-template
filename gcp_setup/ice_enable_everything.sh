@@ -51,7 +51,8 @@ gcloud services list > /tmp/services.$$
 for api in ${APILIST} ; do
   # check that the service actually exists before enabling it
   if grep -E "^${api}" "/tmp/services.$$" >/dev/null ; then
-    gcloud services enable "${api}"
+  	enabling "${api}"
+    gcloud services enable "${api}" --project "${GOOGLE_PROJECT_ID}"
   fi
 done
 # clean up
@@ -59,7 +60,7 @@ rm /tmp/services.$$
 
 ############################################################
 echo "enabling appEngine (may fail if already done)"
-gcloud app create
+gcloud app create --project "${GOOGLE_PROJECT_ID}" || true
 
 ############################################################
 echo enabling audit logs
@@ -74,7 +75,7 @@ if gcloud iam service-accounts describe "terraform@${GOOGLE_PROJECT_ID}.iam.gser
 	echo terraform service account has already been created
 else
 	echo creating terraform service account
-	gcloud iam service-accounts create terraform --display-name "Terraform admin account"
+	gcloud iam service-accounts create terraform --display-name "Terraform admin account" --project "${GOOGLE_PROJECT_ID}"
 fi
 
 ############################################################
