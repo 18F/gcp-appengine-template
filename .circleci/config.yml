@@ -16,6 +16,8 @@ jobs:
       - run: &setupcloudsdk
           name: Setup Google Cloud SDK
           command: |
+            echo GOOGLE_PROJECT_ID is ${GOOGLE_PROJECT_ID} XXX
+            echo contents of BASH_ENV is "$(cat BASH_ENV)" XXX
             gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
             gcloud config set project $GOOGLE_PROJECT_ID
       - run:
@@ -34,8 +36,6 @@ jobs:
           command: |
             export TF_VAR_project_id=${GOOGLE_PROJECT_ID}
             export TF_VAR_environment=${CIRCLE_BRANCH}
-            echo GOOGLE_PROJECT_ID is ${GOOGLE_PROJECT_ID} XXX
-            echo contents of BASH_ENV is "$(cat BASH_ENV)" XXX
             cd terraform && terraform init -backend-config="bucket=gcp-terraform-state-$GOOGLE_PROJECT_ID" && terraform plan -input=false
   apply_terraform:
     docker:
