@@ -2,6 +2,7 @@ require 'digest'
 
 class ApplicationController < ActionController::Base
 	# check to make sure we are authenticated before going forward
+	# NIST-800-53-AC-3
 	before_action :check_auth
 
 	# set the current user depending on whether we are doing basic auth,
@@ -30,6 +31,7 @@ class ApplicationController < ActionController::Base
 	helper_method :current_user
 
 	# set basic auth if requested, and if we are not using SSO
+	# NIST-800-53-AC-3
 	pw = ENV.fetch('BASICAUTH_PASSWORD') {''}
 	idp = ENV.fetch('IDP_PROVIDER_URL') {''}
 	basicauth_username = ENV.fetch('BASICAUTH_USER') {''}

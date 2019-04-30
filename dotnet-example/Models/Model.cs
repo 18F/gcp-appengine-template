@@ -23,6 +23,7 @@ namespace dotnet_example.Models
     {
         public int BlogId { get; set; }
 
+        // NIST-800-53-AC-2
         [StringLength(60, MinimumLength = 3)]
         [Required]
         public string Url { get; set; }
@@ -34,10 +35,12 @@ namespace dotnet_example.Models
     {
         public int PostId { get; set; }
 
+        // NIST-800-53-AC-2
         [StringLength(60, MinimumLength = 3)]
         [Required]
         public string Title { get; set; }
 
+        // NIST-800-53-AC-2
         [StringLength(1024, MinimumLength = 3)]
         [Required]
         public string Content { get; set; }

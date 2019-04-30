@@ -341,6 +341,9 @@ controls that you will need to document for those, as well as different
 documents to follow, different Authorizing Officials and other contacts,
 etc.  You will have to figure that out.
 
+Here is the rough idea, followed by more detailed steps:
+![diagram of GSA LATO Process](https://github.com/18F/gcp-appengine-template/raw/master/LATOProcess.png)
+
 To apply for a GSA LATO, you should:
 1. Download the [Lightweight Security Authorization Guide](https://insite.gsa.gov/cdnstatic/insite/Lightweight_Security_Authorization_Process_%5BCIO_IT_Security_14-68_Rev_6%5D_04-25-2018.docx)
    from [insite](https://insite.gsa.gov/topics/information-technology/security-and-privacy/it-security/it-security-procedural-guides)
@@ -364,10 +367,13 @@ To apply for a GSA LATO, you should:
    from your project and use that information to help you understand what/how
    to fill out the different sections.
 
-   A quick summary of how to generate the [GitBook](https://github.com/opencontrol/compliance-masonry/blob/master/docs/gitbook.md)
+   A quick way to generate the [GitBook](https://github.com/opencontrol/compliance-masonry/blob/master/docs/gitbook.md)
    that lets you see the controls and other compliance information is:
-     2. `cd gcp-appengine-template/compliance && (rm -rf exports ; compliance-masonry get ; compliance-masonry docs gitbook LATO ; npm install -g gitbook-cli ; cd exports ; gitbook serve ; cd ../..)`
-     2. Go to http://localhost:4000/ in your web browser.
+   1. Make sure you have [Docker Desktop](https://www.docker.com/products/docker-desktop)
+      installed.
+   1. `cd gcp-appengine-template && ./generate-compliance-gitbook.sh`
+   1. open `gcp-appengine-template/compliance/exports/pdf/gcp_compliance.pdf`
+      in your favorite PDF viewer.
 
    Most of the sections in the [SSP Template](https://docs.google.com/document/d/1ye-MUIq_0cmv8-Lkd41Gx_V0adIiLEho96GwYI_H_8g/edit#heading=h.nc0r2rvqrwc4)
    (which you can find in Appendix A of the [Lightweight Security Authorization Guide](https://insite.gsa.gov/cdnstatic/insite/Lightweight_Security_Authorization_Process_%5BCIO_IT_Security_14-68_Rev_6%5D_04-25-2018.docx))
