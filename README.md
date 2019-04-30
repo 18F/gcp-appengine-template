@@ -14,35 +14,50 @@ up and running and get an ATO.
 To get the app(s) in this repo going, you will need to:
 
 1. Procure a [CircleCI](https://circleci.com/) account.
-1. Procure a GCP project and gain access to the [GCP console](https://console.cloud.google.com/).
 1. Fork or copy this repo into your github org.  Make your changes to this
    new repo.
 1. Consider your application load on the database and change the
    parameters in `terraform/google_sql.tf` to size your databases
    properly.  The default `db-f1-micro` db size is probably not sufficient
    for most production systems.
-1. Create a Terraform service account via
-   `Console -> IAM & admin -> Service Accounts` in GCP
-1. Save the JSON credentials to `$HOME/gcloud-service-key.json`
-   This file should either be stored securely by the administrators
-   of the system, or (even better) deleted after circleci has been seeded with
-   it's data.
-1. Go to `Console -> IAM & admin` in GCP, click on `View by: Roles`,
-   and then add `Project -> Owner` to the terraform service account.
+1. Procure three GCP projects and gain access to the [GCP console](https://console.cloud.google.com/)
+   on them all.  For each project, do the following:
+  2. Get GSA ICE to enable all of the APIs and roles you need for your GCP
+     Project.  They should be able to check this repo out and cd into `gcp_setup`
+     and run `./ice_enable_everything.sh`.  Or at least they can look the scripts
+     over and understand what needs to be done on their end.
+  2. Generate a key for the Terraform service account via
+     `Console -> IAM & admin -> Service Accounts -> terraform -> Create Key` in GCP.
+  2. Save the JSON credentials to `$HOME/master-gcloud-service-key.json` for
+     your production GCP Project, `$HOME/staging-gcloud-service-key.json` for
+     your staging GCP Project, or `$HOME/dev-gcloud-service-key.json` for
+     your dev GCP Project.
+
+     These files should either be stored securely by the administrators
+     of the system, or (even better) deleted after circleci has been seeded with
+     it's data.
 1. You should be sure to set up master and staging branches as protected branches
    that require approval for PRs to land in this repo.  You should also enable
    as many code analysis integrations as are appropriate within the repo to
    enforce code quality and find vulnerabilities.
-1. Enable circleci on this repo, then add some environment variables to it:
-   * `GCLOUD_SERVICE_KEY`:  Set this to the contents of `$HOME/gcloud-service-key.json`
-   * `GOOGLE_PROJECT_ID`: Set this to your google project ID
+1. [Enable circleci on this repo](https://circleci.com/docs/2.0/project-build/),
+   then [add some environment variables](https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project) to it:
+   * `GCLOUD_SERVICE_KEY_master`:  Set this to the contents of `$HOME/master-gcloud-service-key.json`
+   * `GCLOUD_SERVICE_KEY_staging`:  Set this to the contents of `$HOME/staging-gcloud-service-key.json`
+   * `GCLOUD_SERVICE_KEY_dev`:  Set this to the contents of `$HOME/dev-gcloud-service-key.json`
+   * `GOOGLE_PROJECT_ID_master`: Set this to your production google project ID
+   * `GOOGLE_PROJECT_ID_staging`: Set this to your staging google project ID
+   * `GOOGLE_PROJECT_ID_dev`: Set this to your dev google project ID
    * `BASICAUTH_PASSWORD`: Set this to a basic auth password to frontend non-SSO apps with.
      If it is not set, then your non-SSO app will be public.
    * `BASICAUTH_USER`: Set this to the basic auth username you want.
-1. Watch as circleci deploys the infrastructure.  The apps will all fail
+1. Watch as circleci deploys the infrastructure.  Watch the terraform job,
+   and approve it when it's plan is complete, then wait until it is done.
+
+   The apps will all fail
    because it takes much longer for the databases to be created than the apps,
    and because you will need to get some info from terraform to make the
-   oauth2_proxy work.
+   oauth2_proxy work.  This is fine.
 1. Go to the failed app deploy workflows in circleci and click on `Rerun`.
    Everything should fully deploy this time, though the rails app SSO proxy jobs
    will fail unless you completed the SSO proxy steps too.  This is fine.
@@ -56,10 +71,11 @@ To get the app(s) in this repo going, you will need to:
 1. Sign up as a developer for [login.gov](https://developers.login.gov/) and
    create dev, staging, and production apps in the login.gov dashboard using their 
    directions and the following guidance:
-   1. Look at the output from the `apply_terraform` job in circleci to get the Public Keys.
-      Look for the `sso_cert_XXX` outputs.  If you have the gcloud utility working and
+   1. Look at the output from the `apply_terraform` job for each environment in
+      circleci to get the Public Keys.
+      Look for the `sso_cert` output.  If you have the gcloud utility working and
       have `jq` installed, you can use this command to get the dev cert, for example:  
-      `gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json - | jq -r .sso_cert_dev.value`.
+      `gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID_dev/tf-output.json - | jq -r .sso_cert.value`.
       Change `dev` to `staging` and `production`, and you will have all the certs.
    1. Make the `Return to App URL` be something like `https://dev-dot-${GOOGLE_PROJECT_ID}.appspot.com/oauth2/sign_in`
       for dev, and change dev to `staging` and `production` for those apps too.
@@ -105,7 +121,9 @@ how you turn that on:
    * `LOGTO_AWS_SECRET_ACCESS_KEY`: Set this to the Secret Access Key ID that
      GSA SecOps gives you.
      (like `asdfasdfasdf+klwjelkjewlkjrweklrj`)
-1. Rerun the `deploy-log-sync` workflow for the environments you have set up.
+1. Uncomment the `deploy-log-sync` workflow in the `.circleci/config.yml` file and
+   push the code to GitHub, which should cause the workflow to deploy
+   the service.
 1. Check the logs for the logsync service.  You should see a line like
    `2019-04-08 12:39:34.000 PDT
 2019/04/08 19:39:34 synced logs from gs://logs-bucket-${GOOGLE_PROJECT_ID} to s3://gsa-logbucket/dev`
@@ -126,10 +144,14 @@ KMS or share secrets or whatever.
     [few frameworks](https://cloud.google.com/appengine/docs/flexible/).
     Be sure you use a supported version of the framework.
   * You will need to customize the `.circleci/config.yml` file to remove the
-    example apps and add yours in.  **This is the core of automation in this project.**
+    example apps and add yours in.  **This file is the core of automation in this project.**
+    The example deployment pipelines in there do a lot of work, and you should copy from
+    them liberally to be sure that you are still following the DevSecOps best
+    practices that they implement.
+
     If you are not using a framework that has
     an example app, you may have to write your own deployment pipeline from
-    scratch.  Also, delete the `*-example` directories.
+    scratch.
   * We are trying to keep the secrets mostly managed by terraform so that they
     are relatively easy to rotate and are not kept by operators.  These secrets
     and other config are passed into the applications via environment variables
@@ -401,10 +423,6 @@ have oversight and will work.
     accessing/adding data using the old code/schema/etc.  This is something that
     you could change in the circleci pipelines or your app code.
 
-### Manual Deploy Workflow
-
-XXX You can run some stuff by hand if you want to.
-
 ### Logging/Debugging
 
 Logs can be watched either by using the [GCP Console](https://console.cloud.google.com/logs/),
@@ -436,25 +454,9 @@ do, you should follow this procedure:
   * You can watch the rollout by looking at the `apply_terraform` step once
     it gets going.
 
- **Be aware!  Infrastructure updates are common to _all_ environments.  If
- you make a change to terraform, that change could impact production.  There
- is just one infrastructure into which dev/staging/prod is deployed.**
-
-If you would like to test out a new, potentially dangerous infrastructure
-change, you could:
-  * Create a new repo from the existing one, preferably by forking it.
-  * Procure a new GCP project and bootstrap it using the new repo.
-    If production is using large instance sizes or other expensive
-    options, you might want to make them smaller before you do this.
-  * Make sure that everything works, load example data, etc.
-  * Make your changes to the new repo and test rolling them out.
-  * When done, you should delete everything to save $$.  **Be sure that
-    you delete everything in the _new_ GCP project, not the real
-    production one.**
-
-XXX When we can provision more than one GCP Project, we hope to restructure
-this so that infrastructure will not be shared, and can be branched just like
-the apps, simplifying the infrastructure testing considerably.
+Once you are sure that everything is happy, you can then create a Pull
+Request to roll your changes into the staging branch, seek approval, and
+then PR your code into the master branch to have it go into production.
 
 ### Secrets Rotation Workflow
 
@@ -540,6 +542,3 @@ antiforgery keys, and has basic auth enabled.
 
 To test locally, `cd dotnet-example && dotnet run`.
 This will operate on a local `blogging.db` sqlite db.
-
-### Java Spring Boot / App Engine
-XXX

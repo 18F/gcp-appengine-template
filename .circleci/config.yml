@@ -1,52 +1,22 @@
 version: 2
 jobs:
-  enable_apis:
-    docker:
-      - image: google/cloud-sdk
-    steps:
-      - checkout
-      - run:
-          name: Store Service Account key
-          command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
-      - run:
-          name: Setup Google Cloud SDK
-          command: |
-            gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
-            gcloud config set project $GOOGLE_PROJECT_ID
-            gsutil mb gs://gcp-terraform-state-$GOOGLE_PROJECT_ID || true
-            gcloud app create --region=us-west2 || true
-      - run:
-          name: Enabling APIs
-          command: ./terraform/enable-apis.sh
-      - run:
-          name: Enable Audit Logging
-          command: ./terraform/enable-audit-logs.sh
-      - run:
-          name: make sure jq is installed
-          command: apt-get install -y jq
-      - run:
-          name: Enable KMS
-          command: ./terraform/enable-kms.sh
-      - run:
-          name: enable app engine if not already done
-          command: gcloud app create || true
-      - run:
-          name: Enable app to do schema migrations
-          command: |
-            export PROJECT_NUMBER=$(gcloud projects describe ${GOOGLE_PROJECT_ID} --format=json | jq -r .projectNumber)
-            gcloud projects add-iam-policy-binding ${GOOGLE_PROJECT_ID} --member=serviceAccount:${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com --role=roles/editor
   plan_terraform:
     docker:
       - image: hashicorp/terraform:0.11.13
     steps:
       - checkout
       - run:
-          name: Store Service Account
-          command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+          name: set up job variables and key
+          command: |
+            keyvar=GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}
+            echo ${!keyvar} > ${HOME}/gcloud-service-key.json
+            projectvar=GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}
+            export GOOGLE_PROJECT_ID=${!projectvar}
       - run:
           name: Initialize and plan Terraform (check plan out here before approving!)
           command: |
-            export TF_VAR_project_id=$GOOGLE_PROJECT_ID
+            export TF_VAR_project_id=${GOOGLE_PROJECT_ID}
+            export TF_VAR_environment=${CIRCLE_BRANCH}
             cd terraform && terraform init -backend-config="bucket=gcp-terraform-state-$GOOGLE_PROJECT_ID" && terraform plan -input=false
   apply_terraform:
     docker:
@@ -54,12 +24,17 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Store Service Account
-          command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+          name: set up job variables and key
+          command: |
+            keyvar=GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}
+            echo ${!keyvar} > ${HOME}/gcloud-service-key.json
+            projectvar=GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}
+            export GOOGLE_PROJECT_ID=${!projectvar}
       - run:
           name: Apply Terraform
           command: |
             export TF_VAR_project_id=$GOOGLE_PROJECT_ID
+            export TF_VAR_environment=${CIRCLE_BRANCH}
             mkdir /tmp/workspace
             cd terraform && terraform init -backend-config="bucket=gcp-terraform-state-$GOOGLE_PROJECT_ID" && terraform apply -input=false -auto-approve
             terraform output -json > /tmp/workspace/tf-output.json
@@ -76,7 +51,11 @@ jobs:
       - run:
           name: set up google cloud sdk and copy tf output into bucket
           command: |
-            echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+            keyvar=GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}
+            echo ${!keyvar} > ${HOME}/gcloud-service-key.json
+            projectvar=GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}
+            export GOOGLE_PROJECT_ID=${!projectvar}
+
             gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
             gcloud config set project $GOOGLE_PROJECT_ID
             gsutil cp /tmp/workspace/tf-output.json gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json
@@ -103,8 +82,12 @@ jobs:
       - run:
           name: Setup Google Cloud SDK
           command: |
-            echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
-            export GCLOUD_SDK_VERSION=236
+            keyvar=GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}
+            echo ${!keyvar} > ${HOME}/gcloud-service-key.json
+            projectvar=GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}
+            export GOOGLE_PROJECT_ID=${!projectvar}
+
+            export GCLOUD_SDK_VERSION=242
             curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-$GCLOUD_SDK_VERSION.0.0-linux-x86_64.tar.gz -o ./gcloud-sdk.tar.gz
             tar xzf gcloud-sdk.tar.gz -C ~
             rm gcloud-sdk.tar.gz
@@ -115,29 +98,24 @@ jobs:
             source $BASH_ENV
       - run:
           name: prepare app engine config, deploy, and run db migrations
+          no_output_timeout: 20m
           command: |
             if [ "${CIRCLE_BRANCH}" = "master" ] ; then
               export RAILS_ENV=production
-              # This is kinda like google's default version naming
-              export TARGET_VERSION=$(date +%Y%m%d)t$(printf "%05d" $(expr $(date +%s) % 86400))
-              export TARGET_URL="https://rails-${GOOGLE_PROJECT_ID}.appspot.com/"
-              export PROXY_URL="https://${GOOGLE_PROJECT_ID}.appspot.com/"
               export INSTANCES=2
             else
               export RAILS_ENV=${CIRCLE_BRANCH}
-              export TARGET_VERSION=${CIRCLE_BRANCH}
-              export TARGET_URL="https://${TARGET_VERSION}-dot-rails-dot-${GOOGLE_PROJECT_ID}.appspot.com/"
-              export PROXY_URL="https://${TARGET_VERSION}-dot-${GOOGLE_PROJECT_ID}.appspot.com/"
               export INSTANCES=1
             fi
+            export PROXY_URL="https://${GOOGLE_PROJECT_ID}.appspot.com/"
 
             # put the tf output into a variable so it doesn't hit the disk
             export TFOUTPUT=$(gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json -)
-            export SECRET_KEY_BASE=$(echo ${TFOUTPUT} | jq -r .rails_secret_${RAILS_ENV}.value)
-            export CLOUDSQL_USERNAME=$(echo ${TFOUTPUT} | jq -r .postgres_username_${RAILS_ENV}.value)
-            export CLOUDSQL_PASSWORD=$(echo ${TFOUTPUT} | jq -r .postgres_password_${RAILS_ENV}.value)
-            export CONNECTION_NAME=$(echo ${TFOUTPUT} | jq -r .postgres_instance_${RAILS_ENV}.value)
-            export SIGNATURE_KEY=$(echo ${TFOUTPUT} | jq -r .signature_key_${TARGET_ENV}.value)
+            export SECRET_KEY_BASE=$(echo ${TFOUTPUT} | jq -r .rails_secret.value)
+            export CLOUDSQL_USERNAME=$(echo ${TFOUTPUT} | jq -r .postgres_username.value)
+            export CLOUDSQL_PASSWORD=$(echo ${TFOUTPUT} | jq -r .postgres_password.value)
+            export CONNECTION_NAME=$(echo ${TFOUTPUT} | jq -r .postgres_instance.value)
+            export SIGNATURE_KEY=$(echo ${TFOUTPUT} | jq -r .signature_key.value)
 
             # set the google app engine config file up
             cat <<EOF > rails-example/app.yaml
@@ -166,22 +144,22 @@ jobs:
               cloud_sql_instances: ${CONNECTION_NAME}
             EOF
 
-            # do the deploy!
+            # do the deploy!  Store the version so that we can promote it later.
+            mkdir /tmp/workspace
             cd rails-example
             bundle exec bin/rails assets:precompile
-            gcloud app deploy -q --no-promote --version=${TARGET_VERSION}
+            gcloud app deploy -q --no-promote --format=json | jq -r .versions.id > /tmp/workspace/rails_target_version
+            export TARGET_VERSION=$(cat /tmp/workspace/rails_target_version)
 
-            # Store info on what got deployed so we can test/promote it later on.
-            mkdir /tmp/workspace
-            echo ${TARGET_VERSION} > /tmp/workspace/rails_target_version
-            echo ${TARGET_URL} > /tmp/workspace/rails_target_url
+            # Store signature key and URL so that we can test it later on.
             echo ${SIGNATURE_KEY} > /tmp/workspace/rails_signature_key
+            echo "https://${TARGET_VERSION}-dot-rails-dot-${GOOGLE_PROJECT_ID}.appspot.com/" > /tmp/workspace/rails_target_url
 
             # do db creation/migration here
             bundle exec rake appengine:exec GAE_SERVICE=rails GAE_VERSION=${TARGET_VERSION} -- bundle exec rake db:create db:migrate
 
             # clean up old production versions (leave the last two, so you can roll back)
-            VERSIONS=$(gcloud app versions list --service=rails --format=list | egrep -v '\/dev$|\/staging$' | sort -rn | tail -n +3 | sed 's/^.*\///') || true
+            VERSIONS=$(gcloud app versions list --service=rails --format=list | sort -rn | tail -n +3 | sed 's/^.*\///') || true
             if [ ! -z ${VERSIONS} ] ; then
               gcloud app versions delete ${VERSIONS} || true
               echo cleaned up ${VERSIONS}
@@ -224,7 +202,6 @@ jobs:
           command: |
             # if we are in production, do not do form posts, because they can potentially create cruft in the db.
             if [ "${CIRCLE_BRANCH}" = "master" ] ; then
-              export RAILS_ENV=production
               POSTFORM=false
             else
               POSTFORM=true
@@ -256,7 +233,11 @@ jobs:
       - checkout
       - run:
           name: Store Service Account key
-          command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+          command: |
+            keyvar=GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}
+            echo ${!keyvar} > ${HOME}/gcloud-service-key.json
+            projectvar=GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}
+            export GOOGLE_PROJECT_ID=${!projectvar}
       - run:
           name: Setup Google Cloud SDK
           command: |
@@ -273,40 +254,26 @@ jobs:
             cd oauth2_proxy
 
             # set defaults
-            export TARGET_VERSION=${CIRCLE_BRANCH}
-            export COOKIE_DOMAIN="${TARGET_VERSION}-dot-${GOOGLE_PROJECT_ID}.appspot.com"
+            export COOKIE_DOMAIN="${GOOGLE_PROJECT_ID}.appspot.com"
             export TARGET_URL="https://${COOKIE_DOMAIN}/"
-            export TARGET_ENV=${CIRCLE_BRANCH}
             export INSTANCES=1
+            idpclientidvar=IDP_CLIENT_ID_${CIRCLE_BRANCH}
+            export IDP_CLIENT_ID=${!idpclientidvar}
 
             # override defaults depending on environment
-            case "${CIRCLE_BRANCH}" in
-            "master")
-              # This is kinda like google's default version naming
-              export TARGET_VERSION=$(date +%Y%m%d)t$(printf "%05d" $(expr $(date +%s) % 86400))
-              export COOKIE_DOMAIN="${GOOGLE_PROJECT_ID}.appspot.com"
-              export TARGET_URL="https://${COOKIE_DOMAIN}/"
-              export TARGET_ENV=production
+            if [ "${CIRCLE_BRANCH}" = "master" ] ; then
               export INSTANCES=2
-              export IDP_CLIENT_ID=${IDP_CLIENT_ID_PRODUCTION}
-              ;;
-            "staging")
-              export IDP_CLIENT_ID=${IDP_CLIENT_ID_STAGING}
-              ;;
-            "dev")
-              export IDP_CLIENT_ID=${IDP_CLIENT_ID_DEV}
-              ;;
-            esac
+            fi
 
             # put the tf output into a variable so it doesn't hit the disk
             export TFOUTPUT=$(gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json -)
 
             # extract data for the app.yaml file
-            export COOKIE_SECRET=$(echo ${TFOUTPUT} | jq -r .sso_cookie_secret_${TARGET_ENV}.value)
-            export SIGNATURE_KEY=$(echo ${TFOUTPUT} | jq -r .signature_key_${TARGET_ENV}.value)
+            export COOKIE_SECRET=$(echo ${TFOUTPUT} | jq -r .sso_cookie_secret.value)
+            export SIGNATURE_KEY=$(echo ${TFOUTPUT} | jq -r .signature_key.value)
             export SOURCE="${TARGET_URL}"
             export DEST=$(cat /tmp/workspace/rails_target_url)
-            echo ${TFOUTPUT} | jq -r .sso_key_${TARGET_ENV}.value > jwt_signing_key.pem
+            echo ${TFOUTPUT} | jq -r .sso_key.value > jwt_signing_key.pem
 
             cat <<EOF > app.yaml
             runtime: custom
@@ -336,8 +303,7 @@ jobs:
             EOF
 
             # deploy!
-            gcloud app deploy -q --no-promote --version=${TARGET_VERSION}
-            echo ${TARGET_VERSION} > /tmp/workspace/sso_target_version
+            gcloud app deploy -q --no-promote --format=json | jq -r .versions.id > /tmp/workspace/sso_target_version
             echo ${TARGET_URL} > /tmp/workspace/sso_target_url
       - persist_to_workspace:
           root: /tmp/workspace
@@ -367,7 +333,11 @@ jobs:
     steps:
       - run:
           name: Store Service Account key
-          command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+          command: |
+            keyvar=GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}
+            echo ${!keyvar} > ${HOME}/gcloud-service-key.json
+            projectvar=GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}
+            export GOOGLE_PROJECT_ID=${!projectvar}
       - run:
           name: Setup Google Cloud SDK
           command: |
@@ -410,8 +380,12 @@ jobs:
       - run:
           name: Setup Google Cloud SDK
           command: |
-            echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
-            export GCLOUD_SDK_VERSION=236
+            keyvar=GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}
+            echo ${!keyvar} > ${HOME}/gcloud-service-key.json
+            projectvar=GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}
+            export GOOGLE_PROJECT_ID=${!projectvar}
+
+            export GCLOUD_SDK_VERSION=242
             curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-$GCLOUD_SDK_VERSION.0.0-linux-x86_64.tar.gz -o ./gcloud-sdk.tar.gz
             tar xzf gcloud-sdk.tar.gz -C ~
             rm gcloud-sdk.tar.gz
@@ -437,9 +411,9 @@ jobs:
 
             # put the tf output into a variable so it doesn't hit the disk
             export TFOUTPUT=$(gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json -)
-            export CLOUDSQL_USERNAME=$(echo ${TFOUTPUT} | jq -r .postgres_username_${DEPLOY_ENV}.value)
-            export CLOUDSQL_PASSWORD=$(echo ${TFOUTPUT} | jq -r .postgres_password_${DEPLOY_ENV}.value)
-            export CONNECTION_NAME=$(echo ${TFOUTPUT} | jq -r .postgres_instance_${DEPLOY_ENV}.value)
+            export CLOUDSQL_USERNAME=$(echo ${TFOUTPUT} | jq -r .postgres_username.value)
+            export CLOUDSQL_PASSWORD=$(echo ${TFOUTPUT} | jq -r .postgres_password.value)
+            export CONNECTION_NAME=$(echo ${TFOUTPUT} | jq -r .postgres_instance.value)
 
             cat <<EOF > app.yaml
             runtime: aspnetcore
@@ -504,7 +478,11 @@ jobs:
       - checkout
       - run:
           name: Store Service Account key
-          command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+          command: |
+            keyvar=GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}
+            echo ${!keyvar} > ${HOME}/gcloud-service-key.json
+            projectvar=GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}
+            export GOOGLE_PROJECT_ID=${!projectvar}
       - run:
           name: Setup Google Cloud SDK
           command: |
@@ -523,6 +501,11 @@ jobs:
               exit 0
             fi
 
+            if [ "${CIRCLE_BRANCH}" = "master" ] ; then
+              TARGET_ENV="production"
+            else
+              TARGET_ENV="${CIRCLE_BRANCH}"
+            fi
             apt install -y jq
             cd security-logging
 
@@ -587,7 +570,7 @@ workflows:
   version: 2
   terraform:
     jobs:
-      - enable_apis:
+      - plan_terraform:
           filters:
             branches:
               only:
@@ -595,9 +578,6 @@ workflows:
                 - master
                 - staging
                 - dev
-      - plan_terraform:
-          requires: 
-            - enable_apis
       - hold_terraform:
           type: approval
           requires:
@@ -640,29 +620,29 @@ workflows:
             branches:
               only:
                 - master
-  # deploy-dotnet-example:
-  #   jobs:
-  #     - deploy-dotnet:
-  #         filters:
-  #           branches:
-  #             only:
-  #               # This is the list of branches which will be deployed automatically.
-  #               # Add more branches here if you want them automatically deployed.
-  #               - master
-  #               - staging
-  #               - dev
-  #     - test-dotnet:
-  #         requires:
-  #           - deploy-dotnet
-  #     - owaspzap-dotnet:
-  #         requires:
-  #           - deploy-dotnet
-  #         filters:
-  #           branches:
-  #             only:
-  #               # Do not run this against production, lest it fill it with garbage.
-  #               - dev
-  #               - staging
+  deploy-dotnet-example:
+    jobs:
+      - deploy-dotnet:
+          filters:
+            branches:
+              only:
+                # This is the list of branches which will be deployed automatically.
+                # Add more branches here if you want them automatically deployed.
+                - master
+                - staging
+                - dev
+      - test-dotnet:
+          requires:
+            - deploy-dotnet
+      - owaspzap-dotnet:
+          requires:
+            - deploy-dotnet
+          filters:
+            branches:
+              only:
+                # Do not run this against production, lest it fill it with garbage.
+                - dev
+                - staging
   # deploy-log-sync:
   #   jobs:
   #     - deploy-log-sync:
