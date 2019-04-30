@@ -58,8 +58,8 @@ done
 rm /tmp/services.$$
 
 ############################################################
-echo "enabling appEngine"
-gcloud app create --region=us-west2 >/dev/null 2>&1 || true
+echo "enabling appEngine (may fail if already done)"
+gcloud app create
 
 ############################################################
 echo enabling audit logs

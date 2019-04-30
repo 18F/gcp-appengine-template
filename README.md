@@ -5,8 +5,8 @@ It is meant to be used by people in the GSA (and other agencies)
 as a guide to quickly get a lightweight application running
 safely and securely in GCP.
 
-We hope to have procurement information and this process approved with a
-P-ATO from GSA IT Security to make it so that it would be easy to get
+We hope to have procurement information and this process approved by
+GSA IT Security to make it so that it will be easy to get
 up and running and get an ATO.
 
 ## Bootstrap Process
