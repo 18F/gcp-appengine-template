@@ -1,5 +1,20 @@
 version: 2
 jobs:
+  init_terraform_state:
+    docker:
+      - image: google/cloud-sdk
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: set up google cloud sdk and copy tf output into bucket
+          command: |
+            echo $(env | grep -E "^GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}=" | sed "s/^GCLOUD_SERVICE_KEY_${CIRCLE_BRANCH}=//") > ${HOME}/gcloud-service-key.json
+            export GOOGLE_PROJECT_ID=$(env | awk -F= "/^GOOGLE_PROJECT_ID_${CIRCLE_BRANCH}=/ {print \$2}")
+
+            gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
+            gcloud config set project $GOOGLE_PROJECT_ID
+            gsutil mb gs://gcp-terraform-state-$GOOGLE_PROJECT_ID || true
   plan_terraform:
     docker:
       - image: hashicorp/terraform:0.11.13
@@ -52,7 +67,6 @@ jobs:
 
             gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
             gcloud config set project $GOOGLE_PROJECT_ID
-            gsutil mb gs://gcp-terraform-state-$GOOGLE_PROJECT_ID || true
             gsutil cp /tmp/workspace/tf-output.json gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json
  
   deploy-rails:
@@ -555,7 +569,7 @@ workflows:
   version: 2
   terraform:
     jobs:
-      - plan_terraform:
+      - init_terraform_state:
           filters:
             branches:
               only:
@@ -563,6 +577,9 @@ workflows:
                 - master
                 - staging
                 - dev
+      - plan_terraform:
+          requires:
+            - init_terraform_statebucket
       - hold_terraform:
           type: approval
           requires:
