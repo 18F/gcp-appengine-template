@@ -45,6 +45,7 @@ fi
 ############################################################
 echo enabling services/APIs
 APILIST="
+	appengine.googleapis.com
 	appengineflex.googleapis.com
 	cloudapis.googleapis.com
 	cloudbuild.googleapis.com
@@ -54,9 +55,12 @@ APILIST="
 	cloudscheduler.googleapis.com
 	cloudtrace.googleapis.com
 	iamcredentials.googleapis.com
+	iam.googleapis.com
+	iap.googleapis.com
 	logging.googleapis.com
 	monitoring.googleapis.com
 	oslogin.googleapis.com
+	sourcerepo.googleapis.com
 	sql-component.googleapis.com
 	sqladmin.googleapis.com
 	storage-api.googleapis.com
