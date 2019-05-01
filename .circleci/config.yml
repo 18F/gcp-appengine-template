@@ -396,6 +396,7 @@ jobs:
           <<: *setupcloudsdk-nongoogle
       - run:
           name: prepare app engine config, build, deploy
+          no_output_timeout: 30m
           command: |
             cd dotnet-example
 
