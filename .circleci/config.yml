@@ -662,7 +662,7 @@ workflows:
             - deploy-rails
       - promote-rails:
           requires:
-            - test-ssoproxy
+            - test-rails
   deploy-ssoproxy-example:
     jobs:
       - deploy-ssoproxy:
