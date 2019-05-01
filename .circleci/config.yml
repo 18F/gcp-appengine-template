@@ -398,6 +398,8 @@ jobs:
           <<: *setupjobvarsandkey
       - run:
           <<: *setupcloudsdk-nongoogle
+      - attach_workspace:
+          at: /tmp/workspace
       - run:
           name: prepare app engine config, build, deploy
           no_output_timeout: 30m
@@ -441,20 +443,26 @@ jobs:
             # deploy!  The app will automatically update it's schema.
             dotnet restore
             dotnet publish -c Release
-            gcloud app deploy --no-promote ./bin/Release/netcoreapp2.1/publish/app.yaml
+            gcloud app deploy --no-promote ./bin/Release/netcoreapp2.1/publish/app.yaml --format=json | jq -r .versions[0].id > /tmp/workspace/dotnet_target_version
+            echo "https://$(cat /tmp/workspace/dotnet_target_version)-dot-dotnet-example-${GOOGLE_PROJECT_ID}.appspot.com/" > /tmp/workspace/dotnet_deploy_url
+            echo "https://dotnet-example-dot-${GOOGLE_PROJECT_ID}.appspot.com/" > /tmp/workspace/dotnet_target_url
   test-dotnet:
     docker:
       - image: google/cloud-sdk
     steps:
       - checkout
+      - attach_workspace:
+          at: /tmp/workspace
       - run:
           name: Run Tests!
-          command: echo "not tested! Run a testing script here. XXX"
+          command: echo "not tested! Run a testing script here on $(cat /tmp/workspace/dotnet_deploy_url). XXX"
   owaspzap-dotnet:
     docker:
       - image: owasp/zap2docker-weekly
     steps:
       - checkout
+      - attach_workspace:
+          at: /tmp/workspace
       - run:
           name: Run OWASP Zap against the app! (fails if the test takes more than 30 minutes)
           no_output_timeout: 30m
@@ -472,7 +480,35 @@ jobs:
               -config globalexcludeurl.url_list.url\(0\).enabled=true \
               -config spider.postform=${POSTFORM}"
 
-            zap-full-scan.py -m 5 -z "${ZAP_CONFIG}" -t "https://dotnet-${CIRCLE_BRANCH}-dot-${GOOGLE_PROJECT_ID}.appspot.com/"
+            zap-full-scan.py -m 5 -z "${ZAP_CONFIG}" -t "$(cat  /tmp/workspace/dotnet_deploy_url)"
+  promote-dotnet:
+    docker:
+      - image: google/cloud-sdk
+    steps:
+      - run:
+          <<: *setupjobvarsandkey
+      - run:
+          <<: *setupcloudsdk
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: Promote dotnet-example to production
+          no_output_timeout: 30m
+          command: |
+            # promote dotnet
+            export VERSION=$(cat /tmp/workspace/dotnet_target_version)
+            gcloud app services set-traffic dotnet-example --splits ${VERSION}=1 --quiet
+            echo promoted dotnet ${VERSION} to $(cat /tmp/workspace/dotnet_target_url)
+
+            # clean up old versions (leave the last two, so you can roll back)
+            echo cleaning up old versions
+            VERSIONS=$(gcloud app versions list --service=dotnet-example --format=list | sort -rn | tail -n +3 | sed 's/^.*\///') || true
+            if [ ! -z "${VERSIONS}" ] ; then
+              gcloud app versions delete ${VERSIONS} --quiet || true
+              echo cleaned up dotnet "${VERSIONS}"
+            else
+              echo no dotnet versions to clean up
+            fi
 
   deploy-log-sync:
     docker:
@@ -593,9 +629,9 @@ workflows:
             branches:
               only:
                 # This is the list of branches which will be deployed automatically.
-                # Only master gets promoted to the default production service.
                 # Add more branches here if you want them automatically deployed.
-                # Their RAILS_ENV will get set to the branch name.
+                # Their RAILS_ENV will get set to the branch name, or "production",
+                # if the branch is "master".
                 - master
                 - staging
                 - dev
@@ -631,12 +667,9 @@ workflows:
       - owaspzap-dotnet:
           requires:
             - deploy-dotnet
-          filters:
-            branches:
-              only:
-                # Do not run this against production, lest it fill it with garbage.
-                - dev
-                - staging
+      - promote-dotnet:
+          requires:
+            - test-dotnet
   # deploy-log-sync:
   #   jobs:
   #     - deploy-log-sync:
