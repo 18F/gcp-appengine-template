@@ -64,7 +64,7 @@ APILIST="
 	websecurityscanner.googleapis.com
 "
 # save the list of services that are actually available
-gcloud services list > /tmp/services.$$
+gcloud services list --available > /tmp/services.$$
 for api in ${APILIST} ; do
   # check that the service actually exists before enabling it
   if grep -E "^${api}" "/tmp/services.$$" >/dev/null ; then
