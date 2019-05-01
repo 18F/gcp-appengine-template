@@ -107,8 +107,7 @@ jobs:
           name: create an empty default app if needed for bootstrapping
           no_output_timeout: 20m
           command: |
-            DEFAULTVERSIONS=$(gcloud app versions list --service=default --format=text | wc -l)
-            if gcloud app versions list --service=default --format=text ; then
+            if gcloud app versions list --service=default --format=text >/dev/null 2>&1 ; then
               echo default app already set up
             else
               echo seeding project with a default app so that the other versions can deploy
