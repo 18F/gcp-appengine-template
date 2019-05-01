@@ -15,6 +15,13 @@ It is recommended that you name them something with "dev/staging/prod" in the
 names, to help the users know which project they are operating on, but
 it is not a requirement.
 
+Once provisioned, you should request that their "In-use IP addresses" quota
+be upped to 15 in the us-west region.  You can find this on the
+[GCP Quota Page](https://console.cloud.google.com/iam-admin/quotas).
+If asked for details, you can say that you have 4 services which may have
+up to 3 versions running at once (like during a deploy), requiring at
+least 12.  Adding 3 more gives us a bit of breathing room in just in case.
+
 
 ## Google Groups
 
@@ -34,6 +41,13 @@ The google group names can be used later on for IAM role provisioning.
 Once everything is set up, you can use the `gcp-appengine-template/gcp_setup/ice_enable_everything.sh`
 script to add the service accounts and IAM roles and everything required
 for normal operation in each GCP Project.
+
+You can look at the scripts to see what they do, but the main thing that they do
+is enable the services that they need to deploy and use App Engine, Cloud SQL,
+Cloud KMS, Cloud Storage, and the related build/deploy resources, create the
+terraform service account, and then add various IAM roles to the different
+groups so that the group members will be able to look at logs, restart things,
+etc.
 
 ### Non-windows Platform Usage
 
@@ -65,4 +79,18 @@ a Linux container on your local system which you can use to do all this.
    This should pull down the google cloud SDK images for you to use.
 1. `docker run -it google/cloud-sdk`  This should launch the cloud-sdk
    container and give you a shell prompt.
-1. `
+1. Follow the [Non-windows Platform Usage directions](#non-windows-platform-usage),
+   Though you don't need to install the Google Cloud SDK, because that is already
+   there.
+
+## Followup
+
+After the Project Owner has gotten their infrastructure bootstrapped, you should be
+able to remove the `roles/owner` role from the terraform service account.
+
+It is also possible that the Project Owner may request more people to be added
+as developers or admins over time.  They may also need their quotas adjusted
+over time as they deploy more apps or have higher usage.
+
+Other than that, the users of this project template should be in operation after
+this!

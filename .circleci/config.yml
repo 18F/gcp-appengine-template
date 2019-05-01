@@ -94,7 +94,7 @@ jobs:
       - run: &setupcloudsdk-nongoogle
           name: Setup Google Cloud SDK
           command: |
-            export GCLOUD_SDK_VERSION=242
+            export GCLOUD_SDK_VERSION=244
             curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-$GCLOUD_SDK_VERSION.0.0-linux-x86_64.tar.gz -o ./gcloud-sdk.tar.gz
             tar xzf gcloud-sdk.tar.gz -C ~
             rm gcloud-sdk.tar.gz
