@@ -104,6 +104,21 @@ jobs:
             echo 'export PATH=~/google-cloud-sdk/bin:$PATH' >> $BASH_ENV
             source $BASH_ENV
       - run:
+          name: create an empty default app if needed for bootstrapping
+          no_output_timeout: 20m
+          command: |
+            DEFAULTVERSIONS=$(gcloud app versions list --service=default --format=text | wc -l)
+            if [ "$DEFAULTVERSIONS" = "0"] ; then
+              echo seeding project with a default app so that the other versions can deploy
+              echo this should only happen once, while you are bootstrapping the environment
+              echo and it should go away once the real default app is deployed
+
+              git clone https://github.com/GoogleCloudPlatform/ruby-docs-samples
+              cd ruby-docs-samples/appengine/hello_world
+              bundle install
+              gcloud app deploy -q --no-promote
+            fi
+      - run:
           name: prepare app engine config, deploy, and run db migrations
           no_output_timeout: 20m
           command: |
