@@ -5,13 +5,30 @@
 # a new GCP project.
 #
 
-# make sure that we know what project we are supposed to deploy this to
-if [ -z "${GOOGLE_PROJECT_ID}" ] ; then
-	echo "the GOOGLE_PROJECT_ID environment variable has not been set: set this to the GCP project ID that you want to add these roles to"
+if [ ! -f "$1" ] ; then
+	echo "no config file found: $1"
+	echo "usage: $0 <configfile>"
 	exit 1
 fi
-gcloud config set project "${GOOGLE_PROJECT_ID}"
-PROJECT_NUMBER=$(gcloud projects describe "${GOOGLE_PROJECT_ID}" --format=text | awk '/^projectNumber:/ {print $2}')
+
+# read in the config file
+. "./$1"
+
+# make sure that we know what project we are supposed to deploy this to
+if [ -z "${GOOGLE_PROJECT_ID}" ] ; then
+	echo "the GOOGLE_PROJECT_ID environment variable has not been set in the config file"
+	exit 1
+fi
+
+# make sure that this is a proper project that we can configure
+if gcloud projects list | grep -E "^${GOOGLE_PROJECT_ID} " >/dev/null ; then
+	echo "setting your default project to ${GOOGLE_PROJECT_ID}"
+	gcloud config set project "${GOOGLE_PROJECT_ID}"
+	PROJECT_NUMBER=$(gcloud projects describe "${GOOGLE_PROJECT_ID}" --format=text | awk '/^projectNumber:/ {print $2}')
+else
+	echo "${GOOGLE_PROJECT_ID} is not a valid project"
+	exit 1
+fi
 
 # make sure we are in the proper directory
 if [ ! -f ./enable-roles.sh ] ; then
@@ -21,7 +38,7 @@ fi
 
 # make sure we know who the project owner is
 if [ -z "${PROJECT_OWNER}" ] ; then
-	echo "the PROJECT_OWNER environment variable has not been set: set this to the GCP Project owner's userid, like username@apps.gsa.gov"
+	echo "the PROJECT_OWNER environment variable has not been set in the config file"
 	exit 1
 fi
 
@@ -143,7 +160,7 @@ ROLES="
 	projects/${GOOGLE_PROJECT_ID}/roles/gsa.monitoring.admin
 "
 if [ -z "${PROJECT_OWNER_GROUP}" ] ; then
-	echo "=============> To enable Project Owners as a group, create a google group, add Owners to it, set the PROJECT_OWNER_GROUP environment variable to the name of the google group, and re-run this script."
+	echo "=============> To enable Project Owners as a group, create a google group, add Owners to it, set the PROJECT_OWNER_GROUP environment variable in the config file to the name of the google group, and re-run this script."
 	add_roles user "${PROJECT_OWNER}"
 else
 	add_roles group "${PROJECT_OWNER_GROUP}"
@@ -164,7 +181,7 @@ ROLES="
 	projects/${GOOGLE_PROJECT_ID}/roles/gsa.monitoring.admin
 "
 if [ -z "${PROJECT_ADMIN_GROUP}" ] ; then
-	echo "=============> To enable Project Admins, create a google group, add Admins to it, set the PROJECT_ADMIN_GROUP environment variable to the name of the google group, and re-run this script."
+	echo "=============> To enable Project Admins, create a google group, add Admins to it, set the PROJECT_ADMIN_GROUP environment variable in the config file to the name of the google group, and re-run this script."
 else
 	add_roles group "${PROJECT_ADMIN_GROUP}"
 fi
@@ -173,7 +190,7 @@ fi
 # Enable project dev read/write
 echo "attaching roles to Developers who need r/w access"
 if [ -z "${PROJECT_DEVRW_GROUP}" ] ; then
-	echo "=============> To enable Dev r/w users, create a google group, add Developers to it, set the PROJECT_DEVRW_GROUP environment variable to the name of the google group, and re-run this script."
+	echo "=============> To enable Dev r/w users, create a google group, add Developers to it, set the PROJECT_DEVRW_GROUP environment variable in the config file to the name of the google group, and re-run this script."
 else
 	ROLES="
 		roles/viewer
@@ -193,7 +210,7 @@ fi
 # Enable project dev readonly
 echo "attaching roles to Developers who need readonly access"
 if [ -z "${PROJECT_DEV_GROUP}" ] ; then
-	echo "=============> To enable Dev readonly users, create a google group, add Developers to it, set the PROJECT_DEV_GROUP environment variable to the name of the google group, and re-run this script."
+	echo "=============> To enable Dev readonly users, create a google group, add Developers to it, set the PROJECT_DEV_GROUP environment variable in the config file to the name of the google group, and re-run this script."
 else
 	ROLES="
 		roles/viewer

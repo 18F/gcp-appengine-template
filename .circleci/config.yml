@@ -446,6 +446,12 @@ jobs:
             gcloud app deploy --no-promote ./bin/Release/netcoreapp2.1/publish/app.yaml --format=json | jq -r .versions[0].id > /tmp/workspace/dotnet_target_version
             echo "https://$(cat /tmp/workspace/dotnet_target_version)-dot-dotnet-example-${GOOGLE_PROJECT_ID}.appspot.com/" > /tmp/workspace/dotnet_deploy_url
             echo "https://dotnet-example-dot-${GOOGLE_PROJECT_ID}.appspot.com/" > /tmp/workspace/dotnet_target_url
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - dotnet_target_version
+            - dotnet_target_url
+            - dotnet_deploy_url
   test-dotnet:
     docker:
       - image: google/cloud-sdk

@@ -1,0 +1,25 @@
+# This is the config file for setting up the XXX GCP Project
+
+# this should be changed to the project you are setting up.
+export GOOGLE_PROJECT_ID=XXX
+
+# this should be changed to the account of the person who requested these projects,
+# like `user@apps.gsa.gov`
+export PROJECT_OWNER=XXX
+
+# this should be changed to the name of the google group that you created for the
+# project owners, like `gcp-pilot-owners`, for example.
+export PROJECT_OWNER_GROUP=XXX
+
+# this should be changed to the name of the google group that you created for the
+# project administrators, like `gcp-pilot-admins`, for example.
+export PROJECT_ADMIN_GROUP=XXX
+
+# this should be changed to the name of the google group that you created for the
+# developers with read/write access, like `gcp-pilot-devrw`, for example.
+export PROJECT_DEVRW_GROUP=XXX
+
+# this should be changed to the name of the google group that you created for the
+# developers with readonly access, like `gcp-pilot-devro`, for example.
+export PROJECT_DEV_GROUP=XXX
+
