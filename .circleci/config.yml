@@ -108,7 +108,9 @@ jobs:
           no_output_timeout: 20m
           command: |
             DEFAULTVERSIONS=$(gcloud app versions list --service=default --format=text | wc -l)
-            if [ "$DEFAULTVERSIONS" = "0"] ; then
+            if gcloud app versions list --service=default --format=text ; then
+              echo default app already set up
+            else
               echo seeding project with a default app so that the other versions can deploy
               echo this should only happen once, while you are bootstrapping the environment
               echo and it should go away once the real default app is deployed
