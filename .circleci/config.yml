@@ -185,6 +185,16 @@ jobs:
 
             # do db creation/migration here
             bundle exec rake appengine:exec GAE_SERVICE=rails GAE_VERSION=${TARGET_VERSION} -- bundle exec rake db:create db:migrate
+
+            # clean up old versions (leave the last two, so you can roll back)
+            VERSIONS=$(gcloud app versions list --service=rails --format=list | sort -rn | tail -n +3 | sed 's/^.*\///') || true
+            if [ ! -z ${VERSIONS} ] ; then
+              gcloud app versions delete --service=rails ${VERSIONS} --quiet || true
+              echo cleaned up rails ${VERSIONS}
+            else
+              echo no rails versions to clean up
+            fi
+
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
@@ -315,12 +325,14 @@ jobs:
 
             # deploy!
             gcloud app deploy -q --no-promote --format=json | jq -r .versions[0].id > /tmp/workspace/sso_target_version
-            echo ${TARGET_URL} > /tmp/workspace/sso_target_url
+            echo "https://$(cat /tmp/workspace/sso_target_version)-dot-${GOOGLE_PROJECT_ID}.appspot.com" > /tmp/workspace/sso_deploy_url
+            echo "${TARGET_URL}" > /tmp/workspace/sso_target_url
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
             - sso_target_version
             - sso_target_url
+            - sso_deploy_url
   test-ssoproxy:
     docker:
       - image: google/cloud-sdk
@@ -331,13 +343,13 @@ jobs:
       - run:
           name: Run Tests!
           command: |
-            echo "Need better tests!  Run a testing script here on $(cat /tmp/workspace/sso_target_url). XXX"
+            echo "Need better tests!  Run a testing script here on $(cat /tmp/workspace/sso_deploy_url). XXX"
             echo sleeping a bit to try to make this test more robust
             sleep 30
             echo testing if proxy is alive
-            curl -f $(cat /tmp/workspace/sso_target_url)liveness_check | grep OK || exit 1
+            curl -f $(cat /tmp/workspace/sso_deploy_url)liveness_check | grep OK || exit 1
             echo testing if proxy is giving back an authorize redirect
-            curl -f $(cat /tmp/workspace/sso_target_url) | grep authorize || exit 1
+            curl -f $(cat /tmp/workspace/sso_deploy_url) | grep authorize || exit 1
   promote-rails:
     docker:
       - image: google/cloud-sdk
@@ -370,14 +382,6 @@ jobs:
               echo cleaned up ssoproxy "${VERSIONS}"
             else
               echo no ssoproxy versions to clean up
-            fi
-
-            VERSIONS=$(gcloud app versions list --service=rails --format=list | sort -rn | tail -n +3 | sed 's/^.*\///') || true
-            if [ ! -z ${VERSIONS} ] ; then
-              gcloud app versions delete --service=rails ${VERSIONS} --quiet || true
-              echo cleaned up rails ${VERSIONS}
-            else
-              echo no rails versions to clean up
             fi
 
   deploy-dotnet:
