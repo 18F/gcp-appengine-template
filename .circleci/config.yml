@@ -181,26 +181,14 @@ jobs:
 
             # Store signature key and URL so that we can test it later on.
             echo ${SIGNATURE_KEY} > /tmp/workspace/rails_signature_key
-            echo "https://rails-dot-${GOOGLE_PROJECT_ID}.appspot.com/" > /tmp/workspace/rails_target_url
             echo "https://${TARGET_VERSION}-dot-rails-dot-${GOOGLE_PROJECT_ID}.appspot.com/" > /tmp/workspace/rails_deploy_url
 
             # do db creation/migration here
             bundle exec rake appengine:exec GAE_SERVICE=rails GAE_VERSION=${TARGET_VERSION} -- bundle exec rake db:create db:migrate
-
-            # clean up old versions (leave the last two, so you can roll back)
-            VERSIONS=$(gcloud app versions list --service=rails --format=list | sort -rn | tail -n +3 | sed 's/^.*\///') || true
-            if [ ! -z ${VERSIONS} ] ; then
-              gcloud app versions delete --service=rails ${VERSIONS} --quiet || true
-              echo cleaned up rails ${VERSIONS}
-            else
-              echo no rails versions to clean up
-            fi
-
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
             - rails_target_version
-            - rails_target_url
             - rails_deploy_url
             - rails_signature_key
   test-rails:
@@ -257,6 +245,34 @@ jobs:
             "
 
             zap-full-scan.py -m 5 -z "${ZAP_CONFIG}" -t "$(cat /tmp/workspace/rails_deploy_url)"
+  promote-rails:
+    docker:
+      - image: google/cloud-sdk
+    steps:
+      - run:
+          <<: *setupjobvarsandkey
+      - run:
+          <<: *setupcloudsdk
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: Promote rails-example with sso to production
+          no_output_timeout: 30m
+          command: |
+            # promote rails
+            export VERSION=$(cat /tmp/workspace/rails_target_version)
+            gcloud app services set-traffic rails --splits ${VERSION}=1 --quiet
+            echo promoted rails ${VERSION} to "https://rails-dot-${GOOGLE_PROJECT_ID}.appspot.com/"
+
+            # clean up old versions (leave the last two, so you can roll back)
+            VERSIONS=$(gcloud app versions list --service=rails --format=list | sort -rn | tail -n +3 | sed 's/^.*\///') || true
+            if [ ! -z ${VERSIONS} ] ; then
+              gcloud app versions delete --service=rails ${VERSIONS} --quiet || true
+              echo cleaned up rails ${VERSIONS}
+            else
+              echo no rails versions to clean up
+            fi
+
   deploy-ssoproxy:
     docker:
       - image: google/cloud-sdk
@@ -295,7 +311,7 @@ jobs:
             export COOKIE_SECRET=$(echo ${TFOUTPUT} | jq -r .sso_cookie_secret.value)
             export SIGNATURE_KEY=$(echo ${TFOUTPUT} | jq -r .signature_key.value)
             export SOURCE="${TARGET_URL}"
-            export DEST=$(cat /tmp/workspace/rails_target_url)
+            export DEST="https://rails-dot-${GOOGLE_PROJECT_ID}.appspot.com/"
             echo ${TFOUTPUT} | jq -r .sso_key.value > jwt_signing_key.pem
 
             cat <<EOF > app.yaml
@@ -352,7 +368,7 @@ jobs:
             curl -f $(cat /tmp/workspace/sso_deploy_url)liveness_check | grep OK || exit 1
             echo testing if proxy is giving back an authorize redirect
             curl -f $(cat /tmp/workspace/sso_deploy_url) | grep authorize || exit 1
-  promote-rails:
+  promote-ssoproxy:
     docker:
       - image: google/cloud-sdk
     steps:
@@ -370,11 +386,6 @@ jobs:
             export VERSION=$(cat /tmp/workspace/sso_target_version)
             gcloud app services set-traffic default --splits ${VERSION}=1 --quiet
             echo promoted ${VERSION} to $(cat /tmp/workspace/sso_target_url)
-
-            # promote rails
-            export VERSION=$(cat /tmp/workspace/rails_target_version)
-            gcloud app services set-traffic rails --splits ${VERSION}=1 --quiet
-            echo promoted rails ${VERSION} to $(cat /tmp/workspace/rails_target_url)
 
             # clean up old versions (leave the last two, so you can roll back)
             echo cleaning up old versions
@@ -649,13 +660,24 @@ workflows:
       - owaspzap-rails:
           requires:
             - deploy-rails
-      - deploy-ssoproxy:
+      - promote-rails:
           requires:
-            - test-rails
+            - test-ssoproxy
+  deploy-ssoproxy-example:
+    jobs:
+      - deploy-ssoproxy:
+          filters:
+            branches:
+              only:
+                # This is the list of branches which will be deployed automatically.
+                # Add more branches here if you want them automatically deployed.
+                - master
+                - staging
+                - dev
       - test-ssoproxy:
           requires:
             - deploy-ssoproxy
-      - promote-rails:
+      - promote-ssoproxy:
           requires:
             - test-ssoproxy
   deploy-dotnet-example:
