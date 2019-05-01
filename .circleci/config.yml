@@ -181,7 +181,8 @@ jobs:
 
             # Store signature key and URL so that we can test it later on.
             echo ${SIGNATURE_KEY} > /tmp/workspace/rails_signature_key
-            echo "https://${TARGET_VERSION}-dot-rails-dot-${GOOGLE_PROJECT_ID}.appspot.com/" > /tmp/workspace/rails_target_url
+            echo "https://rails-dot-${GOOGLE_PROJECT_ID}.appspot.com/" > /tmp/workspace/rails_target_url
+            echo "https://${TARGET_VERSION}-dot-rails-dot-${GOOGLE_PROJECT_ID}.appspot.com/" > /tmp/workspace/rails_deploy_url
 
             # do db creation/migration here
             bundle exec rake appengine:exec GAE_SERVICE=rails GAE_VERSION=${TARGET_VERSION} -- bundle exec rake db:create db:migrate
@@ -200,6 +201,7 @@ jobs:
           paths:
             - rails_target_version
             - rails_target_url
+            - rails_deploy_url
             - rails_signature_key
   test-rails:
     docker:
@@ -217,7 +219,7 @@ jobs:
             export AUTH_HEADER="ZAP-Authorization"
             export AUTH_INFO="${HASHED_TOKEN}_${TOKEN}"
 
-            echo "run tests here against $(cat /tmp/workspace/rails_target_url) with an ${AUTH_HEADER} header"
+            echo "run tests here against $(cat /tmp/workspace/rails_deploy_url) with an ${AUTH_HEADER} header"
   owaspzap-rails:
     docker:
       - image: owasp/zap2docker-weekly
@@ -254,7 +256,7 @@ jobs:
               -config spider.postform=${POSTFORM} \
             "
 
-            zap-full-scan.py -m 5 -z "${ZAP_CONFIG}" -t "$(cat /tmp/workspace/rails_target_url)"
+            zap-full-scan.py -m 5 -z "${ZAP_CONFIG}" -t "$(cat /tmp/workspace/rails_deploy_url)"
   deploy-ssoproxy:
     docker:
       - image: google/cloud-sdk
@@ -325,7 +327,7 @@ jobs:
 
             # deploy!
             gcloud app deploy -q --no-promote --format=json | jq -r .versions[0].id > /tmp/workspace/sso_target_version
-            echo "https://$(cat /tmp/workspace/sso_target_version)-dot-${GOOGLE_PROJECT_ID}.appspot.com" > /tmp/workspace/sso_deploy_url
+            echo "https://$(cat /tmp/workspace/sso_target_version)-dot-${GOOGLE_PROJECT_ID}.appspot.com/" > /tmp/workspace/sso_deploy_url
             echo "${TARGET_URL}" > /tmp/workspace/sso_target_url
       - persist_to_workspace:
           root: /tmp/workspace
