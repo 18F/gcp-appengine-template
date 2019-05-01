@@ -8,5 +8,5 @@ variable "environment" {
 }
 
 variable "project_id" {
-  type "string"
+  type = "string"
 }
