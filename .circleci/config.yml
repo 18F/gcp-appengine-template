@@ -175,7 +175,10 @@ jobs:
             mkdir /tmp/workspace
             cd rails-example
             bundle exec bin/rails assets:precompile
-            gcloud app deploy -q --no-promote --format=json | jq -r .versions.id > /tmp/workspace/rails_target_version
+            gcloud app deploy -q --no-promote --format=json > /tmp/railsdeploy.json
+            # XXX
+            cat /tmp/railsdeploy.json
+            cat /tmp/railsdeploy.json | jq -r .versions.id > /tmp/workspace/rails_target_version
             export TARGET_VERSION=$(cat /tmp/workspace/rails_target_version)
 
             # Store signature key and URL so that we can test it later on.
