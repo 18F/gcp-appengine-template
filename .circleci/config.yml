@@ -110,9 +110,13 @@ jobs:
             if gcloud app versions list --service=default --format=text >/dev/null 2>&1 ; then
               echo default app already set up
             else
+              echo ===================================================
               echo seeding project with a default app so that the other versions can deploy
               echo this should only happen once, while you are bootstrapping the environment
-              echo and it should go away once the real default app is deployed
+              echo and it should go away once the real default app is deployed.
+              echo This is needed because you must deploy a default service before you
+              echo deploy any other service.
+              echo ===================================================
 
               git clone https://github.com/GoogleCloudPlatform/ruby-docs-samples
               cd ruby-docs-samples/appengine/hello_world
@@ -180,15 +184,6 @@ jobs:
 
             # do db creation/migration here
             bundle exec rake appengine:exec GAE_SERVICE=rails GAE_VERSION=${TARGET_VERSION} -- bundle exec rake db:create db:migrate
-
-            # clean up old production versions (leave the last two, so you can roll back)
-            VERSIONS=$(gcloud app versions list --service=rails --format=list | sort -rn | tail -n +3 | sed 's/^.*\///') || true
-            if [ ! -z ${VERSIONS} ] ; then
-              gcloud app versions delete ${VERSIONS} || true
-              echo cleaned up ${VERSIONS}
-            else
-              echo no versions to clean up
-            fi
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
@@ -342,7 +337,7 @@ jobs:
             curl -f $(cat /tmp/workspace/sso_target_url)liveness_check | grep OK || exit 1
             echo testing if proxy is giving back an authorize redirect
             curl -f $(cat /tmp/workspace/sso_target_url) | grep authorize || exit 1
-  promote-rails-prod:
+  promote-rails:
     docker:
       - image: google/cloud-sdk
     steps:
@@ -368,16 +363,21 @@ jobs:
 
             # clean up old versions (leave the last two, so you can roll back)
             echo cleaning up old versions
-            VERSIONS=$(gcloud app versions list --service=default --format=list | egrep -v '\/dev$|\/staging$' | sort -rn | tail -n +3 | sed 's/^.*\///') || true
+            VERSIONS=$(gcloud app versions list --service=default --format=list | sort -rn | tail -n +3 | sed 's/^.*\///') || true
             if [ ! -z "${VERSIONS}" ] ; then
               gcloud app versions delete ${VERSIONS} --quiet || true
-              echo cleaned up "${VERSIONS}"
+              echo cleaned up ssoproxy "${VERSIONS}"
+            else
+              echo no ssoproxy versions to clean up
             fi
-            VERSIONS=$(gcloud app versions list --service=rails --format=list | egrep -v '\/dev$|\/staging$' | sort -rn | tail -n +3 | sed 's/^.*\///') || true
-            if [ ! -z "${VERSIONS}" ] ; then
+
+            VERSIONS=$(gcloud app versions list --service=rails --format=list | sort -rn | tail -n +3 | sed 's/^.*\///') || true
+            if [ ! -z ${VERSIONS} ] ; then
               gcloud app versions delete --service=rails ${VERSIONS} --quiet || true
-              echo cleaned up rails "${VERSIONS}"
-            fi            
+              echo cleaned up rails ${VERSIONS}
+            else
+              echo no rails versions to clean up
+            fi
 
   deploy-dotnet:
     docker:
@@ -435,7 +435,7 @@ jobs:
             # deploy!  The app will automatically update it's schema.
             dotnet restore
             dotnet publish -c Release
-            gcloud app deploy --no-promote --version=dotnet-${CIRCLE_BRANCH} ./bin/Release/netcoreapp2.1/publish/app.yaml
+            gcloud app deploy --no-promote ./bin/Release/netcoreapp2.1/publish/app.yaml
   test-dotnet:
     docker:
       - image: google/cloud-sdk
@@ -521,7 +521,7 @@ jobs:
             EOF
 
             # deploy!
-            gcloud app deploy -q --no-promote --version=${CIRCLE_BRANCH}
+            gcloud app deploy -q --no-promote
 
             # deploy the scheduled task that makes the logsync happen
             # You must delete a job before creating it.
@@ -605,13 +605,9 @@ workflows:
       - test-ssoproxy:
           requires:
             - deploy-ssoproxy
-      - promote-rails-prod:
+      - promote-rails:
           requires:
             - test-ssoproxy
-          filters:
-            branches:
-              only:
-                - master
   deploy-dotnet-example:
     jobs:
       - deploy-dotnet:
