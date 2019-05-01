@@ -314,7 +314,7 @@ jobs:
             EOF
 
             # deploy!
-            gcloud app deploy -q --no-promote --format=json | jq -r .versions.id > /tmp/workspace/sso_target_version
+            gcloud app deploy -q --no-promote --format=json | jq -r .versions[0].id > /tmp/workspace/sso_target_version
             echo ${TARGET_URL} > /tmp/workspace/sso_target_url
       - persist_to_workspace:
           root: /tmp/workspace
