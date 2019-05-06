@@ -53,6 +53,8 @@ etc.
 
 To use the `ice_enable_everything.sh` script on a Linux or OS X system, you will need to:
 1. Install the [Google Cloud SDK](https://cloud.google.com/sdk/) on your system.
+   You can test whether it is installed by saying `gcloud version` and seeing if it
+   shows you version info, or an error.
 1. `gcloud auth login` to authenticate with GCP
 1. `git clone https://github.com/18F/gcp-appengine-template` to clone the repo with the script in it.
 1. `cd gcp-appengine-template/gcp_setup` to get into the proper directory
