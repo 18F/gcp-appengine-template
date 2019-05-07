@@ -5,8 +5,8 @@ It is meant to be used by people in the GSA (and other agencies)
 as a guide to quickly get a lightweight application running
 safely and securely in GCP.
 
-We hope to have procurement information and this process approved with a
-P-ATO from GSA IT Security to make it so that it would be easy to get
+We hope to have procurement information and this process approved by
+GSA IT Security to make it so that it will be easy to get
 up and running and get an ATO.
 
 ## Bootstrap Process
@@ -86,11 +86,11 @@ To get the app(s) in this repo going, you will need to:
      (like https://idp.int.identitysandbox.gov/openid_connect/authorize)
    * `IDP_PUBKEY_URL`: Set this to the URL where you can get the public key that
      can be used to verify your IDP. (like https://idp.int.identitysandbox.gov/api/openid_connect/certs)
-   * `IDP_CLIENT_ID_DEV`: Set this to the client ID you registered with your IDP for dev.
+   * `IDP_CLIENT_ID_dev`: Set this to the client ID you registered with your IDP for dev.
      (like `urn:gov:gsa:openidconnect:development`)
-   * `IDP_CLIENT_ID_STAGING`: Set this to the client ID you registered with your IDP for staging.
+   * `IDP_CLIENT_ID_staging`: Set this to the client ID you registered with your IDP for staging.
      (like `urn:gov:gsa:openidconnect:staging`)
-   * `IDP_CLIENT_ID_PRODUCTION`: Set this to the client ID you registered with your IDP for production.
+   * `IDP_CLIENT_ID_master`: Set this to the client ID you registered with your IDP for production.
      (like `urn:gov:gsa:openidconnect:production`)
    * `IDP_EMAIL_DOMAIN`: Set this to either the email domain that you would
    	 like your access restricted to (like `gsa.gov`), or `*`, if you would

@@ -92,6 +92,11 @@ Rails.application.configure do
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
 
+  # XXX This is a bit ugly, but it solves this error:
+  # HTTP Origin header (https://dev-dot-PROJECT.appspot.com) didn't match request.base_url (https://dev-dot-rails-dot-PROJECT.appspot.com)
+  # Probably just need to fiddle with origin headers in the proxy to solve this properly?
+  config.action_controller.forgery_protection_origin_check = false
+
   # allow the oauth2_proxy in
   if ENV["PROXY_URL"].present?
     config.action_dispatch.default_headers['Access-Control-Allow-Origin'] = ENV["PROXY_URL"]
