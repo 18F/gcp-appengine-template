@@ -296,8 +296,7 @@ jobs:
             export COOKIE_DOMAIN="${GOOGLE_PROJECT_ID}.appspot.com"
             export TARGET_URL="https://${COOKIE_DOMAIN}/"
             export INSTANCES=1
-            idpclientidvar=IDP_CLIENT_ID_${CIRCLE_BRANCH}
-            export IDP_CLIENT_ID=${!idpclientidvar}
+            export IDP_CLIENT_ID=$(env | awk -F= "/^IDP_CLIENT_ID_${CIRCLE_BRANCH}=/ {print \$2}")
 
             # override defaults depending on environment
             if [ "${CIRCLE_BRANCH}" = "master" ] ; then
