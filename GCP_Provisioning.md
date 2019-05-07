@@ -49,6 +49,23 @@ terraform service account, and then add various IAM roles to the different
 groups so that the group members will be able to look at logs, restart things,
 etc.
 
+### Windows Platform Usage
+
+Windows machines cannot run the shell scripts, but you should be able to install
+[Docker Desktop](https://www.docker.com/products/docker-desktop), which can run
+a Linux container on your local system which you can use to do all this.
+
+1. [Install Docker Desktop](https://docs.docker.com/docker-for-windows/install/).  
+   You may need to reboot your machine as a part of this.
+1. Pull up powershell or whatever command shell you use, and type 
+   `docker pull google/cloud-sdk`.
+   This should pull down the google cloud SDK images for you to use.
+1. `docker run -it google/cloud-sdk`  This should launch the cloud-sdk
+   container and give you a shell prompt.
+1. Follow the [Non-windows Platform Usage directions](#non-windows-platform-usage),
+   Though you don't need to install the Google Cloud SDK, because that is already
+   there.
+
 ### Non-windows Platform Usage
 
 To use the `ice_enable_everything.sh` script on a Linux or OS X system, you will need to:
@@ -67,23 +84,6 @@ To use the `ice_enable_everything.sh` script on a Linux or OS X system, you will
    temporarily.  Once the environment has been bootstrapped with terraform, you can remove this
    role from the terraform service account.  Coordinate with the Project Owner on this.
 
-
-### Windows Platform Usage
-
-Windows machines cannot run the shell scripts, but you should be able to install
-[Docker Desktop](https://www.docker.com/products/docker-desktop), which can run
-a Linux container on your local system which you can use to do all this.
-
-1. [Install Docker Desktop](https://docs.docker.com/docker-for-windows/install/).  
-   You may need to reboot your machine as a part of this.
-1. Pull up powershell or whatever command shell you use, and type 
-   `docker pull google/cloud-sdk`.
-   This should pull down the google cloud SDK images for you to use.
-1. `docker run -it google/cloud-sdk`  This should launch the cloud-sdk
-   container and give you a shell prompt.
-1. Follow the [Non-windows Platform Usage directions](#non-windows-platform-usage),
-   Though you don't need to install the Google Cloud SDK, because that is already
-   there.
 
 ## Followup
 
