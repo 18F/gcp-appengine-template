@@ -101,6 +101,5 @@ Rails.application.configure do
   if ENV["PROXY_URL"].present?
     config.action_dispatch.default_headers['Access-Control-Allow-Origin'] = ENV["PROXY_URL"]
     config.action_dispatch.default_headers['Access-Control-Request-Method'] = %w{GET POST OPTIONS DELETE}.join(",")
-    config.action_dispatch.root_url(host: ENV["PROXY_URL"])
   end
 end
