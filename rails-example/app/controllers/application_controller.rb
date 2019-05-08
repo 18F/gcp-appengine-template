@@ -5,6 +5,11 @@ class ApplicationController < ActionController::Base
 	# NIST-800-53-AC-3
 	before_action :check_auth
 
+	# need this so that redirects will go to the proxy and not direct to us
+	def default_url_options
+		{:host => request.env['HTTP_ORIGIN']}
+	end
+
 	# set the current user depending on whether we are doing basic auth,
 	# SSO, or local development
 	def current_user
