@@ -41,9 +41,6 @@ class ArticlesController < ApplicationController
     @article = Article.new(article_params)
    
     if @article.save
-      self.request.env.select {|k,v| k =~ /^HTTP_/}.each do |k,v|
-        logger.info "header: #{k} = #{v}"
-      end
       redirect_to @article
     else
       render 'new'
