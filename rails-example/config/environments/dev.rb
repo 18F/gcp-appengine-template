@@ -95,7 +95,7 @@ Rails.application.configure do
   # XXX This is a bit ugly, but it solves this error:
   # HTTP Origin header (https://dev-dot-PROJECT.appspot.com) didn't match request.base_url (https://dev-dot-rails-dot-PROJECT.appspot.com)
   # Probably just need to fiddle with origin headers in the proxy to solve this properly?
-  # config.action_controller.forgery_protection_origin_check = false
+  config.action_controller.forgery_protection_origin_check = false
 
   # allow the oauth2_proxy in
   if ENV["PROXY_URL"].present?
