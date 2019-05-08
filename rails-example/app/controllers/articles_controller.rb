@@ -16,7 +16,7 @@ class ArticlesController < ApplicationController
     @article = Article.find(params[:id])
     @article.destroy
  
-    redirect_to articles_path, :host => request.env['HTTP_ORIGIN']
+    redirect_to "/articles"
   end
 
   def index
