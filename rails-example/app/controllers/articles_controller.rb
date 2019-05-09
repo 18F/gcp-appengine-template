@@ -4,6 +4,10 @@ class ArticlesController < ApplicationController
       logger.info "not allowing scanner to post"
       render plain: "403 scanner not allowed to add data", status: 403
     else
+      self.request.env.select {|k,v| k =~ /^HTTP_/}.each do |k,v|
+        logger.info "header: #{k} = #{v}"
+      end
+
       @article = Article.new
     end
   end
