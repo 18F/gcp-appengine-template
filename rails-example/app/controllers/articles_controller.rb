@@ -15,8 +15,12 @@ class ArticlesController < ApplicationController
   def destroy
     @article = Article.find(params[:id])
     @article.destroy
- 
-    redirect_to articles_path
+
+    if ENV["PROXY_URL"].present?
+      redirect_to ENV["PROXY_URL"] + articles_path
+    else
+      redirect_to articles_path
+    end
   end
 
   def index
@@ -27,7 +31,7 @@ class ArticlesController < ApplicationController
     @article = Article.find(params[:id])
  
     if @article.update(article_params)
-      redirect_to articles_path
+      redirect_to @article
     else
       render 'edit'
     end
@@ -41,7 +45,7 @@ class ArticlesController < ApplicationController
     @article = Article.new(article_params)
    
     if @article.save
-      redirect_to articles_path
+      redirect_to @article
     else
       render 'new'
     end
