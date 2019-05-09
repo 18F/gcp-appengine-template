@@ -16,10 +16,6 @@ class ArticlesController < ApplicationController
     @article = Article.find(params[:id])
     @article.destroy
 
-    self.request.env.select {|k,v| k =~ /^HTTP_/}.each do |k,v|
-      logger.info "header: #{k} = #{v}"
-    end
-
     if ENV["PROXY_URL"].present?
       redirect_to ENV["PROXY_URL"] + articles_path
     else
@@ -28,10 +24,6 @@ class ArticlesController < ApplicationController
   end
 
   def index
-    self.request.env.select {|k,v| k =~ /^HTTP_/}.each do |k,v|
-      logger.info "header: #{k} = #{v}"
-    end
-
     @articles = Article.all
   end
 
