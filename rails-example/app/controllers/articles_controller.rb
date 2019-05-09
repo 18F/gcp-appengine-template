@@ -4,10 +4,7 @@ class ArticlesController < ApplicationController
       logger.info "not allowing scanner to post"
       render plain: "403 scanner not allowed to add data", status: 403
     else
-      self.request.env.select {|k,v| k =~ /^HTTP_/}.each do |k,v|
-        logger.info "header: #{k} = #{v}"
-      end
-
+      logger.info request.inspect
       @article = Article.new
     end
   end
@@ -20,17 +17,13 @@ class ArticlesController < ApplicationController
     @article = Article.find(params[:id])
     @article.destroy
 
-    self.request.env.select {|k,v| k =~ /^HTTP_/}.each do |k,v|
-      logger.info "header: #{k} = #{v}"
-    end
+    logger.info request.inspect
 
     redirect_to articles_path
   end
 
   def index
-    self.request.env.select {|k,v| k =~ /^HTTP_/}.each do |k,v|
-      logger.info "header: #{k} = #{v}"
-    end
+    logger.info request.inspect
 
     @articles = Article.all
   end
@@ -46,19 +39,14 @@ class ArticlesController < ApplicationController
   end
 
   def show
-    self.request.env.select {|k,v| k =~ /^HTTP_/}.each do |k,v|
-      logger.info "header: #{k} = #{v}"
-    end
+    logger.info request.inspect
 
     @article = Article.find(params[:id])
   end
 
   def create
     @article = Article.new(article_params)
-
-    self.request.env.select {|k,v| k =~ /^HTTP_/}.each do |k,v|
-      logger.info "header: #{k} = #{v}"
-    end
+    logger.info request.inspect
    
     if @article.save
       redirect_to @article

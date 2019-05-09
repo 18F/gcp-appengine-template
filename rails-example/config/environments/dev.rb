@@ -99,6 +99,7 @@ Rails.application.configure do
 
   # Need this because otherwise some redirects don't work.
   if ENV["PROXY_URL"].present?
-    config.action_controller.default_url_options = { host: ENV["PROXY_URL"] }
+    proxyhost = URI.parse(ENV["PROXY_URL"]).host
+    config.action_controller.default_url_options = { host: proxyhost }
   end
 end
