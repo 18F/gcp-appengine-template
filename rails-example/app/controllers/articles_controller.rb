@@ -19,7 +19,6 @@ class ArticlesController < ApplicationController
     self.request.env.select {|k,v| k =~ /^HTTP_/}.each do |k,v|
       logger.info "header: #{k} = #{v}"
     end
-    logger.info "articles_path: #{articles_path}"
 
     redirect_to articles_path
   end
@@ -44,6 +43,10 @@ class ArticlesController < ApplicationController
 
   def create
     @article = Article.new(article_params)
+
+    self.request.env.select {|k,v| k =~ /^HTTP_/}.each do |k,v|
+      logger.info "header: #{k} = #{v}"
+    end
    
     if @article.save
       redirect_to @article
