@@ -97,9 +97,9 @@ Rails.application.configure do
   # Probably just need to fiddle with origin headers in the proxy to solve this properly?
   config.action_controller.forgery_protection_origin_check = false
 
-  # # Need this because otherwise some redirects don't work.
-  # if ENV["PROXY_URL"].present?
-  #   proxyhost = URI.parse(ENV["PROXY_URL"]).host
-  #   config.action_controller.default_url_options = { host: proxyhost }
-  # end
+  # Need this because otherwise some redirects don't work.
+  if ENV["PROXY_URL"].present?
+    proxyhost = URI.parse(ENV["PROXY_URL"]).host
+    config.action_controller.default_url_options = { host: proxyhost }
+  end
 end
