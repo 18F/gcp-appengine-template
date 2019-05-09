@@ -15,7 +15,12 @@ class ArticlesController < ApplicationController
   def destroy
     @article = Article.find(params[:id])
     @article.destroy
- 
+
+    self.request.env.select {|k,v| k =~ /^HTTP_/}.each do |k,v|
+      logger.info "header: #{k} = #{v}"
+    end
+    logger.info "articles_path: #{articles_path}"
+
     redirect_to articles_path
   end
 
