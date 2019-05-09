@@ -4,7 +4,6 @@ class ArticlesController < ApplicationController
       logger.info "not allowing scanner to post"
       render plain: "403 scanner not allowed to add data", status: 403
     else
-      logger.info request.inspect
       @article = Article.new
     end
   end
@@ -17,13 +16,21 @@ class ArticlesController < ApplicationController
     @article = Article.find(params[:id])
     @article.destroy
 
-    logger.info request.inspect
+    self.request.env.select {|k,v| k =~ /^HTTP_/}.each do |k,v|
+      logger.info "header: #{k} = #{v}"
+    end
 
-    redirect_to articles_path
+    if ENV["PROXY_URL"].present?
+      redirect_to ENV["PROXY_URL"] + articles_path
+    else
+      redirect_to articles_path
+    end
   end
 
   def index
-    logger.info request.inspect
+    self.request.env.select {|k,v| k =~ /^HTTP_/}.each do |k,v|
+      logger.info "header: #{k} = #{v}"
+    end
 
     @articles = Article.all
   end
@@ -39,14 +46,11 @@ class ArticlesController < ApplicationController
   end
 
   def show
-    logger.info request.inspect
-
     @article = Article.find(params[:id])
   end
 
   def create
     @article = Article.new(article_params)
-    logger.info request.inspect
    
     if @article.save
       redirect_to @article
