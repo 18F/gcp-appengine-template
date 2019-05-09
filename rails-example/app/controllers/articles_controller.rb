@@ -28,6 +28,10 @@ class ArticlesController < ApplicationController
   end
 
   def index
+    self.request.env.select {|k,v| k =~ /^HTTP_/}.each do |k,v|
+      logger.info "header: #{k} = #{v}"
+    end
+
     @articles = Article.all
   end
 
@@ -42,6 +46,10 @@ class ArticlesController < ApplicationController
   end
 
   def show
+    self.request.env.select {|k,v| k =~ /^HTTP_/}.each do |k,v|
+      logger.info "header: #{k} = #{v}"
+    end
+
     @article = Article.find(params[:id])
   end
 
