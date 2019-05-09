@@ -90,17 +90,17 @@ Rails.application.configure do
     config.logger    = ActiveSupport::TaggedLogging.new(logger)
   end
 
+  # Do not dump schema after migrations.
+  config.active_record.dump_schema_after_migration = false
+
   # XXX This is a bit ugly, but it solves this error:
   # HTTP Origin header (https://dev-dot-PROJECT.appspot.com) didn't match request.base_url (https://dev-dot-rails-dot-PROJECT.appspot.com)
   # Probably just need to fiddle with origin headers in the proxy to solve this properly?
   config.action_controller.forgery_protection_origin_check = false
 
-  # Do not dump schema after migrations.
-  config.active_record.dump_schema_after_migration = false
-
-  # allow the oauth2_proxy in
+  # Need this because otherwise some redirects don't work.
   if ENV["PROXY_URL"].present?
-    config.action_dispatch.default_headers['Access-Control-Allow-Origin'] = ENV["PROXY_URL"]
-    config.action_dispatch.default_headers['Access-Control-Request-Method'] = %w{GET POST OPTIONS DELETE}.join(",")
+    proxyhost = URI.parse(ENV["PROXY_URL"]).host
+    config.action_controller.default_url_options = { host: proxyhost }
   end
 end
