@@ -97,9 +97,9 @@ Rails.application.configure do
   # Probably just need to fiddle with origin headers in the proxy to solve this properly?
   config.action_controller.forgery_protection_origin_check = false
 
-  # allow the oauth2_proxy in
-  if ENV["PROXY_URL"].present?
-    config.action_dispatch.default_headers['Access-Control-Allow-Origin'] = ENV["PROXY_URL"]
-    config.action_dispatch.default_headers['Access-Control-Request-Method'] = %w{GET POST OPTIONS DELETE}.join(",")
-  end
+  # # allow the oauth2_proxy in
+  # if ENV["PROXY_URL"].present?
+  #   config.action_dispatch.default_headers['Access-Control-Allow-Origin'] = ENV["PROXY_URL"]
+  #   config.action_dispatch.default_headers['Access-Control-Request-Method'] = %w{GET POST OPTIONS DELETE}.join(",")
+  # end
 end
