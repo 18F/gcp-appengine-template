@@ -244,7 +244,11 @@ jobs:
               -config spider.postform=${POSTFORM} \
             "
 
-            zap-full-scan.py -m 5 -z "${ZAP_CONFIG}" -t "$(cat /tmp/workspace/rails_deploy_url)"
+            if zap-full-scan.py -m 5 -z "${ZAP_CONFIG}" -t "$(cat /tmp/workspace/rails_deploy_url)" ; then
+              echo "OWASP ZAP scan found no problems.  Yay!"
+            else
+              echo "XXX run a script or send email to notify Admins that the OWASP ZAP scan found issues here"
+            fi
   promote-rails:
     docker:
       - image: google/cloud-sdk
@@ -499,7 +503,11 @@ jobs:
               -config globalexcludeurl.url_list.url\(0\).enabled=true \
               -config spider.postform=${POSTFORM}"
 
-            zap-full-scan.py -m 5 -z "${ZAP_CONFIG}" -t "$(cat  /tmp/workspace/dotnet_deploy_url)"
+            if zap-full-scan.py -m 5 -z "${ZAP_CONFIG}" -t "$(cat  /tmp/workspace/dotnet_deploy_url)" ; then
+              echo "OWASP ZAP scan found no problems.  Yay!"
+            else
+              echo "XXX run a script or send email to notify Admins that the OWASP ZAP scan found issues here"
+            fi
   promote-dotnet:
     docker:
       - image: google/cloud-sdk
@@ -604,7 +612,7 @@ jobs:
               exit 0
             fi
 
-            export TARGET_URL="https://${CIRCLE_BRANCH}-dot-logsync-dot-${GOOGLE_PROJECT_ID}.appspot.com//"
+            export TARGET_URL="https://${CIRCLE_BRANCH}-dot-logsync-dot-${GOOGLE_PROJECT_ID}.appspot.com/"
 
             export ZAP_CONFIG=" \
               -config globalexcludeurl.url_list.url\(0\).regex='.*/robots\.txt.*' \
@@ -612,8 +620,11 @@ jobs:
               -config globalexcludeurl.url_list.url\(0\).enabled=true \
               "
 
-            zap-full-scan.py -m 5 -z "${ZAP_CONFIG}" -t "${TARGET_URL}"
-
+            if zap-full-scan.py -m 5 -z "${ZAP_CONFIG}" -t "${TARGET_URL}" ; then
+              echo "OWASP ZAP scan found no problems.  Yay!"
+            else
+              echo "XXX run a script or send email to notify Admins that the OWASP ZAP scan found issues here"
+            fi
 
 
 workflows:
