@@ -244,7 +244,18 @@ jobs:
               -config spider.postform=${POSTFORM} \
             "
 
-            zap-full-scan.py -m 5 -z "${ZAP_CONFIG}" -t "$(cat /tmp/workspace/rails_deploy_url)" || true
+            for i in 1 2 3 4 5 ; do
+              echo sleeping a bit to make this test more robust
+              curl -s "${TARGET_URL}" >/dev/null && break || sleep 15
+            done
+
+            zap-full-scan.py -m 5 -z "${ZAP_CONFIG}" -t "$(cat /tmp/workspace/rails_deploy_url)"
+      - run: &notifyonzapscan
+          name: Notify Admins about OWASP ZAP scan
+          when: on_fail
+          command: |
+            echo "XXX run a script or send email to notify Admins that the OWASP ZAP scan found issues here"
+            true
   promote-rails:
     docker:
       - image: google/cloud-sdk
@@ -499,7 +510,14 @@ jobs:
               -config globalexcludeurl.url_list.url\(0\).enabled=true \
               -config spider.postform=${POSTFORM}"
 
-            zap-full-scan.py -m 5 -z "${ZAP_CONFIG}" -t "$(cat  /tmp/workspace/dotnet_deploy_url)" || true
+            for i in 1 2 3 4 5 ; do
+              echo sleeping a bit to make this test more robust
+              curl -s "${TARGET_URL}" >/dev/null && break || sleep 15
+            done
+
+            zap-full-scan.py -m 5 -z "${ZAP_CONFIG}" -t "$(cat  /tmp/workspace/dotnet_deploy_url)"
+      - run:
+          <<: *notifyonzapscan
   promote-dotnet:
     docker:
       - image: google/cloud-sdk
@@ -612,8 +630,14 @@ jobs:
               -config globalexcludeurl.url_list.url\(0\).enabled=true \
               "
 
-            zap-full-scan.py -m 5 -z "${ZAP_CONFIG}" -t "${TARGET_URL}" || true
+            for i in 1 2 3 4 5 ; do
+              echo sleeping a bit to make this test more robust
+              curl -s "${TARGET_URL}" >/dev/null && break || sleep 15
+            done
 
+            zap-full-scan.py -m 5 -z "${ZAP_CONFIG}" -t "${TARGET_URL}"
+      - run:
+          <<: *notifyonzapscan
 
 
 workflows:
