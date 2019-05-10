@@ -10,4 +10,5 @@ dotnet-example/*.db
 **/*.sqlite3
 rails-example/log
 rails-example/tmp
+terraform/.terraform
 
