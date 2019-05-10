@@ -13,7 +13,7 @@ To get the app(s) in this repo going, you will need to:
    on them all.  For each project, do the following:
   2. Get GSA ICE to enable all of the APIs and roles you need for your GCP
      Project.  They should be able to check this repo out and follow the
-     instructions on the [GCP Provisioning page](https://github.com/18F/gcp-appengine-template/raw/master/GCP_Provisioning.md).
+     instructions on the [GCP Provisioning page](GCP_Provisioning.md).
      Or at least they can look the scripts
      over and understand what needs to be done on their end.
   2. Generate a key for the Terraform service account via
