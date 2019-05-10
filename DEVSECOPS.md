@@ -26,7 +26,7 @@ GCP Projects are fully compartmentalized subdivisions within a GCP Organization 
 be used for individual application environments like dev/test/prod.  Access to one GCP Project
 does not give you access to any other Project.  Billing is managed on a per-Project basis as well.
 
-![diagram of gcp org, project, apps, and services](https://github.com/18F/gcp-appengine-template/raw/master/gcp_diagram.png)
+![diagram of gcp org, project, apps, and services](gcp_diagram.png)
 
 ## Project
 
@@ -38,7 +38,7 @@ CircleCI CI/CD system.  Applications will be configured and deployed as well, us
 CircleCI.  CircleCI will watch a set of branches (usually dev/staging/master) and deploy the code in that
 branch into the appropriate GCP Project whenever there are changes.
 
-![diagram of a CircleCI workflow](https://github.com/18F/gcp-appengine-template/raw/master/workflow.png)
+![diagram of a CircleCI workflow](workflow.png)
 
 Currently, our project uses Google App Engine to deploy apps which use Google Cloud SQL and KMS.  It also
 stores the terraform state in an encrypted Cloud Storage bucket.  All Google App Engine apps are
