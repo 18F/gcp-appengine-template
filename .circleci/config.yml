@@ -244,11 +244,6 @@ jobs:
               -config spider.postform=${POSTFORM} \
             "
 
-            for i in 1 2 3 4 5 ; do
-              echo sleeping a bit to make this test more robust
-              curl -s "${TARGET_URL}" >/dev/null && break || sleep 15
-            done
-
             zap-full-scan.py -m 5 -z "${ZAP_CONFIG}" -t "$(cat /tmp/workspace/rails_deploy_url)"
       - run: &notifyonzapscan
           name: Notify Admins about OWASP ZAP scan
@@ -510,11 +505,6 @@ jobs:
               -config globalexcludeurl.url_list.url\(0\).enabled=true \
               -config spider.postform=${POSTFORM}"
 
-            for i in 1 2 3 4 5 ; do
-              echo sleeping a bit to make this test more robust
-              curl -s "${TARGET_URL}" >/dev/null && break || sleep 15
-            done
-
             zap-full-scan.py -m 5 -z "${ZAP_CONFIG}" -t "$(cat  /tmp/workspace/dotnet_deploy_url)"
       - run:
           <<: *notifyonzapscan
@@ -622,18 +612,13 @@ jobs:
               exit 0
             fi
 
-            export TARGET_URL="https://${CIRCLE_BRANCH}-dot-logsync-dot-${GOOGLE_PROJECT_ID}.appspot.com//"
+            export TARGET_URL="https://${CIRCLE_BRANCH}-dot-logsync-dot-${GOOGLE_PROJECT_ID}.appspot.com/"
 
             export ZAP_CONFIG=" \
               -config globalexcludeurl.url_list.url\(0\).regex='.*/robots\.txt.*' \
               -config globalexcludeurl.url_list.url\(0\).description='Exclude robots.txt' \
               -config globalexcludeurl.url_list.url\(0\).enabled=true \
               "
-
-            for i in 1 2 3 4 5 ; do
-              echo sleeping a bit to make this test more robust
-              curl -s "${TARGET_URL}" >/dev/null && break || sleep 15
-            done
 
             zap-full-scan.py -m 5 -z "${ZAP_CONFIG}" -t "${TARGET_URL}"
       - run:
