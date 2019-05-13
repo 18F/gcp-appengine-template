@@ -5,6 +5,8 @@ It is meant to be used by people in the GSA (and other agencies)
 as a guide to quickly get a lightweight application running
 safely and securely in GCP.
 
+![diagram of gcp org, project, apps, and services](gcp_diagram.png)
+
 We hope to have procurement information and this process approved by
 GSA IT Security to make it so that it will be easy to get
 up and running and get an ATO.  

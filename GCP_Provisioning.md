@@ -21,6 +21,12 @@ be upped to 15 in the us-west region.  You can find this on the
 If asked for details, you can say that you have 4 services which may have
 up to 3 versions running at once (like during a deploy), requiring at
 least 12.  Adding 3 more gives us a bit of breathing room in just in case.
+When you provision the Production GCP Project, double this, because you
+will be deploying failover instances, thus you'll need at least 2x the IPs.
+
+If the service is going to scale up, you may have to bump more of
+these quotas up, so you might ask for that information at this point in
+time so that you can be ahead of the game.
 
 
 ## Google Groups
