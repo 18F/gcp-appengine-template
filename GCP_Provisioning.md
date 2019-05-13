@@ -4,6 +4,8 @@ For GSA ICE folks who are provisioning the GCP Projects for this system,
 the overall architecture is:
 ![diagram of gcp org, project, apps, and services](gcp_diagram.png)
 
+More details on the template can be found [here](DEVSECOPS.md) as well.
+
 ## GCP Project Provisioning
 
 You will need to create three different GCP projects:
@@ -21,6 +23,8 @@ be upped to 15 in the us-west region.  You can find this on the
 If asked for details, you can say that you have 4 services which may have
 up to 3 versions running at once (like during a deploy), requiring at
 least 12.  Adding 3 more gives us a bit of breathing room in just in case.
+When you provision the Production GCP Project, double this, because you
+will be deploying failover instances, thus you'll need at least 2x the IPs.
 
 
 ## Google Groups
@@ -62,6 +66,15 @@ a Linux container on your local system which you can use to do all this.
    This should pull down the google cloud SDK images for you to use.
 1. `docker run -it google/cloud-sdk`  This should launch the cloud-sdk
    container and give you a shell prompt.
+1. Since the cloud-sdk docker image does not have an editor in it, you will
+   need to
+   1. edit the config file locally using your favorite editor
+   1. paste the contents of the file into your terminal window after typing
+      `cat > /yourconfigfile.cfg`
+   1. hit a `^D` (Control-D) to stop creating the file.  You should get a
+      normal shell prompt back.
+   1. check that your file is proper by saying `cat yourconfigfile.cfg`
+      and verifying the contents.
 1. Follow the [Non-windows Platform Usage directions](#non-windows-platform-usage),
    Though you don't need to install the Google Cloud SDK, because that is already
    there.
@@ -78,7 +91,8 @@ To use the `ice_enable_everything.sh` script on a Linux or OS X system, you will
 1. Create or copy in a config file for the script.  An example config file can be found in
    `gcp-appengine-template/gcp_setup/ice_enable_everything.cfg.example`.  You will need to
    change all `XXX` instances into something real.
-1. `./ice_enable_everything.sh yourconfigfile.cfg` to run the script.  You may have to say `Y`
+1. `./ice_enable_everything.sh /yourconfigfile.cfg` to run the script (adjust
+   the path to yourconfigfile.cfg to where you created it).  You may have to say `Y`
    a couple of times.
 1. For bootstrapping, you will need to add the `roles/owner` role to the terraform service account
    temporarily.  Once the environment has been bootstrapped with terraform, you can remove this

@@ -10,12 +10,16 @@ To get the app(s) in this repo going, you will need to:
    properly.  The default `db-f1-micro` db size is probably not sufficient
    for most production systems.
 1. Procure three GCP projects and gain access to the [GCP console](https://console.cloud.google.com/)
-   on them all.  For each project, do the following:
+   on them all.  Unfortunately, as of this writing, the
+   [GSA ICE group](https://www.gsa.gov/about-us/organization/office-of-the-chief-information-officer/office-of-corporate-it-services)
+   has not yet finalized the process for procuring GCP, so we cannot document
+   it fully here, but if you contact them, they should be able to give you
+   the latest information on their process.
+
+   For each project, do the following:
   2. Get GSA ICE to enable all of the APIs and roles you need for your GCP
      Project.  They should be able to check this repo out and follow the
      instructions on the [GCP Provisioning page](GCP_Provisioning.md).
-     Or at least they can look the scripts
-     over and understand what needs to be done on their end.
   2. Generate a key for the Terraform service account via
      `Console -> IAM & admin -> Service Accounts -> terraform -> Create Key` in GCP.
   2. Save the JSON credentials to `$HOME/master-gcloud-service-key.json` for
