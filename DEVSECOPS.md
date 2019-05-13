@@ -263,19 +263,23 @@ a list of requirements, and under each requirement, we listed how this project c
 * We expect that the networking controls will be applied through terraform, and thus easily auditable for compliance.
 
 ## ATO processes are highly automated. Compliant code and process is reused by multiple teams. All ATOs take the same amount of time for the same system and frequent deployment is only interrupted when specific risk triggers are raised through automation. Controls can be continuously monitored and measured with automation.
-* We are still needing some direction on how to manage this.  We hope to use https://pages.nist.gov/OSCAL/
-  or http://opencontrol.cfapps.io/ or something to automate the generation of our compliance documentation.
-* We are hoping to get a P-ATO for this project so that it will be easy to diff this repo against a project
-  derived from it and easily come up with a small subset of changes that need review.
+* We are using [OpenControl](http://opencontrol.cfapps.io/) and [Compliance Masonry](https://github.com/opencontrol/compliance-masonry/)
+  to automate the collection of most of the information required to get a GSA LATO.
+* The compliance documentation is meant to be created along with the code, which means
+  that the compliance information ought to be easier to keep up to date because there
+  are tools that you can use to collect and audit it.
 * It should be easy to tag an ATO'ed revision in github and then review diffs between
   the tag and what is in staging to see if there is anything that requires an SCR on an ongoing basis.
+* More documentation on this can be found in the [Compliance documentation](Compliance.md) for
+  the template.
 
-## Description Backup and data lifecycle management allows application developers to ensure that their data is maintained over time and, in the case of failure of any subsystems, that it can be recovered with potentially some gap in transactional data. Lifecycle management of the data includes capabilities to archive and manage data over a long lifetime.
+## Backup and data lifecycle management allows application developers to ensure that their data is maintained over time and, in the case of failure of any subsystems, that it can be recovered with potentially some gap in transactional data. Lifecycle management of the data includes capabilities to archive and manage data over a long lifetime.
 * The production databases have daily backups automatically scheduled for them, and also are
   configured for HA and failover.
 * All changes to the code are retained in github.
 
 ## Onboarding is largely self-service (within appropriate legal limits), and application owners have full access to their expenditures at any time. Application owners can set triggers on expenditures to manage their costs appropriately.
+* User/Role management is done by the Project Owners, who will request role changes related to offboarding from the GSA ICE group.
 * Billing is configured by GSA ICE.
 * GCP allows billing alerts to be configured, but we do not know if GSA ICE will
   be taking advantage of this feature.  
@@ -286,15 +290,19 @@ a list of requirements, and under each requirement, we listed how this project c
 # Known Issues
 
 There are a few known issues with the project:
-  * The GSA ICE team plans on issuing GCP Projects such that the Project Owner only has Editor level
-    access.  This means that they will be unable to do things like activate stackdriver alerting, create
+  * The GSA ICE team issues GCP Projects such that the Project Owner only is allowed
+    specific roles like `roles/appengine.appAdmin` and so on.  This means that they will be unable
+    to do things like activate stackdriver alerting, create
     service accounts, access the Security Command Center, etc.  This means that most projects will
     be unable to deploy without having to get them to run commands on the Project Owner's behalf.
+
     Seems like it would be better to set up good auditing/logging of access control events and let
     the Project Owner set up the environment and manage their users.  Or at least to let them bootstrap
     the environment and get everything set up, and then lower their access once things are going.
-  * We need the project owner IAM role added to our user accounts so that we can explore how to
-    activate/configure/use Stackdriver alerts and the Security Command Center.
+
+    We hope that these requirements will be relaxed down the road as everybody gets more experience
+    with the platform.  In the meantime, we have written some scripts for the ICE people to run to
+    enable access in the `gcp-appengine-template/gcp_setup` directory.
   * Networking is not very customizable in App Engine:
     * Limiting outbound access seems pretty close to impossible with App Engine.  The firewall that
       App Engine does only operates on inbound traffic.  I have hopes that we can set up some sort of
@@ -305,10 +313,6 @@ There are a few known issues with the project:
       So app implementers need to check for a properly signed GAP-Authentication header.  This seems
       like an easy thing to forget to do, or do improperly, so it would be good to talk with GCP
       to try to understand if they have better networking controls coming.
-  * We really don't have any good guidance on how GSA IT Security would like us to make an SSP
-    or get a P-ATO for
-    this project.  There seem to be some interesting oscal/opencontrol things that would fill
-    this need, but it's feeling a bit unformed right now.
   * Logs are retained with this schedule:
     * Admin Activity audit logs 400 days
     * Data Access audit logs  30 days
@@ -317,8 +321,3 @@ There are a few known issues with the project:
     * Logs other than audit logs or Access Transparency logs  30 days  
     We may need to set up a storage bucket for log archival and automate that process,
     if this retention is not enough.
-  * We only just got dev/staging/prod environments provisioned for us, so we have not yet
-    implemented the full separated environments yet.  Right now, all environments get deployed
-    to our "pilot" GCP project.  This should be fixed soon, but it means that some of the
-    controls we talk of here are not quite going yet.
-
