@@ -1,4 +1,9 @@
 version: 2
+
+# First we will define the jobs that are used in the workflows.
+# 
+# Workflows can be found at the bottom of this file.  They specify
+# what order the jobs run in and what depends on what.
 jobs:
   init_terraform_state:
     docker:
@@ -261,13 +266,15 @@ jobs:
           at: /tmp/workspace
       - run:
           name: Promote rails-example with sso to production
-          no_output_timeout: 30m
           command: |
             # promote rails
             export VERSION=$(cat /tmp/workspace/rails_target_version)
             gcloud app services set-traffic rails --splits ${VERSION}=1 --quiet
             echo promoted rails ${VERSION} to "https://rails-dot-${GOOGLE_PROJECT_ID}.appspot.com/"
-
+      - run:
+          name: Clean up old versions
+          no_output_timeout: 30m
+          command: |
             # clean up old versions (leave the last two, so you can roll back)
             VERSIONS=$(gcloud app versions list --service=rails --format=list | sort -rn | tail -n +3 | sed 's/^.*\///') || true
             if [ ! -z "${VERSIONS}" ] ; then
@@ -384,13 +391,15 @@ jobs:
           at: /tmp/workspace
       - run:
           name: Promote rails-example with sso to production
-          no_output_timeout: 30m
           command: |
             # promote ssoproxy
             export VERSION=$(cat /tmp/workspace/sso_target_version)
             gcloud app services set-traffic default --splits ${VERSION}=1 --quiet
             echo promoted ${VERSION} to $(cat /tmp/workspace/sso_target_url)
-
+      - run:
+          name: Clean up old versions
+          no_output_timeout: 30m
+          command: |
             # clean up old versions (leave the last two, so you can roll back)
             echo cleaning up old versions
             VERSIONS=$(gcloud app versions list --service=default --format=list | sort -rn | tail -n +3 | sed 's/^.*\///') || true
@@ -520,13 +529,15 @@ jobs:
           at: /tmp/workspace
       - run:
           name: Promote dotnet-example to production
-          no_output_timeout: 30m
           command: |
             # promote dotnet
             export VERSION=$(cat /tmp/workspace/dotnet_target_version)
             gcloud app services set-traffic dotnet-example --splits ${VERSION}=1 --quiet
             echo promoted dotnet ${VERSION} to $(cat /tmp/workspace/dotnet_target_url)
-
+      - run:
+          name: Clean up old versions
+          no_output_timeout: 30m
+          command: |
             # clean up old versions (leave the last two, so you can roll back)
             echo cleaning up old versions
             VERSIONS=$(gcloud app versions list --service=dotnet-example --format=list | sort -rn | tail -n +3 | sed 's/^.*\///') || true
@@ -627,6 +638,7 @@ jobs:
             fi
 
 
+# These are the workflows that define what circleci actually does.
 workflows:
   version: 2
   terraform:
@@ -711,17 +723,17 @@ workflows:
       - promote-dotnet:
           requires:
             - test-dotnet
-  # deploy-log-sync:
-  #   jobs:
-  #     - deploy-log-sync:
-  #         filters:
-  #           branches:
-  #             only:
-  #               # This is the list of branches which will be deployed automatically.
-  #               # Add more branches here if you want them automatically deployed.
-  #               - master
-  #               - staging
-  #               - dev
-  #     - owaspzap-log-sync:
-  #         requires:
-  #           - deploy-log-sync
+  deploy-log-sync:
+    jobs:
+      - deploy-log-sync:
+          filters:
+            branches:
+              only:
+                # This is the list of branches which will be deployed automatically.
+                # Add more branches here if you want them automatically deployed.
+                - master
+                - staging
+                - dev
+      - owaspzap-log-sync:
+          requires:
+            - deploy-log-sync

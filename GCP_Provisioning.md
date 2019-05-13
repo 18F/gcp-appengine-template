@@ -2,7 +2,7 @@
 
 For GSA ICE folks who are provisioning the GCP Projects for this system,
 the overall architecture is:
-![diagram of gcp org, project, apps, and services](https://github.com/18F/gcp-appengine-template/raw/master/gcp_diagram.png)
+![diagram of gcp org, project, apps, and services](gcp_diagram.png)
 
 ## GCP Project Provisioning
 
