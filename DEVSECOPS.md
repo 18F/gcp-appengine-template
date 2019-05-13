@@ -128,7 +128,12 @@ a list of requirements, and under each requirement, we listed how this project c
   infrastructure changes, though perhaps without the context that CircleCI access might give you.
 
 ## Application developers have a clear, self-service intake onto the platform.
-* This project does not directly address how GCP is provisioned and set up, but from discussions with the people within GSA ICE who are developing the process, the rough plan is to have a GSA GCP Organization account run by the ICE folks who will, upon receiving an approved request from a Project Owner, set up GCP Project(s) for the Project Owner with a minimal set of permissions and services provisioned in it.
+* This project does not directly address how GCP is provisioned and set up,
+  but from discussions with the people within GSA ICE who are developing the
+  process, the rough plan is to have a GSA GCP Organization account run by
+  the ICE folks who will, upon receiving an approved request from a Project
+  Owner, set up GCP Project(s) for the Project Owner with a minimal set of
+  permissions and services provisioned in it.
 
 ## The platform services are centralized in its infrastructure and pipeline implementation.
 * The creation of GCP Projects will be controlled by GSA ICE.

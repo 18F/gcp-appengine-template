@@ -3,11 +3,18 @@ This repository contains a couple of example applications and
 supporting infrastructure and configuration files for Google App Engine.
 It is meant to be used by people in the GSA (and other agencies)
 as a guide to quickly get a lightweight application running
-safely and securely in GCP.
+safely and securely in GCP.  
 
-We hope to have procurement information and this process approved by
-GSA IT Security to make it so that it will be easy to get
-up and running and get an ATO.  
+![diagram of gcp org, project, apps, and services](gcp_diagram.png)
+
+The overall idea behind this project is
+to create a template that people can clone, add their application to, provision some GCP
+Projects, and then enable CircleCI
+to automatically provision dev/staging/production environments into those GCP Projects
+with good secrets management, backups, tests, and other controls that make their project 
+automatically use best [DevSecOps practices](https://tech.gsa.gov/guides/dev_sec_ops_guide),
+saving a lot of time/budget and also making it easy for people to get an ATO.
+
 
 ## How to use this template
 
