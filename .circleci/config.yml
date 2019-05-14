@@ -651,13 +651,13 @@ workflows:
                 - master
                 - staging
                 - dev
-      # - plan_terraform:
-      #     requires:
-      #       - init_terraform_state
-      # - hold_terraform:
-      #     type: approval
-      #     requires:
-      #       - plan_terraform
+      - plan_terraform:
+          requires:
+            - init_terraform_state
+      - hold_terraform:
+          type: approval
+          requires:
+            - plan_terraform
       - apply_terraform:
           requires:
             - hold_terraform
