@@ -23,6 +23,11 @@ KMS or share secrets or whatever.
   an example app, you may have to write your own deployment pipeline from
   scratch.  If you need to add more steps beyond "deploy, test, scan, promote",
   then feel free to do so.
+
+  You should also update every section that contains `XXX` in it.  These
+  are places where you will need to plug in code that is appropriate for your
+  application or your operational environment, such as tests for your app or
+  sending alerts to your alerting systems.
 * We are trying to keep the secrets mostly managed by terraform so that they
   are relatively easy to rotate and are not kept by operators.  These secrets
   and other config are passed into the applications via environment variables
@@ -38,6 +43,10 @@ KMS or share secrets or whatever.
   your environment, you probably will want to generate unique accounts for each so that
   they can't read each other's data.  You can do that in the `terraform/google_sql.tf`
   file.
+* Monitoring is something that GCP does with
+  [Stackdriver](https://cloud.google.com/monitoring/),
+  but you may need to add additional or customized monitoring or alerting to
+  your system.
 
 ## Domains/SSL
 
