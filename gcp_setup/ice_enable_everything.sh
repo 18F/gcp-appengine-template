@@ -88,8 +88,8 @@ echo enabling audit logs
 ./enable-audit-logs.sh
 
 ############################################################
-echo "creating/updating roles:  You may have to say 'Y' a few times for this"
-./enable-roles.sh -c
+echo "creating/updating roles"
+yes Y | ./enable-roles.sh -c
 
 ############################################################
 if gcloud iam service-accounts describe "terraform@${GOOGLE_PROJECT_ID}.iam.gserviceaccount.com" >/dev/null 2>&1 ; then
