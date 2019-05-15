@@ -17,19 +17,19 @@ To get the app(s) in this repo going, you will need to:
    the latest information on their process.
 
    For each project, do the following:
-  2. Get GSA ICE to enable all of the APIs and roles you need for your GCP
-     Project.  They should be able to check this repo out and follow the
-     instructions on the [GCP Provisioning page](GCP_Provisioning.md).
-  2. Generate a key for the Terraform service account via
-     `Console -> IAM & admin -> Service Accounts -> terraform -> Create Key` in GCP.
-  2. Save the JSON credentials to `$HOME/master-gcloud-service-key.json` for
-     your production GCP Project, `$HOME/staging-gcloud-service-key.json` for
-     your staging GCP Project, or `$HOME/dev-gcloud-service-key.json` for
-     your dev GCP Project.
+   1. Get GSA ICE to enable all of the APIs and roles you need for your GCP
+      Project.  They should be able to check this repo out and follow the
+      instructions on the [GCP Provisioning page](GCP_Provisioning.md).
+   1. Generate a key for the Terraform service account via
+      `Console -> IAM & admin -> Service Accounts -> terraform -> Create Key` in GCP.
+   1. Save the JSON credentials to `$HOME/master-gcloud-service-key.json` for
+      your production GCP Project, `$HOME/staging-gcloud-service-key.json` for
+      your staging GCP Project, or `$HOME/dev-gcloud-service-key.json` for
+      your dev GCP Project.
 
-     These files should either be stored securely by the administrators
-     of the system, or (even better) deleted after circleci has been seeded with
-     it's data.
+      These files should either be stored securely by the administrators
+      of the system, or (even better) deleted after circleci has been seeded with
+      it's data.
 1. You should be sure to set up master and staging branches as protected branches
    that require approval for PRs to land in this repo.  You should also enable
    as many code analysis integrations as are appropriate within the repo to

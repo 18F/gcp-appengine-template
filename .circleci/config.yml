@@ -736,17 +736,17 @@ workflows:
       - promote-dotnet:
           requires:
             - test-dotnet
-  deploy-log-sync:
-    jobs:
-      - deploy-log-sync:
-          filters:
-            branches:
-              only:
-                # This is the list of branches which will be deployed automatically.
-                # Add more branches here if you want them automatically deployed.
-                - master
-                - staging
-                - dev
-      - owaspzap-log-sync:
-          requires:
-            - deploy-log-sync
+  # deploy-log-sync:
+  #   jobs:
+  #     - deploy-log-sync:
+  #         filters:
+  #           branches:
+  #             only:
+  #               # This is the list of branches which will be deployed automatically.
+  #               # Add more branches here if you want them automatically deployed.
+  #               - master
+  #               - staging
+  #               - dev
+  #     - owaspzap-log-sync:
+  #         requires:
+  #           - deploy-log-sync
