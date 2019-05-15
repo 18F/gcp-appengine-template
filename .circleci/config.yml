@@ -601,12 +601,25 @@ jobs:
             EOF
 
             # deploy!
-            gcloud app deploy -q --no-promote
+            gcloud app deploy -q
 
             # deploy the scheduled task that makes the logsync happen
             # You must delete a job before creating it.
             gcloud -q beta scheduler jobs delete logsync-${CIRCLE_BRANCH} || true
             gcloud beta scheduler jobs create http logsync-${CIRCLE_BRANCH} --http-method=GET --schedule 'every 5 minutes' --uri="${TARGET_URL}" --headers ${AUTH_HEADER}="${AUTH_INFO}"
+      - run:
+          name: Clean up old versions
+          no_output_timeout: 30m
+          command: |
+            # clean up old versions (leave the last two, so you can roll back)
+            echo cleaning up old versions
+            VERSIONS=$(gcloud app versions list --service=logsync --format=list | sort -rn | tail -n +3 | sed 's/^.*\///') || true
+            if [ ! -z "${VERSIONS}" ] ; then
+              gcloud app versions delete ${VERSIONS} --quiet || true
+              echo cleaned up logsync "${VERSIONS}"
+            else
+              echo no logsync versions to clean up
+            fi
   owaspzap-log-sync:
     docker:
       - image: owasp/zap2docker-weekly
