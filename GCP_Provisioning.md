@@ -78,6 +78,19 @@ The easiest way to run the `ice_enable_everything.sh` script is to:
    temporarily.  Once the environment has been bootstrapped with terraform, you can remove this
    role from the terraform service account.  Coordinate with the Project Owner on this.
 
+## Stackdriver Setup
+
+Unfortunately, GCP does not allow you to create Stackdriver workspaces using the
+Cloud SDK, so you have to enable Stackdriver by hand.
+
+If you follow [this process](https://cloud.google.com/monitoring/workspaces/guide)
+to create a Stackdriver workspace and add the staging, dev, and prod GCP Projects
+to it, the project's needs should be fulfilled.
+
+Note:  You might consider creating a separate workspace for prod, just in case
+credentails or other sensitive data is logged, so that access to that workspace
+can be managed separately.
+
 ## Followup
 
 After the Project Owner has gotten their infrastructure bootstrapped, you should be
