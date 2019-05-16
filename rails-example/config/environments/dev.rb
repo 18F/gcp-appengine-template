@@ -103,3 +103,4 @@ Rails.application.configure do
     config.action_controller.default_url_options = { host: proxyhost }
   end
 end
+
