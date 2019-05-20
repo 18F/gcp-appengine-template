@@ -36,6 +36,35 @@ Some frameworks can be debugged in the GCP console without changes.  Others
 may require some special libraries.  Consult https://cloud.google.com/debugger/docs/
 for more information.
 
+## Connecting to Databases
+
+Most of the time, you will want to make changes to the database through your
+app's ORM schema update or migration system, so that it is repeatable and documented.
+However, sometimes you need to debug why queries are slow or look at data that is
+causing problem with your app.  When that happens, you will need to connect directly
+to the db.
+
+To do this:
+1. Go to the [GCP Console for Cloud SQL](https://console.cloud.google.com/sql)
+   and click on the database instance you want to connect to.
+1. Click on the `Activate Cloud Shell` icon on the upper right.
+1. Get the database password by doing:
+   `gsutil cp gs://gcp-terraform-state-$GOOGLE_CLOUD_PROJECT/tf-output.json - | jq -r .postgres_password.value`
+   in the Cloud Shell,
+   or by going to one of the App Engine versions and looking at their environment
+   variables to see what the db password is.
+1. Then click on "Connect using Cloud Shell".  It will pull up a Cloud Shell
+   and fill in the commandline with the command needed to connect to your
+   instance, something like
+   `gcloud sql connect postgres --user=postgres --quiet`.  Hit return.
+1. Enter the password you got earlier (it may be in another tab at the bottom of your screen)
+1. You should now be in and able to do things in the database.
+
+If you are using the postgres `\connect DATABASENAME` command, you will need to
+issue that in the first 5 minutes of your session, because the postgres client will
+reconnect to the database, and the IP is only allowed in for the first 5 minutes of
+your session.  Keep the password handy, as it will prompt you for it again.
+
 ## Infrastructure Update Workflow
 
 Infrastructure updates are driven by circleci and implemented by terraform.
