@@ -263,7 +263,7 @@ a list of requirements, and under each requirement, we listed how this project c
 * We expect that the networking controls will be applied through terraform, and thus easily auditable for compliance.
 
 ## ATO processes are highly automated. Compliant code and process is reused by multiple teams. All ATOs take the same amount of time for the same system and frequent deployment is only interrupted when specific risk triggers are raised through automation. Controls can be continuously monitored and measured with automation.
-* We are using [OpenControl](http://opencontrol.cfapps.io/) and [Compliance Masonry](https://github.com/opencontrol/compliance-masonry/)
+* We are using [OpenControl](https://open-control.org/) and [Compliance Masonry](https://github.com/opencontrol/compliance-masonry/)
   to automate the collection of most of the information required to get a GSA LATO.
 * The compliance documentation is meant to be created along with the code, which means
   that the compliance information ought to be easier to keep up to date because there
