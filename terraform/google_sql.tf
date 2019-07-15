@@ -19,9 +19,8 @@ resource "random_string" "postgres_password" {
   special = false
 }
 
-resource "google_sql_user" "postgres" {
-  name     = "postgres"
-  password = "${random_string.postgres_password.result}"
-  instance = "${google_sql_database_instance.postgres.name}"
-  depends_on = ["google_sql_database_instance.postgres"]
-}
+# resource "google_sql_user" "postgres" {
+#   name     = "postgres"
+#   password = "${random_string.postgres_password.result}"
+#   instance = "${google_sql_database_instance.postgres.name}"
+# }
