@@ -121,6 +121,7 @@ ROLES="
 	roles/viewer
 	roles/iam.securityReviewer
 	roles/cloudsql.admin
+	roles/cloudsql.viewer
 	roles/appengine.appAdmin
 	roles/appengine.deployer
 	roles/cloudbuild.builds.editor

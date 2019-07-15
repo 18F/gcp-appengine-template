@@ -4,10 +4,10 @@ output "postgres_password" {
   sensitive = true
 }
 
-# output "postgres_username" {
-#   value = "${google_sql_user.postgres.name}"
-#   description = "Postgres username"
-# }
+output "postgres_username" {
+  value = "${google_sql_user.postgres.name}"
+  description = "Postgres username"
+}
 
 output "postgres_instance" {
   value = "${google_sql_database_instance.postgres.connection_name}"
